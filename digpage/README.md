@@ -8,6 +8,7 @@ DIG//PAGE turns the web page you're looking at into a Dig Dug-style level.
 - **The page's own buttons, links, inputs and icons are the enemies.** They peel off the page, grow goggle eyes, and chase you through your tunnels. Pump one four times and it inflates until it pops into confetti in its own colors.
 - **Big images and boxes are rocks.** Dig under one and it falls, crushes whatever is below, and shatters into pieces of itself.
 - **Esc puts the page back exactly as it was.**
+- **Works on phones and tablets** with an on-screen NES-style controller.
 
 ![DIG//PAGE on github.com](screenshots/github-pumping.jpg)
 
@@ -18,6 +19,10 @@ DIG//PAGE turns the web page you're looking at into a Dig Dug-style level.
 | Bookmarklet | Drag the button on the [install page](https://drunknbass.github.io/misc/digpage/) to your bookmarks bar, open any page, click it. |
 | Userscript | With Tampermonkey or Violentmonkey, open [`digpage.user.js`](https://drunknbass.github.io/misc/digpage/digpage.user.js) to install, then press **Alt+Shift+D** on any page. |
 | Console | Paste the contents of [`digpage.min.js`](digpage.min.js) into your browser's DevTools console. |
+| Phone / tablet, quick try | Open the [install page](https://drunknbass.github.io/misc/digpage/#practice) and tap **Play on this page**. |
+| iPhone / iPad (Safari) | Tap **Copy bookmarklet** on the install page. Bookmark any page, then edit that bookmark and replace its address with the copied code. On any site, open Bookmarks and tap it. |
+| Android (Chrome) | Make the same bookmark. On any site, type its name in the address bar and tap the bookmark suggestion. Chrome only runs bookmarklets from the address bar. |
+| Android (Firefox + Tampermonkey / Violentmonkey) | Install the userscript, then use its **Play DIG//PAGE** menu command. |
 
 ## Controls
 
@@ -28,6 +33,22 @@ DIG//PAGE turns the web page you're looking at into a Dig Dug-style level.
 | Esc | Quit and restore the page |
 | T | Autopilot |
 | P / M / Enter | Pause / mute / play again |
+
+On touch screens a see-through NES-style controller appears automatically, in the style of an emulator's transparent skin. The game fills the whole screen and the controls float over it as frosted outlines: D-pad bottom-left, B and A bottom-right on a diagonal (A upper-right), small SELECT and START pills at the bottom centre. In landscape the pads sit on the left and right edges. Buttons brighten when pressed. The HUD stays clear at the top, and everything respects the notch and home-bar safe areas.
+
+| Button | Action |
+|---|---|
+| D-pad | Dig and move. Slide your thumb between directions without lifting it. |
+| A | Pump: one pump per tap |
+| B | Turbo pump: keeps pumping while held |
+| START | Pause / resume, or play again after game over |
+| SELECT | Quit and restore the page. Tap twice to confirm. |
+
+Multi-touch works: hold the D-pad with one thumb and press A or B with the other. While the game runs, the page can't scroll, zoom, select text or open the long-press menu. Pops vibrate on devices that support it (Android; iOS doesn't).
+
+<img src="screenshots/mobile-portrait.jpg" alt="DIG//PAGE on a phone in portrait with see-through controls" width="270"> <img src="screenshots/mobile-landscape.jpg" alt="DIG//PAGE on a phone in landscape with see-through controls on the edges" width="520">
+
+Mobile clip: [`video/digpage-mobile.mp4`](video/digpage-mobile.mp4)
 
 Scoring: buttons are worth more than links. Deeper enemies score up to ×2.5. A winged enemy popped from the side scores double, and a rock that crushes enemies earns a bonus. The HUD shows score, lives, and how much of the page you've destroyed. Clear every enemy and the page scrolls to the next screen.
 
@@ -54,7 +75,8 @@ Sites with a strict Content Security Policy, such as github.com and MDN, can sto
 
 - Content inside cross-origin iframes (ads, embeds) and inside web-component shadow roots is treated as a plain box.
 - A letter on top of a background image leaves a letter-shaped hole rather than revealing the true background.
-- Keyboard only; no touch controls yet. Page scrolling is paused while you play.
+- Page scrolling is paused while you play.
+- On mobile, start from normal zoom. If the page is pinch-zoomed or wider than the screen, the controls can end up offset. Rotating the device restarts the level at the new size and keeps your score.
 - Overlays that a page opens after the game starts may appear above it.
 
 ## Credits

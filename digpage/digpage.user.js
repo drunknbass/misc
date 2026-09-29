@@ -1,25 +1,26 @@
 // ==UserScript==
 // @name         DIG//PAGE
 // @namespace    https://drunknbass.github.io/misc/digpage/
-// @version      1.0.0
-// @description  Press Alt+Shift+D to turn the page you're viewing into a Dig Dug-style level: tunnel through real content and pump real buttons until they pop. Esc restores the page.
+// @version      1.1.0
+// @description  Turn the page you're viewing into a Dig Dug-style level: tunnel through real content and pump real buttons until they pop. Alt+Shift+D or the "Play DIG//PAGE" menu command. Touch screens get an NES-style controller. Esc/SELECT restores the page.
 // @author       drunknbass
 // @license      MIT
 // @homepageURL  https://drunknbass.github.io/misc/digpage/
 // @downloadURL  https://drunknbass.github.io/misc/digpage/digpage.user.js
 // @updateURL    https://drunknbass.github.io/misc/digpage/digpage.user.js
 // @match        *://*/*
-// @grant        none
+// @grant        GM_registerMenuCommand
+// @grant        GM.registerMenuCommand
 // @run-at       document-idle
 // @noframes
 // ==/UserScript==
 (function () {
   'use strict';
   function digpage() {
-/*! DIG//PAGE v1.0: turns the page you're looking at into a Dig Dug-style level.
+/*! DIG//PAGE v1.1: turns the page you're looking at into a Dig Dug-style level.
  *  Your digger tunnels through the real content, and real buttons/links/icons come alive as enemies you pump until they pop.
  *  Technique after Hugo Duprez's destroy.spritefusion.com (page -> cell grid, harmonic crater carve, dithered scorch, falling letters, detaching chunks).
- *  Original code, art and sound. No dependencies, no network requests, nothing stored. Esc restores the page.
+ *  Original code, art and sound. No dependencies, no network requests, nothing stored. Esc restores the page (on touch screens: SELECT twice).
  *  MIT License. https://drunknbass.github.io/misc/digpage/ */
 (function () {
 'use strict';
@@ -85,12 +86,12 @@ var DIRS = { ArrowUp: [0, -1], KeyW: [0, -1], ArrowDown: [0, 1], KeyS: [0, 1], A
 
 function saveStyle(el) {
   for (var i = 0; i < modified.length; i++) if (modified[i].el === el) return;
-  modified.push({ el: el, had: el.hasAttribute('style'), css: el.style.cssText });
+  modified.push({ el: el, had: el.hasAttribute('style'), css: el.style.cssText, attr: el.getAttribute('style') });
 }
 function restoreStyles() {
   for (var i = modified.length - 1; i >= 0; i--) {
     var m = modified[i];
-    try { if (m.had) m.el.style.cssText = m.css; else m.el.removeAttribute('style'); } catch (e) {}
+    try { if (m.had) m.el.setAttribute('style', m.attr); else m.el.removeAttribute('style'); } catch (e) {}
   }
   modified = [];
 }
@@ -527,8 +528,9 @@ var sfx = {
 // ------------------------------------------------------------------ overlay
 function buildOverlay() {
   host = D.createElement('div');
-  css(host, { position: 'fixed', left: '0px', top: '0px', width: vw + 'px', height: vh + 'px', zIndex: '2147483647', pointerEvents: 'auto', margin: '0px', padding: '0px', border: '0px', background: 'transparent', display: 'block', overflow: 'hidden' });
+  css(host, { position: 'fixed', left: '0px', top: '0px', width: vw + 'px', height: (vh + ctrlH) + 'px', zIndex: '2147483647', pointerEvents: 'auto', margin: '0px', padding: '0px', border: '0px', background: 'transparent', display: 'block', overflow: 'hidden' });
   host.setAttribute('data-digpage', '1');
+  css(host, { touchAction: 'none', userSelect: 'none', webkitUserSelect: 'none', webkitTouchCallout: 'none', webkitTapHighlightColor: 'transparent', overscrollBehavior: 'none' });
   host.addEventListener('digpage-quit', function () { quit(); });
   root = host.attachShadow ? host.attachShadow({ mode: 'open' }) : host;
   layer = mk('div', { position: 'absolute', left: '0px', top: '0px', width: vw + 'px', height: vh + 'px' }, root);
@@ -540,14 +542,19 @@ function buildOverlay() {
   holeC = mk('canvas'); holeC.width = GW; holeC.height = GH; hctx = holeC.getContext('2d'); hImg = hctx.createImageData(GW, GH); hd = hImg.data;
   patchC = mk('canvas'); patchC.width = Math.round(vw * dpr); patchC.height = Math.round(vh * dpr); pctx = patchC.getContext('2d'); pctx.scale(dpr, dpr);
   var font = 'ui-monospace, "SF Mono", Menlo, Consolas, monospace';
-  var bar = mk('div', { position: 'absolute', left: '50%', top: '8px', transform: 'translateX(-50%)', display: 'flex', gap: '16px', alignItems: 'center', padding: '6px 14px', borderRadius: '10px', background: 'rgba(18,10,34,0.86)', boxShadow: '0 4px 18px rgba(0,0,0,.35)', color: '#f4ecd8', font: '700 13px ' + font, letterSpacing: '1px', whiteSpace: 'nowrap', pointerEvents: 'none' }, root);
-  function stat(label, color) { var s = mk('span', null, bar); var l = mk('span', { color: '#9a8fb0', marginRight: '6px' }, s); l.textContent = label; var v = mk('b', { color: color || '#ffd23a' }, s); return v; }
+  var narrow = vw < 640, tiny = vw < 430;
+  var bar = mk('div', { position: 'absolute', left: '50%', top: 'calc(' + (narrow ? 4 : 8) + 'px + env(safe-area-inset-top, 0px))', transform: 'translateX(-50%)', display: 'flex', gap: narrow ? '8px' : '16px', alignItems: 'center', padding: narrow ? '4px 9px' : '6px 14px', borderRadius: '10px', background: 'rgba(18,10,34,0.86)', boxShadow: '0 4px 18px rgba(0,0,0,.35)', color: '#f4ecd8', font: '700 ' + (tiny ? 10 : narrow ? 11 : 13) + 'px ' + font, letterSpacing: narrow ? '0px' : '1px', whiteSpace: 'nowrap', pointerEvents: 'none' }, root);
+  function stat(label, color) { var s = mk('span', null, bar); var l = mk('span', { color: '#9a8fb0', marginRight: narrow ? '3px' : '6px' }, s); l.textContent = label; var v = mk('b', { color: color || '#ffd23a' }, s); return v; }
   var title = mk('span', { color: '#ff8a2b' }, bar); title.textContent = 'DIG//PAGE';
-  hud.score = stat('SCORE'); hud.hi = stat('HI'); hud.round = stat('SCREEN'); hud.lives = stat('LIVES', '#7fd3ff'); hud.pct = stat('DESTROYED', '#ff8a2b'); hud.auto = mk('span', { color: '#7dff6a' }, bar);
+  hud.score = stat('SCORE'); hud.hi = stat('HI'); hud.round = stat(tiny ? 'SCR' : 'SCREEN'); hud.lives = stat(tiny ? '' : 'LIVES', '#7fd3ff'); hud.pct = stat(tiny ? 'DUG' : 'DESTROYED', '#ff8a2b'); hud.auto = mk('span', { color: '#7dff6a' }, bar);
+  bar.setAttribute('data-pad', 'hud');
+  if (tiny) { title.style.display = 'none'; hud.hi.parentNode.style.display = 'none'; }
   var hint = mk('div', { position: 'absolute', right: '10px', bottom: '8px', padding: '4px 10px', borderRadius: '8px', background: 'rgba(18,10,34,0.78)', color: '#cfc4e6', font: '600 11px ' + font, pointerEvents: 'none' }, root);
   hint.textContent = 'ARROWS/WASD dig · SPACE pump · ESC restore page · M mute · T autopilot';
-  msgEl = mk('div', { position: 'absolute', left: '50%', top: '40%', transform: 'translate(-50%,-50%)', textAlign: 'center', color: '#ffd23a', font: '800 34px ' + font, letterSpacing: '4px', textShadow: '0 4px 0 #6b2a00, 0 0 24px rgba(255,138,43,.7)', whiteSpace: 'pre', pointerEvents: 'none' }, root);
-  hud.sub = mk('div', { position: 'absolute', left: '50%', top: 'calc(40% + 40px)', transform: 'translateX(-50%)', color: '#f4ecd8', font: '700 14px ' + font, letterSpacing: '2px', textShadow: '0 2px 0 #000', whiteSpace: 'pre', pointerEvents: 'none', textAlign: 'center' }, root);
+  if (ctrlMode) hint.style.display = 'none';
+  msgEl = mk('div', { position: 'absolute', left: '50%', top: '40%', transform: 'translate(-50%,-50%)', textAlign: 'center', color: '#ffd23a', font: '800 ' + (narrow ? 24 : 34) + 'px ' + font, letterSpacing: narrow ? '2px' : '4px', textShadow: '0 4px 0 #6b2a00, 0 0 24px rgba(255,138,43,.7)', whiteSpace: 'pre', pointerEvents: 'none' }, root);
+  hud.sub = mk('div', { position: 'absolute', left: '12px', right: '12px', top: 'calc(40% + 40px)', color: '#f4ecd8', font: '700 ' + (narrow ? 12 : 14) + 'px ' + font, letterSpacing: narrow ? '1px' : '2px', textShadow: '0 2px 0 #000', whiteSpace: 'pre-wrap', pointerEvents: 'none', textAlign: 'center' }, root);
+  if (ctrlMode) buildPad(root);
   D.documentElement.appendChild(host);
   // cookie walls / modal <dialog>s live in the browser's top layer, above any z-index: join the top layer too (popover API)
   try { if (host.showPopover) { css(host, { right: 'auto', bottom: 'auto', maxWidth: 'none', maxHeight: 'none', inset: '0px auto auto 0px', color: 'inherit' }); host.setAttribute('popover', 'manual'); host.showPopover(); } } catch (e) {}
@@ -715,7 +722,7 @@ function autoTick(dt) {
 function moveAxisToward(axis, target, step) { var cur = player[axis], d = target - cur; if (Math.abs(d) <= step) { player[axis] = target; return step - Math.abs(d); } player[axis] += Math.sign(d) * step; return 0; }
 function updatePlayer(dt) {
   autoTick(dt);
-  var d = inputDir(); player.moving = false;
+  var d = inputDir(); player.moving = false; updatePad(dt, d);
   if (d) {
     if (hose.active) hoseOff();
     var step = PLAYER_SPEED * (player.digging ? 0.75 : 1) * dt;
@@ -772,6 +779,7 @@ function pumpEnemy(e) {
   if (e.inflate >= 4) popEnemy(e);
 }
 function popEnemy(e) {
+  vibrate(30);
   e.alive = false; e.popT = 0.14;
   var px = TXp(e.x), py = TYp(e.y);
   var stratum = clamp(Math.floor(py / vh * 4), 0, 3);
@@ -911,6 +919,7 @@ function updateDomFrags(dt) {
   }
 }
 function shatterRock(rk, top, bot) {
+  vibrate(50);
   rk.state = 'dead'; G.rocksDropped++;
   var r = rk.r, w = r.width, h = r.height, cx = r.left + w / 2;
   if (rk.media && rk.el.tagName === 'IMG' && rk.el.naturalWidth) {       // shatter into real image fragments
@@ -954,8 +963,161 @@ function spawnBonus() {
   bonus = { x: START.x, y: START.y, t: 10, value: 1000 + 200 * (G.round - 1), img: img };
   emberBurst(TXp(START.x), TYp(START.y), 24, 200, ['#7dff6a', '#fff']);
 }
-function killPlayer(why) { if (G.state !== 'play') return; G.deathWhy = why || '?'; setState('dying'); player.dieT = 0; hoseOff(); sfx.die(); shake(0.3); emberBurst(TXp(player.x), TYp(player.y), 30, 260, ['#fff', '#7fd3ff', '#ffd23a']); }
+function killPlayer(why) { if (G.state !== 'play') return; vibrate([40, 60, 40]); G.deathWhy = why || '?'; setState('dying'); player.dieT = 0; hoseOff(); sfx.die(); shake(0.3); emberBurst(TXp(player.x), TYp(player.y), 30, 260, ['#fff', '#7fd3ff', '#ffd23a']); }
 function shake(a) { trauma = Math.min(1, trauma + a); }
+// ------------------------------------------------------------------ on-screen NES-style controller (touch devices only): translucent overlay, emulator-skin style
+// D-pad = move/dig · A = pump (one pump per tap) · B = turbo pump (auto-pumps while held)
+// START = pause / play again after game over · SELECT = restore the page (tap twice to confirm)
+var ctrlMode = '', ctrlH = 0, ctrlPlan = null, pad = null, padTimers = [];
+function isTouchUI() {
+  try {
+    var mm = W.matchMedia ? function (q) { return W.matchMedia(q).matches; } : function () { return false; };
+    return mm('(pointer: coarse)') || (('ontouchstart' in W || (navigator.maxTouchPoints || 0) > 0) && !mm('(pointer: fine)'));
+  } catch (e) { return false; }
+}
+function safeInset(side) {
+  try {
+    var p = D.createElement('div'); p.style.position = 'fixed'; p.style.visibility = 'hidden'; p.style.pointerEvents = 'none';
+    p.style.paddingTop = 'env(safe-area-inset-' + side + ', 0px)'; D.documentElement.appendChild(p);
+    var v = parseFloat(getComputedStyle(p).paddingTop) || 0; p.remove(); return Math.round(v);
+  } catch (e) { return 0; }
+}
+function planController(w, h) {
+  if (!isTouchUI()) return { mode: '', h: 0 };
+  // translucent overlay controls over a full-screen game (emulator-skin style); nothing is reserved below the game
+  return { mode: w > h ? 'landscape' : 'portrait', h: 0, sb: safeInset('bottom'), sl: safeInset('left'), sr: safeInset('right'), st: safeInset('top') };
+}
+function vibrate(ms) { try { if (ctrlMode && navigator.vibrate) navigator.vibrate(ms); } catch (e) {} }
+function padLater(fn, ms) { var id = setTimeout(fn, ms); padTimers.push(id); return id; }
+
+function buildPad(root) {
+  var P = ctrlPlan, land = P.mode === 'landscape';
+  var s = land ? clamp(vh / 390, 0.72, 1.3) : clamp(Math.min(vw / 390, vh / 700), 0.8, 1.5);
+  var font = '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif';
+  var FILL = 'rgba(140,140,155,.2)', FILL_ON = 'rgba(225,225,238,.62)', EDGE = 'rgba(255,255,255,.72)';
+  var RING = '0 0 0 1px rgba(0,0,0,.28), inset 0 0 0 1px rgba(0,0,0,.18), 0 2px 10px rgba(0,0,0,.18)';
+  var LABEL = 'rgba(255,255,255,.88)', LSHADOW = '0 1px 2px rgba(0,0,0,.7), 0 0 1px rgba(0,0,0,.9)';
+  var base = { position: 'absolute', boxSizing: 'border-box', touchAction: 'none', userSelect: 'none', webkitUserSelect: 'none', pointerEvents: 'none' };
+  function box(st, parent) { var o = {}; for (var k in base) o[k] = base[k]; for (var j in st) o[j] = st[j]; return mk('div', o, parent); }
+  function frost(e) { e.style.backdropFilter = 'blur(3px)'; e.style.webkitBackdropFilter = 'blur(3px)'; return e; }
+  var SVG = 'http://www.w3.org/2000/svg';
+  function svg(tag, attrs, parent) { var e = D.createElementNS(SVG, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+  var body = box({ left: '0px', top: '0px', width: vw + 'px', height: vh + 'px' }, root);
+  // layout (px): D-pad bottom-left, A/B bottom-right on a diagonal (A upper-right), SELECT/START pills bottom-centre
+  var D0 = Math.round((land ? 138 : 150) * s), bs = Math.round((land ? 64 : 70) * s);
+  var edgeL = Math.round((land ? 26 : 18) * s) + P.sl, edgeR = Math.round((land ? 26 : 18) * s) + P.sr;
+  var pillsB = Math.round((land ? 12 : 18) * s) + P.sb;
+  var dpB = land ? Math.round(Math.max(40 * s + P.sb, (vh - D0) * 0.28)) : Math.round(pillsB + 58 * s);
+  var dp = box({ left: edgeL + 'px', bottom: dpB + 'px', width: D0 + 'px', height: D0 + 'px', pointerEvents: 'auto' }, body);
+  // D-pad: one frosted cross with a light outline, per-arm press highlights, small arrow marks
+  var arm = Math.round(D0 * 0.34), a0 = (D0 - arm) / 2, a1 = a0 + arm, r = Math.round(arm * 0.2);
+  var crossPoly = 'polygon(' + [[a0, 0], [a1, 0], [a1, a0], [D0, a0], [D0, a1], [a1, a1], [a1, D0], [a0, D0], [a0, a1], [0, a1], [0, a0], [a0, a0]].map(function (p) { return p[0] + 'px ' + p[1] + 'px'; }).join(',') + ')';
+  var fill = frost(box({ left: '0px', top: '0px', width: D0 + 'px', height: D0 + 'px', background: FILL }, dp)); fill.style.clipPath = crossPoly;
+  var armsEl = {
+    ArrowUp: box({ left: a0 + 'px', top: '0px', width: arm + 'px', height: a1 + 'px' }, dp),
+    ArrowDown: box({ left: a0 + 'px', top: a0 + 'px', width: arm + 'px', height: a1 + 'px' }, dp),
+    ArrowLeft: box({ left: '0px', top: a0 + 'px', width: a1 + 'px', height: arm + 'px' }, dp),
+    ArrowRight: box({ left: a0 + 'px', top: a0 + 'px', width: a1 + 'px', height: arm + 'px' }, dp)
+  };
+  for (var k in armsEl) { armsEl[k].style.background = 'transparent'; armsEl[k].style.clipPath = crossPoly; armsEl[k].style.transition = 'background 60ms'; }
+  var sv = svg('svg', { width: D0, height: D0, viewBox: '0 0 ' + D0 + ' ' + D0 }, dp); css(sv, { position: 'absolute', left: '0px', top: '0px', overflow: 'visible', pointerEvents: 'none' });
+  var h = 1.5, d = 'M' + (a0 + r) + ',' + h + ' H' + (a1 - r) + ' Q' + a1 + ',' + h + ' ' + a1 + ',' + (h + r) + ' V' + a0 + ' H' + (D0 - h - r) + ' Q' + (D0 - h) + ',' + a0 + ' ' + (D0 - h) + ',' + (a0 + r) +
+    ' V' + (a1 - r) + ' Q' + (D0 - h) + ',' + a1 + ' ' + (D0 - h - r) + ',' + a1 + ' H' + a1 + ' V' + (D0 - h - r) + ' Q' + a1 + ',' + (D0 - h) + ' ' + (a1 - r) + ',' + (D0 - h) + ' H' + (a0 + r) + ' Q' + a0 + ',' + (D0 - h) + ' ' + a0 + ',' + (D0 - h - r) +
+    ' V' + a1 + ' H' + (h + r) + ' Q' + h + ',' + a1 + ' ' + h + ',' + (a1 - r) + ' V' + (a0 + r) + ' Q' + h + ',' + a0 + ' ' + (h + r) + ',' + a0 + ' H' + a0 + ' V' + (h + r) + ' Q' + a0 + ',' + h + ' ' + (a0 + r) + ',' + h + ' Z';
+  svg('path', { d: d, fill: 'none', stroke: 'rgba(0,0,0,.3)', 'stroke-width': 4, 'stroke-linejoin': 'round' }, sv);
+  svg('path', { d: d, fill: 'none', stroke: EDGE, 'stroke-width': 2, 'stroke-linejoin': 'round' }, sv);
+  svg('circle', { cx: D0 / 2, cy: D0 / 2, r: arm * 0.22, fill: 'none', stroke: 'rgba(255,255,255,.35)', 'stroke-width': 1.5 }, sv);
+  var t = arm * 0.16, m = D0 * 0.4;
+  [[0, -1], [0, 1], [-1, 0], [1, 0]].forEach(function (v) {
+    var cx = D0 / 2 + v[0] * m, cy = D0 / 2 + v[1] * m, px = -v[1], py = v[0];
+    svg('path', { d: 'M' + (cx + v[0] * t) + ',' + (cy + v[1] * t) + ' L' + (cx - v[0] * t + px * t) + ',' + (cy - v[1] * t + py * t) + ' L' + (cx - v[0] * t - px * t) + ',' + (cy - v[1] * t - py * t) + ' Z', fill: 'rgba(255,255,255,.7)', stroke: 'rgba(0,0,0,.3)', 'stroke-width': 1 }, sv);
+  });
+  // A / B: frosted outlined circles, B lower-left, A upper-right
+  var gap = Math.round(bs * 0.18), well = bs + gap * 2;
+  function roundBtn(label, right, bottom) {
+    var w = box({ right: right + 'px', bottom: bottom + 'px', width: well + 'px', height: well + 'px', borderRadius: '50%', pointerEvents: 'auto' }, body);
+    var b = frost(box({ left: gap + 'px', top: gap + 'px', width: bs + 'px', height: bs + 'px', borderRadius: '50%', background: FILL, border: '2px solid ' + EDGE, boxShadow: RING, transition: 'transform 60ms, background 60ms' }, w));
+    var l = box({ left: '0px', top: '0px', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: LABEL, font: '700 ' + Math.round(bs * 0.36) + 'px ' + font, textShadow: LSHADOW }, b);
+    l.textContent = label; return { well: w, btn: b };
+  }
+  var dpMid = dpB + D0 / 2;                                   // A/B cluster centred on the D-pad's height
+  var A = roundBtn('A', edgeR - gap, Math.round(dpMid - well / 2 + bs * 0.34));
+  var B = roundBtn('B', Math.round(edgeR - gap + bs * 1.12), Math.round(dpMid - well / 2 - bs * 0.34));
+  // SELECT / START: small frosted pills with labels above
+  var pw = Math.round(48 * s), ph = Math.round(16 * s), pgap = Math.round(22 * s);
+  function pill(label, dx) {
+    var w = box({ left: Math.round(vw / 2 + dx) + 'px', bottom: (pillsB - Math.round(8 * s)) + 'px', width: (pw + Math.round(16 * s)) + 'px', height: (ph + Math.round(30 * s)) + 'px', pointerEvents: 'auto' }, body);
+    var l = box({ left: '0px', right: '0px', top: '0px', textAlign: 'center', color: LABEL, font: '700 ' + Math.round(9 * s) + 'px ' + font, letterSpacing: '1.5px', textShadow: LSHADOW }, w);
+    l.textContent = label;
+    var p = frost(box({ left: Math.round(8 * s) + 'px', bottom: Math.round(8 * s) + 'px', width: pw + 'px', height: ph + 'px', borderRadius: '99px', background: FILL, border: '1.5px solid ' + EDGE, boxShadow: RING, transition: 'transform 60ms, background 60ms' }, w));
+    return { well: w, btn: p };
+  }
+  var cellW = pw + Math.round(16 * s);
+  var SEL = pill('SELECT', -cellW - pgap / 2), STA = pill('START', pgap / 2);
+  var toast = box({ left: '50%', bottom: (pillsB + Math.round(46 * s)) + 'px', transform: 'translateX(-50%)', padding: '8px 14px', borderRadius: '10px', background: 'rgba(18,10,34,.88)', color: '#ffd23a', font: '700 13px ui-monospace, Menlo, monospace', whiteSpace: 'nowrap', display: 'none' }, root);
+  dp.setAttribute('data-pad', 'dpad'); A.well.setAttribute('data-pad', 'A'); B.well.setAttribute('data-pad', 'B'); SEL.well.setAttribute('data-pad', 'SELECT'); STA.well.setAttribute('data-pad', 'START');
+  pad = { body: body, dp: dp, D0: D0, arms: armsEl, A: A, B: B, SEL: SEL, STA: STA, toast: toast, dir: null, dpId: null, turbo: 0, confirm: 0, flashA: 0, FILL: FILL, FILL_ON: FILL_ON };
+  wirePad();
+}
+function padToast(text, sec) {
+  if (!pad) return; pad.toast.textContent = text; pad.toast.style.display = text ? 'block' : 'none';
+  if (text) { var p = pad; padLater(function () { if (pad === p && p.toast.textContent === text) p.toast.style.display = 'none'; }, sec * 1000); }
+}
+function wirePad() {
+  var p = pad;
+  function kill(e) { e.preventDefault(); e.stopPropagation(); }
+  function wake() { try { if (actx && actx.state === 'suspended') actx.resume(); } catch (e) {} }
+  function setDir(code) {
+    if (p.dir === code) return;
+    if (p.dir) release(p.dir);
+    p.dir = code; if (code) { press(code); p.dirT = Date.now(); }
+  }
+  function dirFrom(e) {
+    var r = p.dp.getBoundingClientRect(), dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+    if (Math.hypot(dx, dy) < p.D0 * 0.12) return p.dir;          // dead zone: keep the current direction
+    return Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'ArrowRight' : 'ArrowLeft') : (dy > 0 ? 'ArrowDown' : 'ArrowUp');
+  }
+  listen(p.dp, 'pointerdown', function (e) { kill(e); wake(); p.dpId = e.pointerId; try { p.dp.setPointerCapture(e.pointerId); } catch (x) {} setDir(dirFrom(e)); });
+  listen(p.dp, 'pointermove', function (e) { if (e.pointerId !== p.dpId) return; kill(e); setDir(dirFrom(e)); });
+  var dpEnd = function (e) {
+    if (e.pointerId !== p.dpId) return; kill(e); p.dpId = null;
+    var d = p.dir, left = 170 - (Date.now() - p.dirT);     // a quick tap still nudges: keep the direction held for at least 170 ms
+    if (d && left > 0) padTimers.push(setTimeout(function () { if (pad === p && p.dpId === null && p.dir === d) setDir(null); }, left));
+    else setDir(null);
+  };
+  listen(p.dp, 'pointerup', dpEnd); listen(p.dp, 'pointercancel', dpEnd); listen(p.dp, 'lostpointercapture', dpEnd);
+  function button(b, down, up) {
+    var id = null;
+    listen(b.well, 'pointerdown', function (e) { kill(e); wake(); id = e.pointerId; try { b.well.setPointerCapture(e.pointerId); } catch (x) {} b.held = true; b.btn.style.transform = 'scale(0.94)'; b.btn.style.background = p.FILL_ON; down(); });
+    var end = function (e) { if (e.pointerId !== id) return; kill(e); id = null; b.held = false; b.btn.style.transform = ''; b.btn.style.background = p.FILL; if (up) up(); };
+    listen(b.well, 'pointerup', end); listen(b.well, 'pointercancel', end); listen(b.well, 'lostpointercapture', end);
+  }
+  button(p.A, function () { press('Space'); }, function () { release('Space'); });
+  button(p.B, function () {
+    press('Space');
+    clearInterval(p.turbo); p.turbo = setInterval(function () { if (!running) { clearInterval(p.turbo); return; } release('Space'); press('Space'); }, 180);
+  }, function () { clearInterval(p.turbo); p.turbo = 0; release('Space'); });
+  button(p.STA, function () {
+    if (G.state === 'gameover') { press('Enter'); release('Enter'); } else { press('KeyP'); release('KeyP'); }
+  });
+  var selArmed = false;
+  button(p.SEL, function () {
+    if (p.confirm > 0) { selArmed = true; return; }
+    p.confirm = 2.5; padToast('Tap SELECT again to restore the page', 2.5);
+  }, function () { if (selArmed) { selArmed = false; quit(); } });   // quit on release, so the lifted finger doesn't click the page underneath
+  listen(host, 'contextmenu', kill); listen(host, 'dblclick', kill);
+  listen(host, 'touchstart', function (e) { if (running) e.preventDefault(); }, { passive: false });
+  listen(W, 'gesturestart', function (e) { if (running) e.preventDefault(); }, { passive: false });
+}
+function updatePad(dt, d) {
+  if (!pad) return;
+  if (pad.confirm > 0) pad.confirm -= dt;
+  if (pumpPressed) pad.flashA = 0.12; else pad.flashA -= dt;
+  var code = d ? (d.x > 0 ? 'ArrowRight' : d.x < 0 ? 'ArrowLeft' : d.y > 0 ? 'ArrowDown' : 'ArrowUp') : null;
+  for (var k in pad.arms) { var on = k === code || k === pad.dir; if (pad.arms[k].__on !== on) { pad.arms[k].__on = on; pad.arms[k].style.background = on ? pad.FILL_ON : 'transparent'; } }
+  var aOn = pad.flashA > 0 || !!pad.A.held; if (pad.A.__on !== aOn) { pad.A.__on = aOn; pad.A.btn.style.background = aOn ? pad.FILL_ON : pad.FILL; }
+}
+function teardownPad() { padTimers.forEach(clearTimeout); padTimers = []; if (pad) clearInterval(pad.turbo); pad = null; }
 
 function killGlyphsIn(r) {
   for (var i = 0; i < glyphs.length; i++) { var g = glyphs[i]; var x = g.x + g.w / 2, y = g.y + g.h / 2; if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) g.alive = false; }
@@ -1124,7 +1286,7 @@ function step(dt) {
   var m = '', sub = '';
   if (G.state === 'ready') { m = 'SCREEN ' + G.round + '\nREADY!'; sub = enemies.length + ' elements came alive'; }
   else if (G.state === 'clear') { m = 'PAGE CLEARED!'; sub = 'scrolling to the next screen...'; }
-  else if (G.state === 'gameover') { m = 'GAME OVER'; sub = 'ENTER to dig again · ESC to restore the page'; }
+  else if (G.state === 'gameover') { m = 'GAME OVER'; sub = ctrlMode ? 'START to dig again · SELECT to restore the page' : 'ENTER to dig again · ESC to restore the page'; }
   else if (paused) m = 'PAUSED';
   setText('m', msgEl, m); setText('sub', hud.sub, sub);
 }
@@ -1141,10 +1303,12 @@ function frame(now) {
 // ------------------------------------------------------------------ lifecycle
 function init(carry) {
   var html = D.documentElement;
-  vw = html.clientWidth || innerWidth; vh = Math.min(innerHeight, html.clientHeight || innerHeight); dpr = Math.min(2, W.devicePixelRatio || 1);
+  vw = html.clientWidth || innerWidth; var vhFull = Math.min(innerHeight, html.clientHeight || innerHeight);
+  ctrlPlan = planController(vw, vhFull); ctrlMode = ctrlPlan.mode; ctrlH = ctrlPlan.h; vh = vhFull - ctrlH;   // ctrlH is 0: touch controls float over the game
+  dpr = Math.min(2, W.devicePixelRatio || 1);
   GW = Math.ceil(vw / CELL); GH = Math.ceil(vh / CELL); NCELL = GW * GH; COLS = Math.floor(vw / T); ROWS = Math.floor(vh / T);
   offX = Math.floor((vw - COLS * T) / 2); offY = Math.floor((vh - ROWS * T) / 2);
-  if (COLS < 12 || ROWS < 8) throw new Error('window too small (need about 400x260)');
+  if (COLS < 9 || ROWS < 7) throw new Error('window too small (need about 300x230)');
   enemies = []; rocks = []; parts = []; letters = []; embersL = []; popups = []; flames = []; modified = []; removed = 0; bonus = null; hudCache = {};
   keys = {}; dirStack = []; paused = false;
   var hi = 0;   // high score lives only for this session: nothing is written to the site's storage
@@ -1178,6 +1342,9 @@ function init(carry) {
   listen(W, 'wheel', stopEvt, { capture: true, passive: false }); listen(W, 'touchmove', stopEvt, { capture: true, passive: false });
   var sy0 = W.scrollY, sx0 = W.scrollX; listen(W, 'scroll', function () { if (running && (W.scrollY !== sy0 || W.scrollX !== sx0)) W.scrollTo(sx0, sy0); }, true);
   listen(W, 'blur', function () { keys = {}; dirStack = []; setTimeout(grabFocus, 0); });
+  var rsz = 0; listen(W, 'resize', function () {   // rotation / big resize: rebuild the level for the new viewport, keep the score
+    clearTimeout(rsz); rsz = setTimeout(function () { if (!running) return; var h = D.documentElement; if (Math.abs((h.clientWidth || innerWidth) - vw) > 40 || Math.abs(Math.min(innerHeight, h.clientHeight || innerHeight) - (vh + ctrlH)) > 120) { var carry = { score: G.score, lives: G.lives, round: G.round, hi: G.hi }; teardown(); setTimeout(function () { launch(carry); }, 60); } }, 350);
+  });
   grabFocus();
   if (D.activeElement && D.activeElement.blur) try { D.activeElement.blur(); } catch (e) {}
   lastT = performance.now(); raf = requestAnimationFrame(frame);
@@ -1185,7 +1352,7 @@ function init(carry) {
 function teardown() {
   running = false; cancelAnimationFrame(raf);
   listeners.forEach(function (l) { l[0].removeEventListener(l[1], l[2], l[3]); }); listeners = [];
-  restoreStyles(); domFrags = [];
+  restoreStyles(); domFrags = []; teardownPad();
   if (host && host.parentNode) host.parentNode.removeChild(host);
   host = null;
   try { if (prevFocus && prevFocus.isConnected && prevFocus !== D.body && prevFocus.tagName !== 'IFRAME') prevFocus.focus({ preventScroll: true }); } catch (e) {}
@@ -1217,4 +1384,8 @@ launch(null);
   window.addEventListener('keydown', function (e) {
     if (e.altKey && e.shiftKey && e.code === 'KeyD') { e.preventDefault(); digpage(); }
   }, true);
+  try {
+    if (typeof GM_registerMenuCommand === 'function') GM_registerMenuCommand('Play DIG//PAGE', digpage);
+    else if (typeof GM !== 'undefined' && GM.registerMenuCommand) GM.registerMenuCommand('Play DIG//PAGE', digpage);
+  } catch (e) {}
 })();
