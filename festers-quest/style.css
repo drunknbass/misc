@@ -13,3 +13,6 @@
 @media(min-width:561px) and (max-width:800px) and (orientation:portrait){.screen{width:min(100%,max(260px,calc((100dvh - 450px)*16/15)))}.controls{grid-template-columns:minmax(0,1fr) 180px}.pad{margin-top:0}.system-pad{flex-direction:column;align-items:stretch;justify-content:center;margin-top:0}.help{grid-column:1/-1}}
 @media(min-width:561px){.toolbar button,.system{min-height:44px}}
 .diagnostics{display:block;overflow-wrap:anywhere;margin:8px 2px 0;color:var(--mint);font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}
+html,body{touch-action:pan-y;overscroll-behavior-x:none}
+.shell,.shell *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.screen{touch-action:none}

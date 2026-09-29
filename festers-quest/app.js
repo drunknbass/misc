@@ -23,6 +23,13 @@ import { bindController } from './controller.mjs';
   const directionPad = $('direction-pad');
   const controlButtons = [...document.querySelectorAll('[data-bit]')];
   const controls = [themeButton, muteButton, pauseButton, ...controlButtons];
+  // Safari can still dispatch proprietary pinch gestures despite viewport limits.
+  // Prevent only those gestures; ordinary pointer events keep reaching the pad
+  // and buttons, including simultaneous direction and action touches.
+  for (const type of ['gesturestart', 'gesturechange']) {
+    document.addEventListener(type, event => event.preventDefault(), { passive: false });
+  }
+  document.querySelector('.shell').addEventListener('selectstart', event => event.preventDefault());
   const heldKeys = new Set();
   const diagnosticNames = ['frames', 'mode', 'fault', 'playerWorldX', 'playerWorldY',
     'graphicsTheme', 'hostButtons', 'hostMuted', 'audioStarted', 'audioMissing'];
