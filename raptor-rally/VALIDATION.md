@@ -2,9 +2,9 @@
 
 Unity 6000.6.3f1
 
-- PASS: F-150 RAPTOR / all four trucks finished three laps. Player AI time: 01:53.05. Peak height: 2.05 m. Recoveries: 0.
-- PASS: BRONCO RAPTOR / all four trucks finished three laps. Player AI time: 01:52.61. Peak height: 2.03 m. Recoveries: 0.
-- PASS: RANGER RAPTOR / all four trucks finished three laps. Player AI time: 01:52.57. Peak height: 2.03 m. Recoveries: 0.
+- PASS: F-150 RAPTOR / all four trucks finished three laps. Player AI time: 01:53.19. Peak height: 2.03 m. Recoveries: 0.
+- PASS: BRONCO RAPTOR / all four trucks finished three laps. Player AI time: 01:52.63. Peak height: 2.04 m. Recoveries: 0.
+- PASS: RANGER RAPTOR / all four trucks finished three laps. Player AI time: 01:52.53. Peak height: 2.03 m. Recoveries: 0.
 - PASS: out-of-order gate rejection, reverse gate rejection, reset preserving progress, pause clock.
 - PASS: throttle acceleration, nitro increasing acceleration/consuming charge, reverse driving.
 - PASS: scoreboard garage, countdown, lap, pause, finish and leader agree with race state.
@@ -21,4 +21,4 @@ Build modules: Mac=False, Web=True.
 
 These are automated physics/AI checks. Human driving feel, gamepad, wheel input and browser behavior are separate validation tasks.
 
-Browser release checks: all three truck presentations, Rive HUD, nitro driving, follow camera, reduced motion, pause, 4K resize and fullscreen passed with no console errors. The 4K test used a 1600×880 buffer and actual fullscreen used 1600×900. Unity splash screen and logo are disabled in saved settings and enforced by the build script; the first ready frame shows the garage. See performance/WEB-FIRST.md for measured render work and Safari Technology Preview results.
+The separate Play Mode suite passes all 84 collision checks, including both segmented rails and all nine truck pairings. Safari Technology Preview release smoke testing confirms startup, driving, follow camera and live HUD with no console errors. See HANDLING.md and COLLISIONS.md.

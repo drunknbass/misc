@@ -4,21 +4,21 @@
   "compression": "gzip with decompression fallback",
   "threads": false,
   "files": {
-    "Build/17857d978cac9e7ae1ef18b5bf1f8050.loader.js": {
+    "Build/700dd6107cf03f52646504abcb3490aa.loader.js": {
       "bytes": 48540,
-      "sha256": "cbd6073ebeed38ebf6a2b48a63f475720a1cbed6cb4c0edaa8ca234a365a17d3"
+      "sha256": "320120d0873e48b279fee06350c3e4fbd82c761285c8dc244b9c0d22789289b5"
     },
-    "Build/781f939ca5a9a01f39cf3556acfff890.data.unityweb": {
-      "bytes": 3705371,
-      "sha256": "1468ea243c4c209f1e3adeeac4140cda6357fa3e0caaa57e6588da2077aa32b9"
+    "Build/7316ba5b6760bd77fdb68818d94d0d95.framework.js.unityweb": {
+      "bytes": 82328,
+      "sha256": "9fa8f06888bc7365d02a5038deb479e6a0cea23fdbd1bdcd83f61aa3241c7bb5"
     },
-    "Build/7d9362322219cda56da7bf7799a28cf1.framework.js.unityweb": {
-      "bytes": 82331,
-      "sha256": "3168aad2d81726fa4afac3606f2c36cbeb7cdaeae4ba1fc743bc7d4efd2b8b2d"
+    "Build/dade41a83ca789179ba3ca781b9591d2.data.unityweb": {
+      "bytes": 3707544,
+      "sha256": "f04f55030f80178d3b8ea7098c04de703d39d2e4f7bf16220e74cf409e602c2c"
     },
-    "Build/e15730f6bc2a1fe76a1b0e8328c4a20c.wasm.unityweb": {
-      "bytes": 6352061,
-      "sha256": "8676f4ace9e0c8f08c783ac1802bc7e4a8e5fefd4beebe6e3615d79279f76200"
+    "Build/e501811a9ccc64c100c8ce99a9bbae31.wasm.unityweb": {
+      "bytes": 6354492,
+      "sha256": "4f5cf6623fa01078e0588ec5a5a77beb529493957293c67f2bdffa4426c78031"
     }
   }
 }

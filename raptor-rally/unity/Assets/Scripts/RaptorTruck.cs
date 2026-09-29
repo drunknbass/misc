@@ -32,6 +32,8 @@ namespace RaptorRally
         public bool CrossedStart;
         public float MaxAirHeight;
         float stuckTime, gateWait;
+        float wallContactTime,truckContactTime;
+        Vector3 wallNormal;
         public int RecoveryCount;
         Transform visual;
         readonly Transform[] wheels = new Transform[4];
@@ -56,7 +58,7 @@ namespace RaptorRally
         {
             Track = track; Spec = TruckSpec.Lineup[type]; Driver = driver; IsPlayer = player;
             gameObject.layer = 8;
-            Body = gameObject.AddComponent<Rigidbody>(); Body.mass = 1400;
+            Body = gameObject.AddComponent<Rigidbody>(); Body.mass = type==0?1700:type==1?1550:1400;
             Body.interpolation = RigidbodyInterpolation.Interpolate;
             Body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
             Body.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
@@ -65,7 +67,11 @@ namespace RaptorRally
             var shape = bodyCollider = gameObject.AddComponent<BoxCollider>(); shape.size = new Vector3(Spec.Width, 1.25f, Spec.Length);
             passingBarriers=new bool[track.Barriers.Count];
             shape.center = new Vector3(0, -.15f, 0);
-            shape.sharedMaterial = new PhysicsMaterial("Arcade body") { dynamicFriction = 0, staticFriction = 0, bounciness = .05f, frictionCombine = PhysicsMaterialCombine.Minimum };
+            shape.sharedMaterial = new PhysicsMaterial("Arcade body") { dynamicFriction = 0, staticFriction = 0, bounciness = 0, frictionCombine = PhysicsMaterialCombine.Minimum, bounceCombine = PhysicsMaterialCombine.Minimum };
+            // Keep physical momentum exchange, but make a bumper tap less able to spin
+            // a long chassis. Driver steering remains independent of impact inertia.
+            Body.ResetInertiaTensor(); var inertia=Body.inertiaTensor; inertia.y*=6; Body.inertiaTensor=inertia;
+            Body.solverIterations=8; Body.solverVelocityIterations=4;
             var model=new RaptorModel(transform,type,color,player);
             visual=model.Body;
             System.Array.Copy(model.Wheels,wheels,4);
@@ -105,6 +111,7 @@ namespace RaptorRally
         }
         void SetPose(Vector3 p, Vector3 forward)
         {
+            wallContactTime=truckContactTime=0; wallNormal=Vector3.zero;
             Body.position = p; Body.rotation = Quaternion.LookRotation(forward);
             transform.SetPositionAndRotation(p, Body.rotation);
             Body.linearVelocity = Vector3.zero; Body.angularVelocity = Vector3.zero;
@@ -131,6 +138,9 @@ namespace RaptorRally
             UpdateBarrierRecovery();
             if (!IsPlayer || Autopilot || Finished) DriveAI(dt);
             Grounded = HasGroundContact();
+            bool slidingWall=wallContactTime>0;
+            float contactGrip=slidingWall?.12f:Mathf.Lerp(1,.22f,Mathf.Clamp01(truckContactTime/.28f));
+            wallContactTime=Mathf.Max(0,wallContactTime-dt); truckContactTime=Mathf.Max(0,truckContactTime-dt);
             Boosting = Boost && Throttle > 0 && Nitro > 0 && Grounded;
             if (Boosting) Nitro = Mathf.Max(0, Nitro - dt / 8);
             Vector3 velocity = Body.linearVelocity;
@@ -141,10 +151,26 @@ namespace RaptorRally
             {
                 float throttle = Mathf.Clamp(Throttle, -1, 1);
                 float force = throttle < 0 && forward > 1 ? 22 : Spec.Acceleration;
-                Body.AddForce((Body.rotation * Vector3.forward) * (throttle * force * (Boosting ? 1.65f : 1)), ForceMode.Acceleration);
-                Body.AddForce(-(Body.rotation * Vector3.right) * Vector3.Dot(planar, (Body.rotation * Vector3.right)) * Spec.Grip, ForceMode.Acceleration);
+                Vector3 drive=(Body.rotation * Vector3.forward) * (throttle * force * (Boosting ? 1.65f : 1));
+                Vector3 grip=-(Body.rotation * Vector3.right) * Vector3.Dot(planar, (Body.rotation * Vector3.right)) * Spec.Grip*contactGrip;
+                if(slidingWall) {
+                    // Reject force into the wall without inventing speed along it.
+                    drive-=wallNormal*Mathf.Min(0,Vector3.Dot(drive,wallNormal));
+                    grip-=wallNormal*Mathf.Min(0,Vector3.Dot(grip,wallNormal));
+                }
+                Body.AddForce(drive+grip,ForceMode.Acceleration);
                 Body.AddForce(-planar * .28f, ForceMode.Acceleration);
                 float yaw = Steer * Spec.Steering * Mathf.Clamp01(Mathf.Abs(forward) / 4) * (forward < -.3f ? -1 : 1);
+                if(slidingWall && Mathf.Abs(forward)>1) {
+                    Vector3 heading=Body.rotation*Vector3.forward;
+                    Vector3 travel=heading*Mathf.Sign(forward);
+                    float into=Vector3.Dot(travel,wallNormal);
+                    Vector3 next=Quaternion.Euler(0,yaw*dt,0)*travel;
+                    if(into<0 && Vector3.Dot(next,wallNormal)<into) yaw=0;
+                    Vector3 tangent=Vector3.ProjectOnPlane(travel,wallNormal);
+                    if(into<0 && tangent.sqrMagnitude>.16f)
+                        yaw+=Mathf.Clamp(Vector3.SignedAngle(travel,tangent,Vector3.up)*3,-65,65);
+                }
                 Body.MoveRotation(Body.rotation * Quaternion.Euler(0, yaw * dt, 0));
                 Body.AddForce(Vector3.down * 6, ForceMode.Acceleration);
             }
@@ -181,6 +207,23 @@ namespace RaptorRally
                 if (CompletedLaps == 3) FinishTime = time;
             }
             NextGate = (NextGate + 1) % Stadium.GateCount; gateWait = 0;
+        }
+        void OnCollisionEnter(Collision collision) => RememberContact(collision);
+        void OnCollisionStay(Collision collision) => RememberContact(collision);
+        void RememberContact(Collision collision)
+        {
+            if(collision.rigidbody!=null && collision.rigidbody.TryGetComponent<RaptorTruck>(out _)) {
+                truckContactTime=.28f;
+                return;
+            }
+            if(collision.collider.gameObject.layer!=11) return;
+            Vector3 normal=Vector3.zero;
+            for(int i=0;i<collision.contactCount;i++) {
+                Vector3 n=collision.GetContact(i).normal;
+                if(Mathf.Abs(n.y)<.5f) normal+=Vector3.ProjectOnPlane(n,Vector3.up);
+            }
+            if(normal.sqrMagnitude<.01f) return;
+            wallNormal=normal.normalized; wallContactTime=.06f;
         }
         bool HasGroundContact()
         {

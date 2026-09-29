@@ -1,0 +1,86 @@
+# Collision acceptance — Play Mode
+
+- PASS: F-150 RAPTOR wall -1 at 15°: travel 40.12 m, exit 22.16 m/s, peak yaw 0.50 rad/s
+- PASS: F-150 RAPTOR steer away after 15° scrape
+- PASS: F-150 RAPTOR wall -1 at 35°: travel 35.67 m, exit 22.16 m/s, peak yaw 0.70 rad/s
+- PASS: F-150 RAPTOR steer away after 35° scrape
+- PASS: F-150 RAPTOR wall -1 at 55°: travel 21.97 m, exit 19.09 m/s, peak yaw 0.38 rad/s
+- PASS: F-150 RAPTOR steer away after 55° scrape
+- PASS: F-150 RAPTOR wall +1 at 15°: travel 40.12 m, exit 22.16 m/s, peak yaw 0.50 rad/s
+- PASS: F-150 RAPTOR steer away after 15° scrape
+- PASS: F-150 RAPTOR wall +1 at 35°: travel 35.67 m, exit 22.16 m/s, peak yaw 0.70 rad/s
+- PASS: F-150 RAPTOR steer away after 35° scrape
+- PASS: F-150 RAPTOR wall +1 at 55°: travel 21.97 m, exit 19.09 m/s, peak yaw 0.38 rad/s
+- PASS: F-150 RAPTOR steer away after 55° scrape
+- PASS: BRONCO RAPTOR wall -1 at 15°: travel 37.61 m, exit 20.15 m/s, peak yaw 0.55 rad/s
+- PASS: BRONCO RAPTOR steer away after 15° scrape
+- PASS: BRONCO RAPTOR wall -1 at 35°: travel 33.55 m, exit 20.15 m/s, peak yaw 0.75 rad/s
+- PASS: BRONCO RAPTOR steer away after 35° scrape
+- PASS: BRONCO RAPTOR wall -1 at 55°: travel 21.23 m, exit 18.07 m/s, peak yaw 0.37 rad/s
+- PASS: BRONCO RAPTOR steer away after 55° scrape
+- PASS: BRONCO RAPTOR wall +1 at 15°: travel 37.61 m, exit 20.15 m/s, peak yaw 0.55 rad/s
+- PASS: BRONCO RAPTOR steer away after 15° scrape
+- PASS: BRONCO RAPTOR wall +1 at 35°: travel 33.55 m, exit 20.15 m/s, peak yaw 0.75 rad/s
+- PASS: BRONCO RAPTOR steer away after 35° scrape
+- PASS: BRONCO RAPTOR wall +1 at 55°: travel 21.23 m, exit 18.07 m/s, peak yaw 0.37 rad/s
+- PASS: BRONCO RAPTOR steer away after 55° scrape
+- PASS: RANGER RAPTOR wall -1 at 15°: travel 39.46 m, exit 21.18 m/s, peak yaw 0.57 rad/s
+- PASS: RANGER RAPTOR steer away after 15° scrape
+- PASS: RANGER RAPTOR wall -1 at 35°: travel 35.87 m, exit 21.18 m/s, peak yaw 0.80 rad/s
+- PASS: RANGER RAPTOR steer away after 35° scrape
+- PASS: RANGER RAPTOR wall -1 at 55°: travel 23.66 m, exit 20.71 m/s, peak yaw 0.42 rad/s
+- PASS: RANGER RAPTOR steer away after 55° scrape
+- PASS: RANGER RAPTOR wall +1 at 15°: travel 39.46 m, exit 21.18 m/s, peak yaw 0.57 rad/s
+- PASS: RANGER RAPTOR steer away after 15° scrape
+- PASS: RANGER RAPTOR wall +1 at 35°: travel 35.87 m, exit 21.18 m/s, peak yaw 0.80 rad/s
+- PASS: RANGER RAPTOR steer away after 35° scrape
+- PASS: RANGER RAPTOR wall +1 at 55°: travel 23.66 m, exit 20.71 m/s, peak yaw 0.42 rad/s
+- PASS: RANGER RAPTOR steer away after 55° scrape
+- PASS: F-150 RAPTOR square wall hit stops without invented sideways speed
+- PASS: BRONCO RAPTOR square wall hit stops without invented sideways speed
+- PASS: RANGER RAPTOR square wall hit stops without invented sideways speed
+- PASS: F-150 RAPTOR → F-150 RAPTOR rear: push 12.93 m, target peak 13.19 m/s, target turn 0.0°
+- PASS: F-150 RAPTOR → F-150 RAPTOR offset: push 12.88 m, target peak 13.17 m/s, target turn 4.4°
+- PASS: F-150 RAPTOR → F-150 RAPTOR side: push 8.44 m, target peak 8.22 m/s, target turn 0.0°
+- PASS: F-150 RAPTOR → F-150 RAPTOR head-on: push -2.55 m, target peak 9.94 m/s, target turn 0.4°
+- PASS: F-150 RAPTOR → BRONCO RAPTOR rear: push 13.34 m, target peak 13.80 m/s, target turn 0.0°
+- PASS: F-150 RAPTOR → BRONCO RAPTOR offset: push 13.29 m, target peak 13.77 m/s, target turn 4.9°
+- PASS: F-150 RAPTOR → BRONCO RAPTOR side: push 8.62 m, target peak 8.72 m/s, target turn 0.0°
+- PASS: F-150 RAPTOR → BRONCO RAPTOR head-on: push -2.29 m, target peak 9.94 m/s, target turn 0.5°
+- PASS: F-150 RAPTOR → RANGER RAPTOR rear: push 14.07 m, target peak 14.46 m/s, target turn 0.0°
+- PASS: F-150 RAPTOR → RANGER RAPTOR offset: push 14.01 m, target peak 14.44 m/s, target turn 4.8°
+- PASS: F-150 RAPTOR → RANGER RAPTOR side: push 9.40 m, target peak 9.11 m/s, target turn 0.0°
+- PASS: F-150 RAPTOR → RANGER RAPTOR head-on: push -1.70 m, target peak 9.94 m/s, target turn 0.7°
+- PASS: BRONCO RAPTOR → F-150 RAPTOR rear: push 11.69 m, target peak 11.99 m/s, target turn 0.0°
+- PASS: BRONCO RAPTOR → F-150 RAPTOR offset: push 11.64 m, target peak 11.98 m/s, target turn 4.6°
+- PASS: BRONCO RAPTOR → F-150 RAPTOR side: push 7.53 m, target peak 7.78 m/s, target turn 0.0°
+- PASS: BRONCO RAPTOR → F-150 RAPTOR head-on: push -3.16 m, target peak 9.94 m/s, target turn 0.4°
+- PASS: BRONCO RAPTOR → BRONCO RAPTOR rear: push 12.08 m, target peak 12.57 m/s, target turn 0.0°
+- PASS: BRONCO RAPTOR → BRONCO RAPTOR offset: push 12.02 m, target peak 12.55 m/s, target turn 5.4°
+- PASS: BRONCO RAPTOR → BRONCO RAPTOR side: push 7.69 m, target peak 8.17 m/s, target turn 0.0°
+- PASS: BRONCO RAPTOR → BRONCO RAPTOR head-on: push -2.90 m, target peak 9.94 m/s, target turn 0.4°
+- PASS: BRONCO RAPTOR → RANGER RAPTOR rear: push 12.77 m, target peak 13.21 m/s, target turn 0.0°
+- PASS: BRONCO RAPTOR → RANGER RAPTOR offset: push 12.71 m, target peak 13.19 m/s, target turn 5.2°
+- PASS: BRONCO RAPTOR → RANGER RAPTOR side: push 8.40 m, target peak 8.61 m/s, target turn 0.0°
+- PASS: BRONCO RAPTOR → RANGER RAPTOR head-on: push -2.39 m, target peak 9.94 m/s, target turn 0.0°
+- PASS: RANGER RAPTOR → F-150 RAPTOR rear: push 12.04 m, target peak 12.46 m/s, target turn 0.0°
+- PASS: RANGER RAPTOR → F-150 RAPTOR offset: push 11.99 m, target peak 12.45 m/s, target turn 4.7°
+- PASS: RANGER RAPTOR → F-150 RAPTOR side: push 7.52 m, target peak 7.55 m/s, target turn 0.0°
+- PASS: RANGER RAPTOR → F-150 RAPTOR head-on: push -3.56 m, target peak 9.94 m/s, target turn 0.5°
+- PASS: RANGER RAPTOR → BRONCO RAPTOR rear: push 12.48 m, target peak 13.10 m/s, target turn 0.0°
+- PASS: RANGER RAPTOR → BRONCO RAPTOR offset: push 12.43 m, target peak 13.08 m/s, target turn 5.4°
+- PASS: RANGER RAPTOR → BRONCO RAPTOR side: push 7.68 m, target peak 7.98 m/s, target turn 0.0°
+- PASS: RANGER RAPTOR → BRONCO RAPTOR head-on: push -3.34 m, target peak 9.94 m/s, target turn 0.0°
+- PASS: RANGER RAPTOR → RANGER RAPTOR rear: push 13.23 m, target peak 13.80 m/s, target turn 0.0°
+- PASS: RANGER RAPTOR → RANGER RAPTOR offset: push 13.17 m, target peak 13.78 m/s, target turn 5.3°
+- PASS: RANGER RAPTOR → RANGER RAPTOR side: push 8.54 m, target peak 8.45 m/s, target turn 0.0°
+- PASS: RANGER RAPTOR → RANGER RAPTOR head-on: push -2.76 m, target peak 9.94 m/s, target turn 0.3°
+- PASS: F-150 RAPTOR actual segmented rail -1: travel 18.12 m, exit 19.49 m/s
+- PASS: F-150 RAPTOR actual segmented rail +1: travel 18.11 m, exit 19.47 m/s
+- PASS: BRONCO RAPTOR actual segmented rail -1: travel 17.55 m, exit 18.63 m/s
+- PASS: BRONCO RAPTOR actual segmented rail +1: travel 17.54 m, exit 18.61 m/s
+- PASS: RANGER RAPTOR actual segmented rail -1: travel 14.03 m, exit 10.36 m/s
+- PASS: RANGER RAPTOR actual segmented rail +1: travel 14.04 m, exit 10.36 m/s
+- PASS: Four-truck race with callbacks: F-150 RAPTOR, player 113.69s, recoveries 0
+- PASS: Four-truck race with callbacks: BRONCO RAPTOR, player 113.05s, recoveries 0
+- PASS: Four-truck race with callbacks: RANGER RAPTOR, player 112.99s, recoveries 0
