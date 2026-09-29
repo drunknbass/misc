@@ -1,7 +1,7 @@
 /*! DIG//PAGE v1.1: turns the page you're looking at into a Dig Dug-style level.
  *  Your digger tunnels through the real content, and real buttons/links/icons come alive as enemies you pump until they pop.
  *  Technique after Hugo Duprez's destroy.spritefusion.com (page -> cell grid, harmonic crater carve, dithered scorch, falling letters, detaching chunks).
- *  Original code, art and sound. No dependencies, no network requests, nothing stored. Esc restores the page (on touch screens: SELECT twice).
+ *  Original code, art and sound. No dependencies, no network requests, nothing stored. Esc restores the page (on touch screens: tap ✕ twice).
  *  MIT License. https://drunknbass.github.io/misc/digpage/ */
 (function () {
 'use strict';
@@ -948,7 +948,7 @@ function killPlayer(why) { if (G.state !== 'play') return; vibrate([40, 60, 40])
 function shake(a) { trauma = Math.min(1, trauma + a); }
 // ------------------------------------------------------------------ on-screen NES-style controller (touch devices only): translucent overlay, emulator-skin style
 // D-pad = move/dig · A = pump (one pump per tap) · B = turbo pump (auto-pumps while held)
-// START = pause / play again after game over · SELECT = restore the page (tap twice to confirm)
+// top corners, beside the HUD: pause/resume (play again after game over) · ✕ restore the page (tap twice to confirm)
 var ctrlMode = '', ctrlH = 0, ctrlPlan = null, pad = null, padTimers = [];
 function isTouchUI() {
   try {
@@ -984,11 +984,10 @@ function buildPad(root) {
   var SVG = 'http://www.w3.org/2000/svg';
   function svg(tag, attrs, parent) { var e = D.createElementNS(SVG, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
   var body = box({ left: '0px', top: '0px', width: vw + 'px', height: vh + 'px' }, root);
-  // layout (px): D-pad bottom-left, A/B bottom-right on a diagonal (A upper-right), SELECT/START pills bottom-centre
+  // layout (px): D-pad bottom-left, A/B bottom-right on a diagonal (A upper-right); pause and ✕ sit in the top corners
   var D0 = Math.round((land ? 138 : 150) * s), bs = Math.round((land ? 64 : 70) * s);
   var edgeL = Math.round((land ? 26 : 18) * s) + P.sl, edgeR = Math.round((land ? 26 : 18) * s) + P.sr;
-  var pillsB = Math.round((land ? 12 : 18) * s) + P.sb;
-  var dpB = land ? Math.round(Math.max(40 * s + P.sb, (vh - D0) * 0.28)) : Math.round(pillsB + 58 * s);
+  var dpB = Math.round((land ? 16 : 16) * s) + P.sb;
   var dp = box({ left: edgeL + 'px', bottom: dpB + 'px', width: D0 + 'px', height: D0 + 'px', pointerEvents: 'auto' }, body);
   // D-pad: one frosted cross with a light outline, per-arm press highlights, small arrow marks
   var arm = Math.round(D0 * 0.34), a0 = (D0 - arm) / 2, a1 = a0 + arm, r = Math.round(arm * 0.2);
@@ -1021,23 +1020,32 @@ function buildPad(root) {
     var l = box({ left: '0px', top: '0px', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: LABEL, font: '700 ' + Math.round(bs * 0.36) + 'px ' + font, textShadow: LSHADOW }, b);
     l.textContent = label; return { well: w, btn: b };
   }
-  var dpMid = dpB + D0 / 2;                                   // A/B cluster centred on the D-pad's height
-  var A = roundBtn('A', edgeR - gap, Math.round(dpMid - well / 2 + bs * 0.34));
-  var B = roundBtn('B', Math.round(edgeR - gap + bs * 1.12), Math.round(dpMid - well / 2 - bs * 0.34));
-  // SELECT / START: small frosted pills with labels above
-  var pw = Math.round(48 * s), ph = Math.round(16 * s), pgap = Math.round(22 * s);
-  function pill(label, dx) {
-    var w = box({ left: Math.round(vw / 2 + dx) + 'px', bottom: (pillsB - Math.round(8 * s)) + 'px', width: (pw + Math.round(16 * s)) + 'px', height: (ph + Math.round(30 * s)) + 'px', pointerEvents: 'auto' }, body);
-    var l = box({ left: '0px', right: '0px', top: '0px', textAlign: 'center', color: LABEL, font: '700 ' + Math.round(9 * s) + 'px ' + font, letterSpacing: '1.5px', textShadow: LSHADOW }, w);
-    l.textContent = label;
-    var p = frost(box({ left: Math.round(8 * s) + 'px', bottom: Math.round(8 * s) + 'px', width: pw + 'px', height: ph + 'px', borderRadius: '99px', background: FILL, border: '1.5px solid ' + EDGE, boxShadow: RING, transition: 'transform 60ms, background 60ms' }, w));
-    return { well: w, btn: p };
+  var bB = Math.round(dpB + D0 * 0.08 - gap);                 // B sits low, level with the D-pad's lower arm; A up and to the right
+  var A = roundBtn('A', edgeR - gap, Math.round(bB + bs * 0.7));
+  var B = roundBtn('B', Math.round(edgeR - gap + bs * 1.12), bB);
+  // pause/resume and quit: small frosted icon buttons in the top corners, level with the HUD bar (44 px hit area)
+  var IB = 44, iv = 32, hudMid = (vw < 640 ? 4 : 8) + (vw < 640 ? 11 : 16);
+  function iconBtn(side) {
+    var o = { top: Math.max(0, P.st + hudMid - IB / 2) + 'px', width: IB + 'px', height: IB + 'px', pointerEvents: 'auto' };
+    o[side] = (side === 'left' ? P.sl : P.sr) + 6 + 'px';
+    var w = box(o, root);
+    var b = frost(box({ left: (IB - iv) / 2 + 'px', top: (IB - iv) / 2 + 'px', width: iv + 'px', height: iv + 'px', borderRadius: '50%', background: FILL, border: '1.5px solid ' + EDGE, boxShadow: RING, transition: 'transform 60ms, background 60ms' }, w));
+    var g = svg('svg', { width: iv, height: iv, viewBox: '0 0 32 32' }, b); css(g, { position: 'absolute', left: '-1.5px', top: '-1.5px', pointerEvents: 'none' });
+    return { well: w, btn: b, g: g };
   }
-  var cellW = pw + Math.round(16 * s);
-  var SEL = pill('SELECT', -cellW - pgap / 2), STA = pill('START', pgap / 2);
-  var toast = box({ left: '50%', bottom: (pillsB + Math.round(46 * s)) + 'px', transform: 'translateX(-50%)', padding: '8px 14px', borderRadius: '10px', background: 'rgba(18,10,34,.88)', color: '#ffd23a', font: '700 13px ui-monospace, Menlo, monospace', whiteSpace: 'nowrap', display: 'none' }, root);
-  dp.setAttribute('data-pad', 'dpad'); A.well.setAttribute('data-pad', 'A'); B.well.setAttribute('data-pad', 'B'); SEL.well.setAttribute('data-pad', 'SELECT'); STA.well.setAttribute('data-pad', 'START');
-  pad = { body: body, dp: dp, D0: D0, arms: armsEl, A: A, B: B, SEL: SEL, STA: STA, toast: toast, dir: null, dpId: null, turbo: 0, confirm: 0, flashA: 0, FILL: FILL, FILL_ON: FILL_ON };
+  function glyph(btn, kind) {
+    while (btn.g.firstChild) btn.g.removeChild(btn.g.firstChild);
+    var st = { fill: 'rgba(255,255,255,.92)', stroke: 'rgba(0,0,0,.45)', 'stroke-width': 1 };
+    function add(tag, at) { var o = {}; for (var k in st) o[k] = st[k]; for (var j in at) o[j] = at[j]; svg(tag, o, btn.g); }
+    if (kind === 'pause') { add('rect', { x: 10.5, y: 9.5, width: 4, height: 13, rx: 1 }); add('rect', { x: 17.5, y: 9.5, width: 4, height: 13, rx: 1 }); }
+    else if (kind === 'play') add('path', { d: 'M12,9 L23,16 L12,23 Z', 'stroke-linejoin': 'round' });
+    else { add('path', { d: 'M10,10 L22,22 M22,10 L10,22', fill: 'none', stroke: 'rgba(0,0,0,.45)', 'stroke-width': 5, 'stroke-linecap': 'round' }); add('path', { d: 'M10,10 L22,22 M22,10 L10,22', fill: 'none', stroke: 'rgba(255,255,255,.92)', 'stroke-width': 2.6, 'stroke-linecap': 'round' }); }
+    btn.kind = kind;
+  }
+  var PAU = iconBtn('left'), QUIT = iconBtn('right'); glyph(PAU, 'pause'); glyph(QUIT, 'x');
+  var toast = box({ left: '50%', top: (P.st + hudMid + 30) + 'px', transform: 'translateX(-50%)', padding: '8px 14px', borderRadius: '10px', background: 'rgba(18,10,34,.88)', color: '#ffd23a', font: '700 13px ui-monospace, Menlo, monospace', whiteSpace: 'nowrap', display: 'none' }, root);
+  dp.setAttribute('data-pad', 'dpad'); A.well.setAttribute('data-pad', 'A'); B.well.setAttribute('data-pad', 'B'); PAU.well.setAttribute('data-pad', 'pause'); QUIT.well.setAttribute('data-pad', 'quit');
+  pad = { body: body, dp: dp, D0: D0, arms: armsEl, A: A, B: B, PAU: PAU, QUIT: QUIT, glyph: glyph, toast: toast, confirmUntil: 0, dir: null, dpId: null, turbo: 0, confirm: 0, flashA: 0, FILL: FILL, FILL_ON: FILL_ON };
   wirePad();
 }
 function padToast(text, sec) {
@@ -1078,25 +1086,32 @@ function wirePad() {
     press('Space');
     clearInterval(p.turbo); p.turbo = setInterval(function () { if (!running) { clearInterval(p.turbo); return; } release('Space'); press('Space'); }, 180);
   }, function () { clearInterval(p.turbo); p.turbo = 0; release('Space'); });
-  button(p.STA, function () {
+  button(p.PAU, function () {
     if (G.state === 'gameover') { press('Enter'); release('Enter'); } else { press('KeyP'); release('KeyP'); }
+    padIcons();
   });
-  var selArmed = false;
-  button(p.SEL, function () {
-    if (p.confirm > 0) { selArmed = true; return; }
-    p.confirm = 2.5; padToast('Tap SELECT again to restore the page', 2.5);
-  }, function () { if (selArmed) { selArmed = false; quit(); } });   // quit on release, so the lifted finger doesn't click the page underneath
+  var quitArmed = false;
+  button(p.QUIT, function () {
+    if (Date.now() < p.confirmUntil) { quitArmed = true; return; }
+    p.confirmUntil = Date.now() + 2500; padToast('Tap ✕ again to restore the page', 2.5);
+    p.QUIT.btn.style.borderColor = 'rgba(255,120,110,.95)';
+    padLater(function () { if (pad === p && !quitArmed) p.QUIT.btn.style.borderColor = ''; }, 2500);
+  }, function () { if (quitArmed) { quitArmed = false; quit(); } });   // quit on release, so the lifted finger doesn't click the page underneath
   listen(host, 'contextmenu', kill); listen(host, 'dblclick', kill);
   listen(host, 'touchstart', function (e) { if (running) e.preventDefault(); }, { passive: false });
   listen(W, 'gesturestart', function (e) { if (running) e.preventDefault(); }, { passive: false });
 }
 function updatePad(dt, d) {
   if (!pad) return;
-  if (pad.confirm > 0) pad.confirm -= dt;
   if (pumpPressed) pad.flashA = 0.12; else pad.flashA -= dt;
   var code = d ? (d.x > 0 ? 'ArrowRight' : d.x < 0 ? 'ArrowLeft' : d.y > 0 ? 'ArrowDown' : 'ArrowUp') : null;
   for (var k in pad.arms) { var on = k === code || k === pad.dir; if (pad.arms[k].__on !== on) { pad.arms[k].__on = on; pad.arms[k].style.background = on ? pad.FILL_ON : 'transparent'; } }
   var aOn = pad.flashA > 0 || !!pad.A.held; if (pad.A.__on !== aOn) { pad.A.__on = aOn; pad.A.btn.style.background = aOn ? pad.FILL_ON : pad.FILL; }
+}
+function padIcons() {
+  if (!pad) return;
+  var want = paused || (G && G.state === 'gameover') ? 'play' : 'pause';
+  if (pad.PAU.kind !== want) pad.glyph(pad.PAU, want);
 }
 function teardownPad() { padTimers.forEach(clearTimeout); padTimers = []; if (pad) clearInterval(pad.turbo); pad = null; }
 
@@ -1267,7 +1282,7 @@ function step(dt) {
   var m = '', sub = '';
   if (G.state === 'ready') { m = 'SCREEN ' + G.round + '\nREADY!'; sub = enemies.length + ' elements came alive'; }
   else if (G.state === 'clear') { m = 'PAGE CLEARED!'; sub = 'scrolling to the next screen...'; }
-  else if (G.state === 'gameover') { m = 'GAME OVER'; sub = ctrlMode ? 'START to dig again · SELECT to restore the page' : 'ENTER to dig again · ESC to restore the page'; }
+  else if (G.state === 'gameover') { m = 'GAME OVER'; sub = ctrlMode ? '▶ to dig again · ✕ to restore the page' : 'ENTER to dig again · ESC to restore the page'; }
   else if (paused) m = 'PAUSED';
   setText('m', msgEl, m); setText('sub', hud.sub, sub);
 }
@@ -1276,8 +1291,10 @@ function frame(now) {
   try {
     var dt = Math.min(1 / 30, (now - lastT) / 1000 || 0); lastT = now;
     if (!paused && !hold) step(dt);
+    else if (paused && G && G.state !== 'gameover') { setText('m', msgEl, 'PAUSED'); setText('sub', hud.sub, ''); }
     if (running) render(paused || hold ? 0 : dt);
   } catch (err) { fail(err); return; }
+  if (pad) padIcons();
   raf = requestAnimationFrame(frame);
 }
 

@@ -34,15 +34,15 @@ DIG//PAGE turns the web page you're looking at into a Dig Dug-style level.
 | T | Autopilot |
 | P / M / Enter | Pause / mute / play again |
 
-On touch screens a see-through NES-style controller appears automatically, in the style of an emulator's transparent skin. The game fills the whole screen and the controls float over it as frosted outlines: D-pad bottom-left, B and A bottom-right on a diagonal (A upper-right), small SELECT and START pills at the bottom centre. In landscape the pads sit on the left and right edges. Buttons brighten when pressed. The HUD stays clear at the top, and everything respects the notch and home-bar safe areas.
+On touch screens a see-through NES-style controller appears automatically, in the style of an emulator's transparent skin. The game fills the whole screen and the controls float over it as frosted outlines: D-pad in the bottom-left corner, B and A in the bottom-right on a diagonal (A upper-right). Small pause and ✕ buttons sit in the top corners beside the score bar. Buttons brighten when pressed. The HUD stays clear at the top, and everything respects the notch and home-bar safe areas.
 
 | Button | Action |
 |---|---|
 | D-pad | Dig and move. Slide your thumb between directions without lifting it. |
 | A | Pump: one pump per tap |
 | B | Turbo pump: keeps pumping while held |
-| START | Pause / resume, or play again after game over |
-| SELECT | Quit and restore the page. Tap twice to confirm. |
+| ⏸ (top left) | Pause / resume, or play again after game over |
+| ✕ (top right) | Quit and restore the page. Tap twice to confirm. |
 
 Multi-touch works: hold the D-pad with one thumb and press A or B with the other. While the game runs, the page can't scroll, zoom, select text or open the long-press menu. Pops vibrate on devices that support it (Android; iOS doesn't).
 
