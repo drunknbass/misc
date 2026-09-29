@@ -14,9 +14,8 @@ Shader "Hidden/RaptorRally/PreviewToGUI"
             float4 frag(v2f_img input) : SV_Target
             {
                 float4 color=tex2D(_MainTex,input.uv);
-                #ifndef UNITY_COLORSPACE_GAMMA
-                color.rgb=GammaToLinearSpace(color.rgb);
-                #endif
+                // Unity camera textures are already sampled in linear space.
+                // Converting them a second time crushed the showroom shadows.
                 return color;
             }
             ENDCG

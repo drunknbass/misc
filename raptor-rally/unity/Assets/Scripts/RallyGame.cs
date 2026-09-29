@@ -18,6 +18,7 @@ namespace RaptorRally
         public bool Paused;
         public bool Verification;
         public Camera View;
+        Camera garageBackground;
         float finishFlash;
         float[] best = new float[3];
         readonly Color ink = new Color(.025f,.055f,.078f,.97f);
@@ -38,6 +39,7 @@ namespace RaptorRally
         {
             if (initialized) return; initialized = true;
             Application.targetFrameRate = 60;
+            gameObject.AddComponent<RallyLighting>().Configure();
             Track = new Stadium(transform);
             wheel=new SteeringWheelHud();
             if(Application.isPlaying) { garagePreview=new GaragePreview(transform); MotionHud=new RiveRaceHud(); }
@@ -47,13 +49,14 @@ namespace RaptorRally
             View.backgroundColor = new Color(.035f,.065f,.09f); View.clearFlags = CameraClearFlags.SolidColor;
             View.transform.position = new Vector3(19, 84, -100); View.transform.LookAt(new Vector3(0, 0, 1));
             View.nearClipPlane = .3f; View.farClipPlane = 300;
+            var background=new GameObject("Garage backdrop",typeof(Camera)); background.transform.SetParent(transform,false);
+            garageBackground=background.GetComponent<Camera>(); garageBackground.depth=-10; garageBackground.cullingMask=0;
+            garageBackground.clearFlags=CameraClearFlags.SolidColor; garageBackground.backgroundColor=new Color(.025f,.04f,.05f);
             var light = new GameObject("Late afternoon sun", typeof(Light)); light.transform.SetParent(transform);
             light.transform.rotation = Quaternion.Euler(48, -35, 0);
-            var sun = light.GetComponent<Light>(); sun.type = LightType.Directional; sun.intensity = 1.3f;
-            sun.shadows = LightShadows.Soft; sun.shadowStrength = .7f;
-            RenderSettings.ambientLight = new Color(.59f,.64f,.66f);
-            RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
-            QualitySettings.shadowDistance = 200;
+            var sun = light.GetComponent<Light>(); sun.type = LightType.Directional; sun.intensity = 1.08f; sun.color=new Color(1,.91f,.78f); sun.cullingMask=~(1<<10);
+            sun.shadows = LightShadows.Soft; sun.shadowStrength = .88f; sun.shadowBias=.025f; sun.shadowNormalBias=.16f;
+            if(Application.isPlaying) { var dust=new GameObject("Shared tire dust"); dust.transform.SetParent(transform,false); dust.AddComponent<RallyDust>().Initialize(this); }
             for (int i = 0; i < best.Length; i++) best[i] = PlayerPrefs.GetFloat("coyote-basin-v3-" + i, 0);
             PrepareGrid();
         }
@@ -142,10 +145,14 @@ namespace RaptorRally
         {
             float aspect = Mathf.Max(.5f, (float)Screen.width / Screen.height);
             bool tracking=FollowPlayer && State!=Phase.Garage && Trucks.Count>0;
-            View.rect=State==Phase.Garage?new Rect(.68f,.25f,.31f,.63f):new Rect(0,0,1,1);
+            garageBackground.enabled=State==Phase.Garage;
+            if(State==Phase.Garage) {
+                float s=Mathf.Min(Screen.width/1600f,Screen.height/900f),x=(Screen.width-1600*s)*.5f,y=(Screen.height-900*s)*.5f;
+                View.rect=new Rect((x+1110*s)/Screen.width,(Screen.height-y-735*s)/Screen.height,465*s/Screen.width,485*s/Screen.height);
+            } else View.rect=new Rect(0,0,1,1);
             Vector3 target=tracking?Player.transform.position+Player.transform.forward*2.5f+Vector3.up*.5f:new Vector3(0,0,1);
             Vector3 position=tracking?target+new Vector3(10,20,-25):new Vector3(19,84,-100);
-            float size=tracking?Mathf.Max(10.5f,12/aspect):Mathf.Max(58,76/(aspect*View.rect.width));
+            float size=tracking?Mathf.Max(10.5f,12/aspect):State==Phase.Garage?73:Mathf.Max(58,76/aspect);
             float blend=snap?1:1-Mathf.Exp(-Mathf.Max(0,dt)*7);
             View.transform.position=Vector3.Lerp(View.transform.position,position,blend);
             View.transform.rotation=Quaternion.Slerp(View.transform.rotation,Quaternion.LookRotation(target-position),blend);

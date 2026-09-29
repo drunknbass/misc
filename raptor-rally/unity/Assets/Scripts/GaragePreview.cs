@@ -19,8 +19,8 @@ namespace RaptorRally
             var go=new GameObject("Garage detail camera",typeof(Camera)); go.transform.SetParent(stage,false);
             camera=go.GetComponent<Camera>(); camera.enabled=false; camera.cullingMask=1<<10;
             camera.clearFlags=CameraClearFlags.SolidColor; camera.backgroundColor=new Color(.025f,.045f,.06f);
-            camera.orthographic=true; camera.orthographicSize=2.75f; camera.nearClipPlane=.1f; camera.farClipPlane=30;
-            go.transform.localPosition=new Vector3(4.8f,3.25f,6.3f); go.transform.LookAt(stage.position+new Vector3(0,.35f,0));
+            camera.orthographic=true; camera.orthographicSize=2.55f; camera.nearClipPlane=.1f; camera.farClipPlane=30;
+            go.transform.localPosition=new Vector3(4.8f,2.5f,6.3f); go.transform.LookAt(stage.position+new Vector3(0,.35f,0));
             sceneTexture=new RenderTexture(1000,700,24,RenderTextureFormat.ARGB32) { name="Garage scene render",antiAliasing=4 };
             Texture=new RenderTexture(1000,700,0,RenderTextureFormat.ARGB32) { name="Live Raptor garage preview" };
             guiColor=new Material(Resources.Load<Shader>("HUD/PreviewToGUI"));
@@ -33,7 +33,7 @@ namespace RaptorRally
             foreach(Vector3 p in new[]{new Vector3(2,5,4),new Vector3(-4,3,-2)})
             {
                 var lamp=new GameObject("Studio soft light",typeof(Light)); lamp.transform.SetParent(stage,false); lamp.transform.localPosition=p;
-                var light=lamp.GetComponent<Light>(); light.type=LightType.Point; light.range=15; light.intensity=.8f; light.cullingMask=1<<10;
+                var light=lamp.GetComponent<Light>(); light.type=LightType.Directional; lamp.transform.LookAt(stage.position); light.intensity=p.x>0?1.15f:.8f; light.color=p.x>0?new Color(1,.94f,.84f):new Color(.60f,.77f,1); light.cullingMask=1<<10;
             }
         }
         public void Render(int vehicle)

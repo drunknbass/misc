@@ -38,3 +38,5 @@ See [validation](VALIDATION.md) for tested behavior and platform limits.
 ## Performance update
 
 The browser build now batches static scenery, indexes nearby barriers, reuses trucks and cached garage graphics, limits Rive refresh work and caps Retina/fullscreen rendering resolution. See [before/after results and test method](performance/RESULTS.md).
+
+The latest [visual quality pass](performance/VISUAL-QUALITY.md) adds revised truck proportions, material/lighting detail, original dirt artwork, shaped barriers, pooled dust, contact shadows and corrected garage presentation while retaining the browser performance gains.

@@ -29,12 +29,12 @@ function resizeCanvas(){const r=canvas.getBoundingClientRect(),scale=Math.min(wi
 new ResizeObserver(resizeCanvas).observe(canvas);resizeCanvas();
 function showError(message){loading.hidden=false;progress.hidden=true;status.className='error';status.textContent='The game could not start. '+String(message);document.getElementById('retry').hidden=false;}
 document.getElementById('retry').onclick=()=>location.reload();
-const loader=document.createElement('script');loader.src='Build/8d606ef6499b34a571ce7d7d9e0dccae.loader.js';loader.onerror=()=>showError('Check your connection and reload.');
+const loader=document.createElement('script');loader.src='Build/e336889a0aac067a2f7d1517f33b065f.loader.js';loader.onerror=()=>showError('Check your connection and reload.');
 loader.onload=()=>createUnityInstance(canvas,{
 arguments:[],
-dataUrl:'Build/178479836b3595c74d3795449b3f69ee.data.unityweb',
-frameworkUrl:'Build/80db4b41436f5ae0e145b5dc32f76315.framework.js.unityweb',
-codeUrl:'Build/9f51e72743a4412376fb5063515b6841.wasm.unityweb',
+dataUrl:'Build/f1abbb5a823cc6482ea785f2990c6ac0.data.unityweb',
+frameworkUrl:'Build/91905769a98301fefa759a0f8447733d.framework.js.unityweb',
+codeUrl:'Build/c6d1e4b20dfb4c433470e4807c49be63.wasm.unityweb',
 streamingAssetsUrl:'StreamingAssets',companyName:"RaptorRallyPrototype",productName:"Raptor Rally",productVersion:"1.0",matchWebGLToCanvasSize:false,
 showBanner:(message,type)=>{if(type==='error')showError(message);else console.warn(message);}
 },value=>{progress.value=value;status.textContent=value<.9?'Loading the track… '+Math.round(value*100)+'%':'Starting engines…';}).then(instance=>{window.raptorGame=instance;loading.hidden=true;fullscreen.disabled=false;fullscreen.onclick=()=>{canvas.focus();instance.SetFullscreen(1);};canvas.focus();document.documentElement.dataset.gameReady='true';}).catch(showError);

@@ -19,17 +19,17 @@ namespace RaptorRally
         {
             this.type=type;
             resources=parent.gameObject.AddComponent<RaptorModelResources>();
-            var spec=TruckSpec.Lineup[type]; length=spec.Length; width=spec.Width*.41f;
-            axle=length*(type==1?.325f:.32f); tire=type==1?.61f:.58f;
+            var spec=TruckSpec.Lineup[type]; length=spec.Length*(type==1?1.05f:1.10f); width=spec.Width*.395f;
+            axle=length*(type==1?.325f:.32f); tire=type==1?.61f:type==0?.57f:.55f;
             Body=new GameObject(spec.Name+" • shaped bodywork").transform; Body.SetParent(parent,false);
-            paint=Material(color,.22f,.48f); trim=Material(new Color(.032f,.039f,.045f),.05f,.24f);
-            glass=Material(new Color(.045f,.12f,.17f),.5f,.84f);
+            paint=Material(color*.94f,.42f,.76f); paint.shader=Resources.Load<Shader>("RallyPaint"); trim=Material(new Color(.032f,.039f,.045f),.05f,.24f);
+            glass=Material(new Color(.025f,.048f,.065f),.72f,.94f);
             metal=Material(new Color(.32f,.36f,.39f),.72f,.58f);
             alloy=Material(new Color(.20f,.23f,.26f),.5f,.4f);
             rubber=Material(new Color(.018f,.023f,.027f),0,.1f);
             light=Material(new Color(.90f,.97f,1),.05f,.7f);
             amber=Material(new Color(1,.32f,.025f),.05f,.5f); red=Material(new Color(.68f,.025f,.015f),.1f,.55f);
-            BuildBody(); BuildFace(); BuildDetails(player);
+            BuildBody(); BuildFace(); BuildDetails(player); BuildFinishDetails();
             Flush(Body);
             for(int side=-1;side<=1;side+=2) for(int front=-1;front<=1;front+=2)
             {
@@ -67,7 +67,7 @@ namespace RaptorRally
                 var go=new GameObject("Sculpted mesh",typeof(MeshFilter),typeof(MeshRenderer)); go.transform.SetParent(parent,false);
                 var mesh=new Mesh { name="Raptor body / wheel mesh" }; mesh.SetVertices(pair.Value.vertices); mesh.SetTriangles(pair.Value.triangles,0);
                 resources.Items.Add(mesh);
-                mesh.RecalculateNormals(); mesh.RecalculateBounds(); go.GetComponent<MeshFilter>().sharedMesh=mesh;
+                mesh.SetNormals(pair.Value.normals); mesh.RecalculateBounds(); go.GetComponent<MeshFilter>().sharedMesh=mesh;
                 go.GetComponent<MeshRenderer>().sharedMaterial=pair.Key;
             }
             parts.Clear();
@@ -98,8 +98,8 @@ namespace RaptorRally
                         Box(front==1?amber:red,new Vector3(side*width*(flare+.025f),.24f,front*axle+front*.64f),new Vector3(.025f,.075f,.12f));
                 }
             }
-            float cabFront=type==1?.82f:1.02f, cabRear=type==1?-1.73f:-.65f;
-            float roofFront=type==1?.61f:.58f, roofRear=type==1?-1.65f:-.51f, roof=type==1?1.57f:1.43f;
+            float cabFront=type==1?.82f:1.12f, cabRear=type==1?-1.73f:-.90f;
+            float roofFront=type==1?.61f:.63f, roofRear=type==1?-1.65f:-.76f, roof=type==1?1.43f:1.20f;
             // Sloped windscreen, tapered greenhouse and chamfered roof define the silhouette.
             Vector3 fl=new Vector3(-width*.88f,belt+.1f,cabFront),fr=new Vector3(width*.88f,belt+.1f,cabFront);
             Vector3 tl=new Vector3(-width*.78f,roof-.08f,roofFront),tr=new Vector3(width*.78f,roof-.08f,roofFront);
@@ -252,11 +252,31 @@ namespace RaptorRally
                 Box(trim,new Vector3(side*(width+.02f),.43f,.91f),new Vector3(.025f,.18f,.33f));
                 for(int i=0;i<3;i++) Box(metal,new Vector3(side*(width+.035f),.39f+i*.045f,.91f),new Vector3(.02f,.012f,.25f));
             }
-            if(player)
-            {
-                float roof=type==1?1.63f:1.49f;
-                Box(light,new Vector3(0,roof,0),new Vector3(.13f,.012f,type==1?2.2f:.95f));
+
+        }
+        void BuildFinishDetails()
+        {
+            // Grille mesh sits behind raised FORD lettering, with a dark surround.
+            float front=length*.5f+.07f;
+            for(int row=0;row<4;row++) for(int col=0;col<15;col++)
+                Box(alloy,new Vector3((col-7)*.10f,.06f+row*.11f,front-.016f),new Vector3(.06f,.016f,.012f),Quaternion.Euler(0,0,row%2==0?18:-18));
+            if(type!=1) {
+                float rear=-length*.5f, cab=-.90f;
+                for(int rib=-6;rib<=6;rib++) Box(trim,new Vector3(rib*.12f,.183f,(rear+cab)*.5f),new Vector3(.026f,.028f,cab-rear-.2f));
+                foreach(int side in new[]{-1,1}) {
+                    Box(trim,new Vector3(side*width*.88f,.25f,rear+.8f),new Vector3(.24f,.22f,.64f));
+                    Box(metal,new Vector3(side*width*.83f,.50f,rear+.20f),new Vector3(.045f,.045f,.08f));
+                }
             }
+            // Chamfered rock rails, visible tow loops and machined bumper edges.
+            foreach(int side in new[]{-1,1}) {
+                Loft(trim,-axle*.66f,axle*.60f,.13f,-.29f,-.17f,.04f,side*width*1.07f);
+                Ring(red,new Vector3(side*.58f,-.26f,front+.09f),.082f,.048f,Vector3.forward,20);
+                Box(trim,new Vector3(side*width*.99f,.535f,-.27f),new Vector3(.018f,.016f,.86f));
+            }
+            // Split wipers follow the windscreen plane.
+            float z=type==1?.82f:1.12f, belt=type==1?.65f:.57f;
+            foreach(int side in new[]{-1,1}) Beam(trim,new Vector3(side*.12f,belt+.13f,z+.012f),new Vector3(side*.69f,belt+.21f,z-.025f),.022f,.020f);
         }
         void Lettering(string word,Vector3 origin,float unit,Material material,Quaternion? rotation=null)
         {
@@ -275,7 +295,7 @@ namespace RaptorRally
             for(int i=0;i<40;i++) for(int band=0;band<xs.Length-1;band++)
             {
                 float a=i*Mathf.PI*2/40,b=(i+1)*Mathf.PI*2/40;
-                G(rubber).Quad(new Vector3(xs[band],Mathf.Cos(a)*rs[band],Mathf.Sin(a)*rs[band]),new Vector3(xs[band],Mathf.Cos(b)*rs[band],Mathf.Sin(b)*rs[band]),new Vector3(xs[band+1],Mathf.Cos(b)*rs[band+1],Mathf.Sin(b)*rs[band+1]),new Vector3(xs[band+1],Mathf.Cos(a)*rs[band+1],Mathf.Sin(a)*rs[band+1]),new Vector3(0,Mathf.Cos((a+b)/2),Mathf.Sin((a+b)/2)));
+                G(rubber).TireQuad(new Vector3(xs[band],Mathf.Cos(a)*rs[band],Mathf.Sin(a)*rs[band]),new Vector3(xs[band],Mathf.Cos(b)*rs[band],Mathf.Sin(b)*rs[band]),new Vector3(xs[band+1],Mathf.Cos(b)*rs[band+1],Mathf.Sin(b)*rs[band+1]),new Vector3(xs[band+1],Mathf.Cos(a)*rs[band+1],Mathf.Sin(a)*rs[band+1]),new Vector3(0,Mathf.Cos((a+b)/2),Mathf.Sin((a+b)/2)));
             }
             for(int i=0;i<28;i++)
             {
@@ -311,14 +331,25 @@ namespace RaptorRally
         sealed class Geometry
         {
             public readonly List<Vector3> vertices=new List<Vector3>(); public readonly List<int> triangles=new List<int>();
+            public readonly List<Vector3> normals=new List<Vector3>();
             public void Triangle(Vector3 a,Vector3 b,Vector3 c,Vector3 normal)
             {
                 int start=vertices.Count; vertices.Add(a); vertices.Add(b); vertices.Add(c);
+                Vector3 n=Vector3.Cross(b-a,c-a).normalized; if(Vector3.Dot(n,normal)<0) n=-n; normals.AddRange(new[]{n,n,n});
                 if(Vector3.Dot(Vector3.Cross(b-a,c-a),normal)>=0) triangles.AddRange(new[]{start,start+1,start+2});
                 else triangles.AddRange(new[]{start,start+2,start+1});
             }
             public void Quad(Vector3 a,Vector3 b,Vector3 c,Vector3 d,Vector3 normal)
             { Triangle(a,b,c,normal); Triangle(a,c,d,normal); }
+            public void TireQuad(Vector3 a,Vector3 b,Vector3 c,Vector3 d,Vector3 direction)
+            {
+                int start=vertices.Count; Quad(a,b,c,d,direction);
+                for(int i=start;i<vertices.Count;i++) {
+                    Vector3 p=vertices[i];
+                    float shoulder=Mathf.Clamp01((Mathf.Abs(p.x)-.15f)/.10f);
+                    normals[i]=new Vector3(Mathf.Sign(p.x)*shoulder*.9f,p.y,p.z).normalized;
+                }
+            }
             public void Box(Vector3 p,Vector3 size,Quaternion rotation)
             {
                 var c=new Vector3[8];

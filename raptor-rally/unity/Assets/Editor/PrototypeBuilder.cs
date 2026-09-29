@@ -37,6 +37,7 @@ public static class PrototypeBuilder
     public static void Verify()
     {
         ConfigureWheelTexture();
+        ConfigureGroundTexture();
         CreateScene();
         var game=UnityEngine.Object.FindAnyObjectByType<RallyGame>(); game.Initialize(); game.Verification=true;
         Physics.simulationMode=SimulationMode.Script;
@@ -267,9 +268,21 @@ public static class PrototypeBuilder
     }
     [MenuItem("Raptor Rally/Build Mac")]
     public static void BuildMac() => Build(BuildTarget.StandaloneOSX,"Mac/Raptor Rally.app");
+    static void ConfigureGroundTexture()
+    {
+        const string path="Assets/Resources/Surface/CoyoteDirt.png";
+        var importer=AssetImporter.GetAtPath(path) as TextureImporter;
+        if(importer==null) return;
+        importer.textureType=TextureImporterType.Default; importer.sRGBTexture=true;
+        importer.mipmapEnabled=true; importer.wrapMode=TextureWrapMode.Repeat;
+        importer.filterMode=FilterMode.Trilinear; importer.anisoLevel=8; importer.maxTextureSize=1024;
+        importer.textureCompression=TextureImporterCompression.Compressed;
+        importer.SaveAndReimport();
+    }
     [MenuItem("Raptor Rally/Build Browser")]
     public static void BuildWeb()
     {
+        ConfigureGroundTexture();
         // GitHub Pages cannot provide custom compression/isolation headers.
         PlayerSettings.WebGL.compressionFormat=WebGLCompressionFormat.Gzip;
         PlayerSettings.WebGL.decompressionFallback=true;

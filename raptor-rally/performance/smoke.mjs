@@ -13,7 +13,7 @@ async function size(){return evaluate("({width:document.querySelector('canvas').
 await call('Page.enable');await call('Runtime.enable');await call('Emulation.setCPUThrottlingRate',{rate:1});
 await call('Emulation.setDeviceMetricsOverride',{width:3840,height:2160,deviceScaleFactor:2,mobile:false});await call('Page.navigate',{url});
 let ready=false;for(let i=0;i<120;i++){if(await evaluate("document.documentElement?.dataset.gameReady==='true'")){ready=true;break;}await wait(500);}if(!ready)throw Error('Startup timed out');
-await wait(1200);const initial=await size();if(initial.width>1920||initial.height>1080)throw Error('4K pixel budget exceeded');
+await wait(4500);const initial=await size();if(initial.width>1920||initial.height>1080)throw Error('4K pixel budget exceeded');
 await call('Emulation.setDeviceMetricsOverride',{width:1600,height:900,deviceScaleFactor:1,mobile:false});await wait(300);
 await key('2','Digit2',50);await wait(300);await shot('bronco');await key('3','Digit3',51);await wait(300);await shot('ranger');
 await key('Enter','Enter',13);await wait(4000);await key('c','KeyC',67);await key('m','KeyM',77);

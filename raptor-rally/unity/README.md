@@ -72,7 +72,7 @@ Dependencies are pinned in `Packages/manifest.json` and `Packages/packages-lock.
 
 The first art pass adds pickup bed rails, Bronco roof rails and a round spare, wider fenders, wheel hubs with roll and steering animation, and visual body movement. The course now uses an original 452 m switchback layout with procedurally textured dirt and gold jump-crest markers. Six-tier stands with access aisles, segmented floodlights, finish flags, a compact outside-lane service compound and a rear scoreboard give Coyote Basin a coherent miniature-stadium setting. The scoreboard uses the same race state, player lap and standings as the HUD.
 
-The new track uses 384 samples and 48 sequential gates; three hairpins replace the oval. Truck collision shapes are unchanged; the re-entry and jump pass below updates barrier handling, ground contact and jump profiles. Scenery is visual only. Best-time keys use course version 3, preserving older course records separately. Vehicle geometry remains an original stylized placeholder. Dust, audio, gamepad support and a human handling review remain future work. See `../PROJECT-BRIEF.md` for reference evidence and visual priorities.
+The new track uses 384 samples and 48 sequential gates; three hairpins replace the oval. Truck collision shapes are unchanged; the re-entry and jump pass below updates barrier handling, ground contact and jump profiles. Scenery is visual only. Best-time keys use course version 3, preserving older course records separately. Vehicle geometry remains an original stylized placeholder. Audio, gamepad support and a human handling review remain future work. See `../PROJECT-BRIEF.md` for reference evidence and visual priorities.
 
 ## Steering-wheel HUD
 
@@ -117,3 +117,11 @@ Static stadium props are combined into spatial chunks with original colors store
 The stationary garage preview renders only when its selected model changes. Rive uses a 1600×900 surface and at most 30 updates/second in browser players; recovery, boost and motion-mode changes bypass that interval. Unchanged text bindings are not resent. The camera, input and steering-wheel indicator retain their display-rate updates. The browser canvas follows its layout while capping its drawing buffer at 1920×1080, including on Retina displays and after resizing.
 
 The public repository includes `performance/RESULTS.md`, measurements and a dependency-free Chrome DevTools benchmark. Simulated CPU slowdown results are comparisons on one machine, not promises for every browser/device.
+
+## Visual quality pass
+
+The stadium uses a warm directional key with a cooler sky fill, two high-resolution shadow cascades, and a small original reflection cubemap. Painted bodywork has a glossier finish and lower-panel dust; glass, alloys, and rubber have distinct responses. Pickup bodies are longer with lower cabins, tire shoulders use smooth normals, and the meshes include grille slats, bed ribs, wipers, rock rails and tow loops. The three models remain original stylized Raptor-inspired geometry.
+
+The dirt surface uses an original generated albedo blended at two world-space scales, mipmapping and anisotropic filtering, with separate granular normals, racing-line wear and darker wall edges. Concrete barriers now have a chamfered Jersey profile while retaining the same physical collision shapes. A fixed 160-quad mesh renders pooled tire dust and four soft ground-contact shadows for the entire field; no per-frame particle object creation or realtime reflection-probe rendering is required. The garage has separate studio lighting and its track preview follows the same letterboxed layout as the controls.
+
+Ground-art provenance and the exact built-in imagegen prompt are in `Assets/Resources/Surface/ART-PROVENANCE.md`. No new package dependencies were added.

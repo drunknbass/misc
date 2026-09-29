@@ -25,6 +25,7 @@ namespace RaptorRally
         TextMesh raceBoard;
         readonly Dictionary<Vector2Int,List<int>> barrierCells=new Dictionary<Vector2Int,List<int>>();
         Texture2D dirtTexture;
+        Mesh barrierMesh;
         RallyGame.Phase boardPhase;
         bool boardInitialized,boardPaused;
         int boardLap;
@@ -153,7 +154,7 @@ namespace RaptorRally
             Box("Stadium plinth", new Vector3(0, -2.35f, 5), new Vector3(132, 4, 102), new Color(.27f,.16f,.085f), true);
             var ground=Box("Infield dirt", new Vector3(0, -.15f, 5), new Vector3(130, .3f, 100), Sand, true);
             var groundDirt=DirtMaterial(); groundDirt.color=new Color(.84f,.77f,.66f);
-            groundDirt.mainTextureScale=new Vector2(9,9); ground.GetComponent<Renderer>().sharedMaterial=groundDirt;
+            groundDirt.SetFloat("_Course",0); ground.GetComponent<Renderer>().sharedMaterial=groundDirt;
             var vertices = new List<Vector3>(); var triangles = new List<int>(); var uv=new List<Vector2>();
             for (int i = 0; i <= Samples; i++)
             {
@@ -165,7 +166,7 @@ namespace RaptorRally
                 triangles.AddRange(new[] { v, v + 2, v + 1, v + 1, v + 2, v + 3 });
             }
             Mesh mesh = new Mesh { name = "Closed dirt ribbon", vertices = vertices.ToArray(), triangles = triangles.ToArray(), uv=uv.ToArray() };
-            mesh.RecalculateNormals(); mesh.RecalculateBounds();
+            mesh.RecalculateNormals(); mesh.RecalculateTangents(); mesh.RecalculateBounds();
             var road = new GameObject("Driveable dirt / jumps", typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider));
             road.transform.SetParent(Root); road.layer = 9;
             road.GetComponent<MeshCollider>().sharedMesh = mesh;
@@ -184,6 +185,7 @@ namespace RaptorRally
                     Color c = (i / 3) % 2 == 0 ? new Color(.84f, .88f, .82f) : new Color(.66f, .095f, .055f);
                     var wall = Box("Safety barrier", (p + q) / 2 + Vector3.up * .65f, new Vector3(.55f, 1.3f, Vector3.Distance(p, q) + .1f), c, true);
                     wall.transform.rotation = Quaternion.LookRotation(q - p);
+                    wall.GetComponent<MeshFilter>().sharedMesh=BarrierMesh();
                     wall.layer=11; // Walls must never count as drivable ground in suspension raycasts.
                     Barriers.Add(new Barrier(wall.GetComponent<Collider>(),(p+q)*.5f,((Side(i)+Side(i+1))*.5f*sign).normalized));
                 }
@@ -197,6 +199,22 @@ namespace RaptorRally
                 var mark = Box("Direction marker", Points[i] + Vector3.up * .035f, new Vector3(.45f, .04f, 2.5f), new Color(.95f, .76f, .31f));
                 mark.transform.rotation = Quaternion.LookRotation(Tangent(i)) * Quaternion.Euler(0, 35, 0);
             }
+        }
+        Mesh BarrierMesh()
+        {
+            if(barrierMesh!=null) return barrierMesh;
+            var ring=new[]{new Vector2(-.5f,-.5f),new Vector2(-.5f,-.18f),new Vector2(-.30f,.16f),new Vector2(-.30f,.47f),new Vector2(-.23f,.5f),new Vector2(.23f,.5f),new Vector2(.30f,.47f),new Vector2(.30f,.16f),new Vector2(.5f,-.18f),new Vector2(.5f,-.5f)};
+            var v=new List<Vector3>(); var t=new List<int>();
+            for(int i=0;i<ring.Length;i++) {
+                Vector2 a=ring[i],b=ring[(i+1)%ring.Length]; int n=v.Count;
+                v.Add(new Vector3(a.x,a.y,-.5f)); v.Add(new Vector3(a.x,a.y,.5f)); v.Add(new Vector3(b.x,b.y,.5f)); v.Add(new Vector3(b.x,b.y,-.5f));
+                t.AddRange(new[]{n,n+1,n+2,n,n+2,n+3});
+                foreach(int sign in new[]{-1,1}) {
+                    n=v.Count; v.Add(new Vector3(0,0,sign*.5f)); v.Add(new Vector3(a.x,a.y,sign*.5f)); v.Add(new Vector3(b.x,b.y,sign*.5f));
+                    t.AddRange(sign==1?new[]{n,n+2,n+1}:new[]{n,n+1,n+2});
+                }
+            }
+            barrierMesh=new Mesh { name="Chamfered concrete Jersey wall" }; barrierMesh.SetVertices(v); barrierMesh.SetTriangles(t,0); barrierMesh.RecalculateNormals(); return barrierMesh;
         }
         void BuildRecoveryShoulders()
         {
@@ -214,7 +232,7 @@ namespace RaptorRally
                     if(i<Samples) { int v=i*2; triangles.AddRange(new[]{v,v+2,v+1,v+1,v+2,v+3}); }
                 }
                 var mesh=new Mesh { name="Sloped recovery verge",vertices=vertices.ToArray(),triangles=triangles.ToArray(),uv=uv.ToArray() };
-                mesh.RecalculateNormals();
+                mesh.RecalculateNormals(); mesh.RecalculateTangents();
                 var go=new GameObject("Drivable recovery shoulder",typeof(MeshFilter),typeof(MeshCollider));
                 go.transform.SetParent(Root,false); go.layer=9;
                 go.GetComponent<MeshCollider>().sharedMesh=mesh;
@@ -253,23 +271,19 @@ namespace RaptorRally
         {
             if(dirtTexture==null)
             {
-            var texture=new Texture2D(256,512,TextureFormat.RGB24,false) { name="Original procedural stadium dirt",wrapMode=TextureWrapMode.Repeat };
+            var texture=new Texture2D(256,512,TextureFormat.RGB24,true,true) { name="Original procedural stadium dirt",wrapMode=TextureWrapMode.Repeat,filterMode=FilterMode.Trilinear,anisoLevel=8 };
             var pixels=new Color[256*512]; var random=new System.Random(931);
             for(int y=0;y<512;y++) for(int x=0;x<256;x++)
             {
                 float u=x/255f,v=y/512f;
                 float broad=Mathf.PerlinNoise(u*7,v*14);
                 float grain=(float)random.NextDouble()-.5f;
-                float center=.5f+.07f*Mathf.Sin(v*Mathf.PI*6);
-                float packed=Mathf.Exp(-Mathf.Pow((u-center)/.32f,4));
-                float rut=Mathf.Pow(Mathf.Sin((u+.013f*Mathf.Sin(v*40))*95),14)*packed;
-                Color color=Color.Lerp(new Color(.77f,.56f,.29f),new Color(.61f,.40f,.19f),packed*.55f);
-                pixels[y*256+x]=color*(.88f+broad*.24f+grain*.13f-rut*.055f);
+                pixels[y*256+x]=new Color(broad*.70f+grain*.15f+.15f,Mathf.PerlinNoise(u*65,v*130),Mathf.PerlinNoise(u*65+21,v*130+17));
             }
-            texture.SetPixels(pixels); texture.Apply(false,true); dirtTexture=texture;
+            texture.SetPixels(pixels); texture.Apply(true,true); dirtTexture=texture;
             }
-            var material=new Material(Mat(Color.white)); material.name="Warm textured dirt";
-            material.mainTexture=dirtTexture; return material;
+            var material=new Material(Resources.Load<Shader>("RallyDirt")); material.name="Layered packed dirt / gravel";
+            material.mainTexture=Resources.Load<Texture2D>("Surface/CoyoteDirt"); material.SetTexture("_NoiseTex",dirtTexture); return material;
         }
 
         TextMesh Sign(string name, string text, Vector3 position, float size, Color color)
