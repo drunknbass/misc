@@ -4,21 +4,29 @@
   "compression": "gzip with decompression fallback",
   "threads": false,
   "files": {
-    "Build/700dd6107cf03f52646504abcb3490aa.loader.js": {
+    "Build/07e1cd7c44124b9d2b887e0f37bc0465.loader.js": {
       "bytes": 48540,
-      "sha256": "320120d0873e48b279fee06350c3e4fbd82c761285c8dc244b9c0d22789289b5"
+      "sha256": "a6177e7656dea796c0a7c351d73aae73ecb1886086b7f268e24fe6edfd98ef47"
     },
-    "Build/7316ba5b6760bd77fdb68818d94d0d95.framework.js.unityweb": {
-      "bytes": 82328,
-      "sha256": "9fa8f06888bc7365d02a5038deb479e6a0cea23fdbd1bdcd83f61aa3241c7bb5"
+    "Build/4548eb32800d2585485109db8f2ab526.data.unityweb": {
+      "bytes": 3707754,
+      "sha256": "2b2301019071c405a4b22ff37e483f2af499bcb4b263fe89fa0941007e246300"
     },
-    "Build/dade41a83ca789179ba3ca781b9591d2.data.unityweb": {
-      "bytes": 3707544,
-      "sha256": "f04f55030f80178d3b8ea7098c04de703d39d2e4f7bf16220e74cf409e602c2c"
+    "Build/57eaf0dea5f3ea7d90f8db51746ed925.wasm.unityweb": {
+      "bytes": 6357008,
+      "sha256": "f41d721dc7b2ad82bc63f842ff1aaad7ddcd75ad7683b889b226aa819ae1bdd8"
     },
-    "Build/e501811a9ccc64c100c8ce99a9bbae31.wasm.unityweb": {
-      "bytes": 6354492,
-      "sha256": "4f5cf6623fa01078e0588ec5a5a77beb529493957293c67f2bdffa4426c78031"
+    "Build/9ad4d8a0cb3a7c6e66d82050373183ab.framework.js.unityweb": {
+      "bytes": 82447,
+      "sha256": "22a1aac35d594b53fd79e138ea33d0987faebefac946217e021c8d0280e03cd7"
+    },
+    "touch-controls.css": {
+      "bytes": 6136,
+      "sha256": "8b2299c68cf4171fba1808b967619fa984b870ecb9ad3f138b362264d45bb218"
+    },
+    "touch-controls.js": {
+      "bytes": 5216,
+      "sha256": "68dff2efaac2682fffc7b948b900f04ddaa574f19f8321d2766d1567a244da03"
     }
   }
 }

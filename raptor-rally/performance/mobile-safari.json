@@ -1,0 +1,31 @@
+{
+  "browser": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.0 Safari/605.1.15",
+  "viewport": [
+    390,
+    740
+  ],
+  "forcedTouchMode": true,
+  "pressed": [
+    "2",
+    "16",
+    "4"
+  ],
+  "acceleratesAndBoosts": true,
+  "state": {
+    "phase": 2,
+    "paused": false,
+    "selected": 2,
+    "rank": 4,
+    "lap": 1,
+    "time": 22.52032470703125,
+    "speed": 3,
+    "nitro": 0,
+    "countdown": -0.019997309893369675,
+    "offCourse": false,
+    "following": true,
+    "reducedMotion": false
+  },
+  "released": true,
+  "consoleErrors": [],
+  "method": "Desktop Safari Technology Preview, touch capability forced for layout; DOM button actions and synthetic keyboard holds exercise the Unity bridge. Not an iPhone hardware test."
+}

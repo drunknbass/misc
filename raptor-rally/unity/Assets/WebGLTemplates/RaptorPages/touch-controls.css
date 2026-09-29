@@ -1,0 +1,38 @@
+body.touch-enabled{height:100dvh;overscroll-behavior:none;--header-height:48px}
+.touch-enabled header{height:calc(var(--header-height) + env(safe-area-inset-top));padding:env(safe-area-inset-top) max(12px,env(safe-area-inset-right)) 0 max(12px,env(safe-area-inset-left));gap:12px}
+.touch-enabled header span{display:none}.touch-enabled header strong{font-size:11px}
+.touch-enabled header button{min-height:44px;padding:4px 10px}
+.touch-enabled #stage{height:calc(100dvh - var(--header-height) - env(safe-area-inset-top))}
+#stage:fullscreen{width:100vw;height:100dvh;background:#081117}
+.touch-enabled #unity-canvas{touch-action:none}
+#touch-ui{position:absolute;inset:0;z-index:2;pointer-events:none;color:#f0f5f5;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+#touch-ui[hidden],#touch-ui [hidden]{display:none!important}
+#touch-ui button{margin:0;min-height:44px;border:1px solid #abc4cc60;border-radius:12px;background:#0b1d2dcc;color:#f1f7f8;font:700 12px/1.2 system-ui;pointer-events:auto;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#touch-ui button:focus-visible{outline:3px solid #b9f26a;outline-offset:2px}
+#touch-ui button:disabled{opacity:.45}
+#touch-ui button:active,#touch-ui button[aria-pressed=true]{background:#b9f26acc;color:#0b1c23;border-color:#d1ff97}
+#touch-ui .touch-primary{width:100%;background:#b9f26a;color:#081117;border:0;font-size:14px;letter-spacing:.05em}
+.touch-glass{background:#0a1c29d9;border:1px solid #a6c5d33b;border-radius:16px;box-shadow:0 4px 20px #0003}
+.garage-heading{position:absolute;top:24px;left:max(20px,env(safe-area-inset-left));right:16px}
+.garage-heading .eyebrow{font-size:10px;letter-spacing:.16em}#touch-ui h2{margin:8px 0;font-size:clamp(22px,6vw,34px);line-height:1.05}
+.garage-actions{position:absolute;left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));padding:14px;display:grid;gap:12px;pointer-events:auto}
+.garage-actions p{margin:0;color:#bbced6;font-size:13px}.truck-options{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.truck-options button{padding:10px 4px}
+.garage-actions .touch-tip{font-size:11px;line-height:1.5;text-align:center;color:#91a9b4}
+.touch-stats{position:absolute;top:10px;left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:12px;padding:10px 14px;max-width:460px}
+.touch-stats div{display:grid;gap:3px}.touch-stats span{font-size:9px;letter-spacing:.12em;color:#aac1cc}.touch-stats strong{font-size:19px;letter-spacing:0;font-variant-numeric:tabular-nums}
+.touch-tools{position:absolute;top:81px;right:max(12px,env(safe-area-inset-right));display:flex;gap:6px}.touch-tools button{padding:8px 12px}
+.touch-speed{position:absolute;bottom:calc(116px + env(safe-area-inset-bottom));left:max(16px,env(safe-area-inset-left));display:flex;align-items:baseline;gap:7px;text-shadow:0 1px 6px #000;background:#081923b3;border-radius:10px;padding:5px 10px}
+.touch-speed strong{font-size:24px;font-variant-numeric:tabular-nums}.touch-speed span{font-size:10px;letter-spacing:.04em}#touch-surface{color:#b9f26a}
+#touch-controller{position:absolute;bottom:0;left:0;right:0;display:flex;align-items:flex-end;justify-content:space-between;gap:8px;padding:22px max(12px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:linear-gradient(transparent,#081923ad)}
+.steering-group,.pedal-group{display:flex;gap:7px;align-items:flex-end}
+#touch-ui .drive-button{touch-action:none;width:clamp(48px,13.5vw,72px);height:66px;padding:5px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;background:#0d233875;border:1px solid #d7e8f18c;box-shadow:inset 0 1px #ffffff19,0 3px 12px #0003;border-radius:18px}
+#touch-ui .steer{font-size:44px;line-height:1;height:72px}#touch-ui .gas{height:84px;background:#b9f26a45;border-color:#c2ef948c}#touch-ui .gas>span:first-child,#touch-ui .brake>span:first-child{font-size:26px}
+#touch-ui .nitro{height:56px;color:#8ce6f0;border-color:#8ce6f0a6;font-size:10px}#touch-ui .drive-button[aria-pressed=true]{background:#b9f26abd;color:#081923;transform:translateY(2px)}
+#touch-countdown{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);font-size:76px;font-weight:900;color:#b9f26a;text-shadow:0 2px 12px #000}
+.touch-modal{position:absolute;inset:0;display:grid;place-items:center;background:#020b14a6;pointer-events:auto;padding:14px max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+.touch-modal>div{width:min(360px,100%);max-height:100%;overflow:auto;padding:20px;display:grid;gap:12px}.touch-modal p{margin:0;color:#bbced6}.touch-modal button{width:100%}
+@media(min-aspect-ratio:1/1){.garage-heading{top:14px}.garage-heading h2{font-size:24px}.garage-actions{left:auto;width:41%;max-width:360px}.touch-stats{right:auto;width:min(320px,46vw)}.touch-tools{top:12px}.touch-speed{bottom:calc(105px + env(safe-area-inset-bottom))}#touch-controller{padding-top:14px}#touch-ui .drive-button{width:64px}}
+@media(max-height:460px){body.touch-enabled{--header-height:40px}.touch-enabled header button{min-height:36px}.garage-heading{top:12px}.garage-heading .eyebrow{font-size:9px}.garage-actions{padding:10px;gap:8px}.garage-actions .touch-tip{display:none}.touch-stats{top:6px;padding:7px 12px;border-radius:12px}.touch-stats strong{font-size:17px}.touch-tools{top:6px}.touch-tools button{padding:6px 10px}#touch-controller{padding-top:10px;padding-bottom:max(8px,env(safe-area-inset-bottom))}#touch-ui .drive-button{height:54px;width:58px;border-radius:14px}#touch-ui .gas{height:64px}.touch-speed{bottom:calc(79px + env(safe-area-inset-bottom));padding:3px 8px}.touch-speed strong{font-size:20px}.touch-modal>div{padding:12px;gap:8px}.touch-modal h2{font-size:23px;margin:2px 0}}
+@media(prefers-reduced-motion:reduce){#touch-ui .drive-button[aria-pressed=true]{transform:none}}
+
+.touch-enabled #stage:fullscreen #touch-ui{top:env(safe-area-inset-top)}

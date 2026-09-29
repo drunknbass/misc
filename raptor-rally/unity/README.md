@@ -30,8 +30,8 @@ Race three laps against three AI drivers. Complete checkpoints in order; reversi
 - One original course, **Coyote Basin**, with four long lanes, three hairpins, three main jumps, a low roller, textured dirt, timber ramp facing, blue course flags, red/white barriers, tiered stands, pit scenery, finish flags and a live race board.
 - Rigidbody collision/gravity, arcade yaw steering and lateral grip. Pitch/roll are constrained for forgiving handling.
 - Fictional balance values and original stylized models with model-specific body, grille, lighting, fender and wheel details. These are not measured Ford models or vehicle specifications.
-- Keyboard controls only in this first pass. Gamepad and wheel input remain follow-up work.
-- No sound, multiplayer, accounts, online leaderboard or hosted website.
+- Keyboard controls plus mobile browser touch controls. Gamepad and wheel input remain follow-up work.
+- No sound, multiplayer, accounts or online leaderboard. The browser build is hosted on GitHub Pages.
 - Track and truck geometry are original procedural code. The wheel HUD uses a generated image based on the user-provided Bronco Raptor photo. The racing instruments use original Rive artwork and the official Rive Unity runtime, pinned to version 0.5.1's commit; typography uses Adobe's OFL-licensed Source Sans 3. Dependency and asset provenance is recorded in `Design/RacingHud/README.md`.
 
 ## Build and verify
@@ -90,7 +90,7 @@ All three use **Raptor trim** as the exterior reference. The trim pass adds high
 
 References: Ford's official [F-150 Raptor](https://www.ford.com/trucks/f150/models/raptor/), [Bronco Raptor](https://www.ford.com/suvs/bronco/models/raptor/) and [Ranger Raptor](https://www.ford.com/trucks/ranger/models/raptor/) pages, plus the [Bronco Raptor launch description](https://media.ford.com/content/fordmedia/fna/ca/en/news/2022/01/24/bronco-raptor.html) for amber signature lighting. These are visual proportions in the arcade scale, not dimensionally exact replicas or a simulation of the production suspension.
 
-Press **C** or click the footer camera button during a race to transition smoothly between the complete stadium and a close view following your player truck. Tracking preserves the elevated viewing angle, includes a little look-ahead, and remains selected through retry. The garage always shows its studio layout. The default race mode remains the whole-track overview.
+Press **C** or click the footer camera button during a race to transition smoothly between the complete stadium and a close view following your player truck. Tracking preserves the elevated viewing angle, includes a little look-ahead, and remains selected through retry. The garage always shows its studio layout. Desktop defaults to the whole-track overview; mobile defaults to player tracking.
 
 ## Re-entry and jump handling
 
@@ -108,7 +108,7 @@ The editable `Design/RacingHud/scene.rml`, licensed fonts, runtime contract and 
 
 The public browser build is published in [`drunknbass/misc`](https://github.com/drunknbass/misc/tree/main/raptor-rally) at [Raptor Rally](https://drunknbass.github.io/misc/raptor-rally/). `Assets/WebGLTemplates/RaptorPages/index.html` provides its loading screen, error display and fullscreen button.
 
-The build retains a `Resources/RacingSurface.mat` shader reference because the track and trucks create their materials at runtime; otherwise Unity can strip Standard from player builds. Web assets use hashed filenames. Browser controls require a keyboard; there are no touch controls yet.
+The build retains a `Resources/RacingSurface.mat` shader reference because the track and trucks create their materials at runtime; otherwise Unity can strip Standard from player builds. Web assets use hashed filenames. Phones and touch tablets use a responsive translucent controller: steering on the left, gas/brake/nitro on the right. Multiple fingers work together; interrupted touches, pause, orientation changes and focus loss release held input. The mobile garage, race instruments and menus use the HTML template and an official Unity JavaScript bridge. Mobile starts with the following camera. The desktop Rive HUD remains available. See `../MOBILE.md` for validation.
 
 ## Browser performance
 

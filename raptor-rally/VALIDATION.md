@@ -22,3 +22,5 @@ Build modules: Mac=False, Web=True.
 These are automated physics/AI checks. Human driving feel, gamepad, wheel input and browser behavior are separate validation tasks.
 
 The separate Play Mode suite passes all 84 collision checks, including both segmented rails and all nine truck pairings. Safari Technology Preview release smoke testing confirms startup, driving, follow camera and live HUD with no console errors. See HANDLING.md and COLLISIONS.md.
+
+Mobile browser controls and responsive layouts: 25 browser checks passed, plus desktop and Safari Technology Preview smoke checks. See MOBILE.md for methods and physical-device limits.

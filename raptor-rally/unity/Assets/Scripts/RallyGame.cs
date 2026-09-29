@@ -35,6 +35,48 @@ namespace RaptorRally
         public bool ReducedMotion;
         public bool FollowPlayer;
         public float WheelAngle { get; private set; }
+        public bool TouchControls { get; private set; }
+        int touchInput;
+        float nextTouchState;
+#if UNITY_WEBGL && !UNITY_EDITOR
+        [System.Runtime.InteropServices.DllImport("__Internal")]
+        static extern void RaptorTouchState(int phase,int paused,int selected,int rank,int lap,float time,int speed,float nitro,float countdown,int offCourse,int following,int reducedMotion);
+#endif
+        public void SetTouchControls(float enabled)
+        {
+            TouchControls=enabled!=0; ClearTouchInput(); nextTouchState=0;
+            if(TouchControls) FollowPlayer=true;
+#if UNITY_WEBGL && !UNITY_EDITOR
+            WebGLInput.captureAllKeyboardInput=!TouchControls;
+#endif
+        }
+        public void SetTouchInput(float value) { touchInput=TouchControls?Mathf.RoundToInt(value)&31:0; if(touchInput==0) ClearTouchInput(); }
+        void ClearTouchInput()
+        {
+            touchInput=0;
+            if(Trucks.Count>0 && !Player.Autopilot) { Player.Throttle=Player.Steer=0; Player.Boost=false; }
+        }
+        public void TouchAction(string action)
+        {
+            if(!TouchControls) return;
+            if(action=="camera" && State!=Phase.Garage) FollowPlayer=!FollowPlayer;
+            else if(action=="recover" && State==Phase.Racing && !Paused) Player.Recover();
+            else if(action=="pause" && State!=Phase.Garage) { ClearTouchInput(); Paused=!Paused; Time.timeScale=Paused?0:1; }
+            else if(action=="resume") { ClearTouchInput(); Paused=false; Time.timeScale=1; }
+            else if(action=="garage") Garage();
+            else if(action=="start" && (State==Phase.Garage || State==Phase.Results)) StartRace();
+            else if(action=="motion") ReducedMotion=!ReducedMotion;
+            else if(State==Phase.Garage && action.StartsWith("truck") && int.TryParse(action.Substring(5),out int index) && index>=0 && index<3) { Selected=index; PrepareGrid(); }
+            nextTouchState=0;
+        }
+        void PublishTouchState()
+        {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            if(!TouchControls || Time.unscaledTime<nextTouchState) return;
+            nextTouchState=Time.unscaledTime+.1f;
+            RaptorTouchState((int)State,Paused?1:0,Selected,Standings().IndexOf(Player)+1,Mathf.Min(3,Player.CompletedLaps+1),Player.Finished?Player.FinishTime:RaceTime,Mathf.RoundToInt(Player.Speed*2.23694f),Player.Nitro,Countdown,Player.OffCourse?1:0,FollowPlayer?1:0,ReducedMotion?1:0);
+#endif
+        }
 
         void Awake() { Initialize(); }
         public void Initialize()
@@ -87,10 +129,12 @@ namespace RaptorRally
         }
         public void StartRace()
         {
+            ClearTouchInput(); nextTouchState=0;
             Time.timeScale = 1; Paused = false; PrepareGrid(); RaceTime = 0; Countdown = 3; finishFlash = 0; State = Phase.Countdown;
         }
         public void Garage()
         {
+            ClearTouchInput(); nextTouchState=0;
             Paused = false; Time.timeScale = 1; State = Phase.Garage; PrepareGrid();
         }
         void Update()
@@ -106,9 +150,9 @@ namespace RaptorRally
             }
             else if (State == Phase.Racing && !Player.Autopilot)
             {
-                Player.Throttle = (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow) ? 1 : 0) - (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow) ? 1 : 0);
-                Player.Steer = (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow) ? 1 : 0) - (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow) ? 1 : 0);
-                Player.Boost = Input.GetKey(KeyCode.Space);
+                Player.Throttle = (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow) || (touchInput&4)!=0 ? 1 : 0) - (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow) || (touchInput&8)!=0 ? 1 : 0);
+                Player.Steer = (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow) || (touchInput&2)!=0 ? 1 : 0) - (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow) || (touchInput&1)!=0 ? 1 : 0);
+                Player.Boost = Input.GetKey(KeyCode.Space) || (touchInput&16)!=0;
                 if (Input.GetKeyDown(KeyCode.R)) Player.Recover();
             }
         }
@@ -142,10 +186,11 @@ namespace RaptorRally
             RefreshBoard();
             AdvanceWheel(Time.deltaTime);
             UpdateCamera(Time.unscaledDeltaTime);
-            MotionHud?.Update(this,Time.deltaTime);
+            if(!TouchControls) MotionHud?.Update(this,Time.deltaTime);
+            PublishTouchState();
             if(State==Phase.Garage) {
                 garagePreview?.Render(Selected);
-                if(circuitDirty || circuitPreview==null || !circuitPreview.IsCreated()) RenderCircuitPreview();
+                if(!TouchControls && (circuitDirty || circuitPreview==null || !circuitPreview.IsCreated())) RenderCircuitPreview();
             }
         }
         public void UpdateCamera(float dt,bool snap=false)
@@ -160,7 +205,7 @@ namespace RaptorRally
             } else View.rect=new Rect(0,0,1,1);
             Vector3 target=tracking?Player.transform.position+Player.transform.forward*2.5f+Vector3.up*.5f:new Vector3(0,0,1);
             Vector3 position=tracking?target+new Vector3(10,20,-25):new Vector3(19,84,-100);
-            float size=tracking?Mathf.Max(10.5f,12/aspect):State==Phase.Garage?73:Mathf.Max(58,76/aspect);
+            float size=tracking?(TouchControls?Mathf.Max(8.5f,8/aspect):Mathf.Max(10.5f,12/aspect)):State==Phase.Garage?73:Mathf.Max(58,76/aspect);
             float blend=snap?1:1-Mathf.Exp(-Mathf.Max(0,dt)*7);
             View.transform.position=Vector3.Lerp(View.transform.position,position,blend);
             View.transform.rotation=Quaternion.Slerp(View.transform.rotation,Quaternion.LookRotation(target-position),blend);
@@ -213,6 +258,15 @@ namespace RaptorRally
         void OnGUI()
         {
             if (!initialized || Trucks.Count == 0) return;
+            if(TouchControls) {
+                GUI.matrix=Matrix4x4.identity;
+                if(State==Phase.Garage && garagePreview!=null) {
+                    bool portrait=Screen.height>Screen.width;
+                    var rect=portrait?new Rect(0,88,Screen.width,Mathf.Max(80,Screen.height-330)):new Rect(0,0,Screen.width*.56f,Screen.height);
+                    GUI.DrawTexture(rect,garagePreview.Texture,ScaleMode.ScaleToFit,false);
+                }
+                return;
+            }
             Style(); float scale = Mathf.Min(Screen.width / 1600f, Screen.height / 900f);
             GUI.matrix = Matrix4x4.TRS(new Vector3((Screen.width - 1600 * scale) / 2, (Screen.height - 900 * scale) / 2, 0), Quaternion.identity, Vector3.one * scale);
             bool riveHud=State!=Phase.Garage && MotionHud!=null && MotionHud.Ready;

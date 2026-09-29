@@ -1,0 +1,106 @@
+{
+  "url": "http://127.0.0.1:8874/outputs/Web/",
+  "checks": [
+    {
+      "name": "Unity loaded",
+      "passed": true
+    },
+    {
+      "name": "Mobile HUD active",
+      "passed": true
+    },
+    {
+      "name": "Bronco selected in Unity",
+      "passed": true
+    },
+    {
+      "name": "Ranger selected in Unity",
+      "passed": true
+    },
+    {
+      "name": "Race started",
+      "passed": true
+    },
+    {
+      "name": "Three simultaneous controls",
+      "passed": true
+    },
+    {
+      "name": "Truck accelerates and boosts",
+      "passed": true
+    },
+    {
+      "name": "Release resets inputs",
+      "passed": true
+    },
+    {
+      "name": "Pause works",
+      "passed": true
+    },
+    {
+      "name": "Pause freezes race clock",
+      "passed": true
+    },
+    {
+      "name": "Rotation clears throttle",
+      "passed": true
+    },
+    {
+      "name": "Whole track camera works",
+      "passed": true
+    },
+    {
+      "name": "Follow camera works",
+      "passed": true
+    },
+    {
+      "name": "Brake and left steering combine",
+      "passed": true
+    },
+    {
+      "name": "App focus loss releases controls",
+      "passed": true
+    },
+    {
+      "name": "Interrupted touch releases throttle",
+      "passed": true
+    },
+    {
+      "name": "Controls fit 320x568",
+      "passed": true
+    },
+    {
+      "name": "Stats and tools do not overlap 320x568",
+      "passed": true
+    },
+    {
+      "name": "Controls fit 568x320",
+      "passed": true
+    },
+    {
+      "name": "Stats and tools do not overlap 568x320",
+      "passed": true
+    },
+    {
+      "name": "Controls fit 844x390",
+      "passed": true
+    },
+    {
+      "name": "Stats and tools do not overlap 844x390",
+      "passed": true
+    },
+    {
+      "name": "Return to garage",
+      "passed": true
+    },
+    {
+      "name": "Desktop UI restored",
+      "passed": true
+    },
+    {
+      "name": "No runtime errors",
+      "passed": true
+    }
+  ],
+  "errors": []
+}

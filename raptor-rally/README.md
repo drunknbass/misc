@@ -2,7 +2,7 @@
 
 [Play in your browser](https://drunknbass.github.io/misc/raptor-rally/)
 
-A keyboard arcade racer with three stylized Raptor-inspired trucks, four racers, three laps, an original dirt stadium, nitro, a following camera and live Rive instruments.
+An arcade racer with keyboard and mobile touch controls with three stylized Raptor-inspired trucks, four racers, three laps, an original dirt stadium, nitro, a following camera and live Rive instruments.
 
 ## Controls
 
@@ -17,7 +17,7 @@ A keyboard arcade racer with three stylized Raptor-inspired trucks, four racers,
 | 1 / 2 / 3 | Select a truck in the garage |
 | Enter | Start race |
 
-Off-course trucks can rejoin through barriers; collisions restore after the truck clears the wall. Best times stay in this browser. A keyboard and WebGL 2 browser are required; touch/gamepad input is not implemented.
+Off-course trucks can rejoin through barriers; collisions restore after the truck clears the wall. Best times stay in this browser. A WebGL 2 browser is required. On phones and touch tablets, translucent bottom controls provide steering, gas, brake/reverse and nitro, with simultaneous touches supported. Portrait and landscape layouts include touch truck selection, race information, camera switching, recovery and pause. Gamepad input is not implemented. See [mobile implementation and validation](MOBILE.md).
 
 Glancing wall impacts now slide along the rail, and truck impacts transfer momentum with reduced spin. See [handling changes](HANDLING.md) and the [84 Play Mode contact checks](COLLISIONS.md).
 
@@ -25,7 +25,7 @@ Glancing wall impacts now slide along the rail, and truck impacts transfer momen
 
 The complete editable Unity project is in [`unity/`](unity/), including the Rive source in `unity/Design/RacingHud/`. Open it with Unity **6000.6.3f1** plus official Web Build Support. Dependencies are pinned in the package manifest and lock file.
 
-Run **Raptor Rally → Build Browser**, or invoke the editor with `-batchmode -nographics -projectPath /absolute/path/to/unity -buildTarget WebGL -executeMethod PrototypeBuilder.BuildWeb -quit -logFile /absolute/path/to/build.log`. The build appears at `../Web/`. Copy its `index.html`, `Build/` and any `StreamingAssets/` into this directory, removing only obsolete generated build files.
+Run **Raptor Rally → Build Browser**, or invoke the editor with `-batchmode -nographics -projectPath /absolute/path/to/unity -buildTarget WebGL -executeMethod PrototypeBuilder.BuildWeb -quit -logFile /absolute/path/to/build.log`. The build appears at `../Web/`. Copy its `index.html`, `touch-controls.css`, `touch-controls.js`, `Build/` and any `StreamingAssets/` into this directory, removing only obsolete generated build files.
 
 The `RaptorPages` template supplies the loading screen and fullscreen button. Gzip with Unity's decompression fallback works without custom response headers. Native WebAssembly threads are disabled; no cross-origin-isolation headers or third-party hosting service are needed. Hashed build filenames prevent stale assets across deployments. GitHub Pages serves this folder from the repository's `main` branch.
 
