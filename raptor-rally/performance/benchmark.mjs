@@ -1,0 +1,22 @@
+import fs from 'node:fs/promises';
+const url=process.argv[2],out=process.argv[3];
+const targets=await (await fetch('http://127.0.0.1:9334/json/list')).json();
+const target=targets.find(t=>t.type==='page');
+const ws=new WebSocket(target.webSocketDebuggerUrl); await new Promise(r=>ws.addEventListener('open',r,{once:true}));
+let id=0;const pending=new Map(),errors=[];
+ws.addEventListener('message',e=>{const m=JSON.parse(e.data);if(m.id){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(m.error):p.resolve(m.result);}else if(m.method==='Runtime.exceptionThrown')errors.push(m.params.exceptionDetails.text);else if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')errors.push(m.params.args.map(a=>a.value||a.description).join(' '));});
+function call(method,params={}){return new Promise((resolve,reject)=>{const i=++id;pending.set(i,{resolve,reject});ws.send(JSON.stringify({id:i,method,params}));});}
+async function evaluate(expression){const r=await call('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(r.exceptionDetails)throw Error(JSON.stringify(r.exceptionDetails));return r.result.value;}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+await call('Page.enable');await call('Runtime.enable');await call('Emulation.setCPUThrottlingRate',{rate:Number(process.argv[4]||1)});await call('Emulation.setDeviceMetricsOverride',process.argv[5]==='retina'?{width:1920,height:1080,deviceScaleFactor:2,mobile:false}:{width:1600,height:900,deviceScaleFactor:1,mobile:false});
+await call('Page.addScriptToEvaluateOnNewDocument',{source:`(()=>{let draws=0,last=0;window.frameSamples=[];window.drawSamples=[];window.longTasks=[];for(const C of [WebGLRenderingContext,WebGL2RenderingContext])for(const name of ['drawArrays','drawElements','drawArraysInstanced','drawElementsInstanced']){const original=C.prototype[name];if(original)C.prototype[name]=function(...args){draws++;return original.apply(this,args);};}function tick(t){if(last){window.frameSamples.push(t-last);window.drawSamples.push(draws);}draws=0;last=t;requestAnimationFrame(tick);}requestAnimationFrame(tick);new PerformanceObserver(list=>window.longTasks.push(...list.getEntries().map(e=>e.duration))).observe({entryTypes:['longtask']});})()`});
+await call('Page.navigate',{url});
+let ready=false;for(let i=0;i<120;i++){if(await evaluate("document.documentElement?.dataset.gameReady==='true'")){ready=true;break;}await sleep(500);}if(!ready)throw Error('Game startup timed out');
+async function key(key,code,vk,hold=80){await call('Input.dispatchKeyEvent',{type:'keyDown',key,code,windowsVirtualKeyCode:vk});await sleep(hold);await call('Input.dispatchKeyEvent',{type:'keyUp',key,code,windowsVirtualKeyCode:vk});}
+async function sample(name,ms){await evaluate('window.frameSamples=[];window.drawSamples=[];window.longTasks=[];');await sleep(ms);const result=await evaluate(`(()=>{const a=frameSamples.slice().sort((a,b)=>a-b),d=drawSamples;const gl=document.querySelector('canvas').getContext('webgl2'),ext=gl.getExtension('WEBGL_debug_renderer_info');return {frames:a.length,meanMs:a.reduce((a,b)=>a+b,0)/a.length,p50Ms:a[Math.floor(a.length*.5)],p95Ms:a[Math.floor(a.length*.95)],p99Ms:a[Math.floor(a.length*.99)],framesOver33:a.filter(t=>t>33.4).length,drawCallsMean:d.reduce((a,b)=>a+b,0)/d.length,drawCallsMax:Math.max(...d),longTasks:longTasks.length,longTaskTotalMs:longTasks.reduce((a,b)=>a+b,0),metrics:raptorGame.GetMetricsInfo(),canvas:[gl.drawingBufferWidth,gl.drawingBufferHeight],gpu:ext?gl.getParameter(ext.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER)};})()`);console.log(name,JSON.stringify(result));return result;}
+const results={url,measuredAt:new Date().toISOString(),cpuThrottle:Number(process.argv[4]||1),viewport:process.argv[5]||'1600x900@1'};await sleep(2000);results.garage=await sample('garage',8000);
+await key('Enter','Enter',13);await sleep(4500);
+await call('Input.dispatchKeyEvent',{type:'keyDown',key:'w',code:'KeyW',windowsVirtualKeyCode:87});results.race=await sample('race',15000);await call('Input.dispatchKeyEvent',{type:'keyUp',key:'w',code:'KeyW',windowsVirtualKeyCode:87});
+await key('c','KeyC',67);await sleep(1500);results.follow=await sample('follow',10000);
+await key('Escape','Escape',27);await sleep(300);results.errors=errors;
+const shot=await call('Page.captureScreenshot',{format:'png'});await fs.writeFile(out+'.png',Buffer.from(shot.data,'base64'));await fs.writeFile(out+'.json',JSON.stringify(results,null,2));await call('Page.navigate',{url:'about:blank'});ws.close();

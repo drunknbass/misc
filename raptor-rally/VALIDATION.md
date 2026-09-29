@@ -13,28 +13,16 @@ Unity 6000.6.3f1
 - PASS: follow camera zooms, frames and tracks the player; switching back restores the complete stadium view.
 - PASS: all three trucks physically re-enter through inner and outer barriers on flat dirt and beside every raised jump; barriers re-enable after clearance and still block outward driving. Collision changes stay per truck.
 - PASS: all three trucks cross every jump at full nitro speed within the lane; off-course gate crossing and manual recovery preserve progress.
+- PASS: spatial recovery matches exhaustive collision rules across 240 positions, cell boundaries and teleports; at most 119 candidates instead of 768 per truck. Stadium has 37 mesh renderers with all 768 barriers retained.
+- PASS: retry reuses the four truck models and resets charge, velocity, laps, finish state and pose.
 
-Original physics-run module detection: Mac=False, Web=False. Official Web Build Support was subsequently installed for the GitHub Pages release below.
+Build modules: Mac=False, Web=True.
 
 These are automated physics/AI checks. Human driving feel, gamepad, wheel input and browser behavior are separate validation tasks.
 
-## Rive and visual validation
+## Optimized WebGL release
 
-- PASS: official Rive CLI 1.1.1 verifies the final editable source with zero errors/warnings; compiled bytes match the Unity resource. Original source, embedded Adobe fonts and license are included.
-- PASS: CLI bound-data readback and rendered states at 1600×900 and 960×540 for speed, nitro, boost and off-course recovery.
-- PASS: Unity native Metal runtime loads the `RaceHUD` artboard/state machine/view model, receives real speed/nitro/recovery values, freezes the paused clock and disables the boost state in reduced-motion mode.
-- PASS: native screenshots reviewed for garage, follow camera, race, recovery, boost and pause. Rive texture orientation and alpha handoff are handled explicitly. Raised road/shoulder surfaces and finish markings have separate visual elevations to avoid coplanar flicker.
-- Runtime and physics checks cover the installed macOS Unity editor. Standalone Mac was not built because that build module is absent. Web player validation was completed subsequently as recorded below.
-- Unity Editor SearchDatabase emitted its existing startup index exception; the game compiled, ran and completed the native HUD checks without game exceptions.
-
-Evidence logs: `work/verify-reentry-rive-final.log` (physics) and `work/preview-rive-delivery.log` (final native visual run) in the working folder. CLI-only timing measurements and dependency provenance are in `RaptorRally/Design/RacingHud/README.md`.
-
-## GitHub Pages web release — September 28, 2026
-
-- PASS: Unity 6000.6.3f1 official Web Build Support installed through Unity Hub; release WebGL build completed successfully with IL2CPP, gzip decompression fallback, hashed filenames and native threads disabled.
-- FIXED: retained Standard via a material resource; preserved SphereCollider/CapsuleCollider types required by runtime-generated primitives. These issues were found in the actual browser player rather than editor tests.
-- PASS: final browser player starts with no new console warnings/errors; Rive reports its artboard, state machine and live view model ready. Track, truck models and HUD render.
-- PASS: browser keyboard start, throttle (visible nonzero speed), camera toggle, pause with frozen race clock, resume and reduced-motion toggle. This is a browser smoke test, not a complete race or cross-browser certification.
-- PASS: four generated resources total 9,586,021 bytes; HTML references resolve locally and all three compressed resources pass gzip integrity checks.
-- Published target: `https://drunknbass.github.io/misc/raptor-rally/` in the existing `drunknbass/misc` main-branch Pages site. Final live-site verification is reported with delivery.
-- Desktop keyboard controls are required. Touch controls, gamepads, Safari/Firefox testing and standalone Mac packaging remain outside this release.
+- PASS: release WebGL player builds with original vertex-color stadium shader. Browser benchmark and smoke checks captured no errors.
+- PASS: changing garage models refreshes the cached preview; racing, nitro, follow camera, pause and reduced motion render correctly.
+- PASS: 4K/Retina and fullscreen drawing-buffer sizes remain within the 1920×1080 budget.
+- Actual before/after measurements and limits are documented in `performance/RESULTS.md` in the public repository and `PERFORMANCE.md` in the output folder.

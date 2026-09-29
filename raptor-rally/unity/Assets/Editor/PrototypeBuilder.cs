@@ -130,6 +130,13 @@ public static class PrototypeBuilder
             if(Vector3.Distance(game.View.transform.position,new Vector3(19,84,-100))>.01f || game.View.orthographicSize<50) throw new Exception("Overview camera failed to restore");
             report.AppendLine("- PASS: follow camera zooms, frames and tracks the player; switching back restores the complete stadium view.");
             VerifyRecoveryAndJumps(game,report);
+            VerifyBarrierIndex(game,report);
+            var existing=game.Player;
+            game.Player.Nitro=0; game.Player.FinishTime=42; game.Player.CompletedLaps=3;
+            game.Garage(); game.StartRace();
+            if(game.Player!=existing || game.Player.Nitro!=1 || game.Player.Finished || game.Player.CompletedLaps!=0 || game.Player.Speed>.001f)
+                throw new Exception("Reusable grid retained race state or rebuilt its truck models");
+            report.AppendLine("- PASS: retry reuses the four truck models and resets charge, velocity, laps, finish state and pose.");
             bool mac=BuildPipeline.IsBuildTargetSupported(BuildTargetGroup.Standalone,BuildTarget.StandaloneOSX);
             bool web=BuildPipeline.IsBuildTargetSupported(BuildTargetGroup.WebGL,BuildTarget.WebGL);
             report.AppendLine("\nBuild modules: Mac="+mac+", Web="+web+".");
@@ -213,6 +220,36 @@ public static class PrototypeBuilder
         }
         report.AppendLine("- PASS: all three trucks physically re-enter through inner and outer barriers on flat dirt and beside every raised jump; barriers re-enable after clearance and still block outward driving. Collision changes stay per truck.");
         report.AppendLine("- PASS: all three trucks cross every jump at full nitro speed within the lane; off-course gate crossing and manual recovery preserve progress.");
+    }
+    static void VerifyBarrierIndex(RallyGame game,System.Text.StringBuilder report)
+    {
+        var truck=game.Player; var collider=truck.GetComponent<BoxCollider>();
+        var expected=new bool[game.Track.Barriers.Count];
+        int maxCandidates=0;
+        for(int step=0;step<240;step++)
+        {
+            int index=Stadium.Wrap(step*7);
+            Vector3 position=game.Track.Points[index]+game.Track.Side(index)*(Mathf.Sin(step*.41f)*10)+Vector3.up*.92f;
+            Quaternion rotation=Quaternion.LookRotation(game.Track.Tangent(index));
+            truck.Body.position=position; truck.Body.rotation=rotation;
+            truck.transform.SetPositionAndRotation(position,rotation);
+            bool reset=step==0 || step%41==0;
+            if(step==82) { truck.gameObject.SetActive(false); truck.gameObject.SetActive(true); }
+            truck.UpdateBarrierRecovery(reset); maxCandidates=Mathf.Max(maxCandidates,truck.LastBarrierChecks);
+            for(int i=0;i<expected.Length;i++)
+            {
+                var wall=game.Track.Barriers[i]; Vector3 delta=position-wall.Center; delta.y=0;
+                float signed=Vector3.Dot(delta,wall.Outward);
+                float clearance=Mathf.Abs(Vector3.Dot(rotation*Vector3.right,wall.Outward))*truck.Spec.Width*.5f
+                    +Mathf.Abs(Vector3.Dot(rotation*Vector3.forward,wall.Outward))*truck.Spec.Length*.5f+.45f;
+                expected[i]=delta.sqrMagnitude<100 && (signed>0 || (!reset && expected[i] && signed>-clearance));
+                if(Physics.GetIgnoreCollision(collider,wall.Collider)!=expected[i]) throw new Exception("Spatial recovery diverged at step "+step+" wall "+i);
+            }
+        }
+        if(maxCandidates>=game.Track.Barriers.Count/2) throw new Exception("Barrier index did not sufficiently bound collision work");
+        int renderers=game.Track.Root.GetComponentsInChildren<MeshRenderer>().Length;
+        if(renderers>80 || game.Track.Barriers.Count!=Stadium.Samples*2) throw new Exception("Static batching changed collider count or failed to reduce renderers");
+        report.AppendLine("- PASS: spatial recovery matches exhaustive collision rules across 240 positions, cell boundaries and teleports; at most "+maxCandidates+" candidates instead of 768 per truck. Stadium has "+renderers+" mesh renderers with all 768 barriers retained.");
     }
     static void ConfigureWheelTexture()
     {

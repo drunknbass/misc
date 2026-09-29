@@ -10,6 +10,8 @@ namespace RaptorRally
         public Phase State = Phase.Garage;
         [NonSerialized] public Stadium Track;
         public readonly List<RaptorTruck> Trucks = new List<RaptorTruck>();
+        readonly List<RaptorTruck> rankedTrucks=new List<RaptorTruck>(4);
+        static readonly Comparison<RaptorTruck> CompareTrucks=(a,b)=>a.Finished && b.Finished ? a.FinishTime.CompareTo(b.FinishTime) : a.Finished ? -1 : b.Finished ? 1 : b.Progress.CompareTo(a.Progress);
         public RaptorTruck Player => Trucks[0];
         public int Selected;
         public float RaceTime, Countdown;
@@ -23,6 +25,7 @@ namespace RaptorRally
         readonly Color accent = new Color(.64f,.90f,.35f);
         GUIStyle label, heading, small, number, button;
         bool initialized;
+        int preparedLineup=-1;
         SteeringWheelHud wheel;
         GaragePreview garagePreview;
         public RiveRaceHud MotionHud { get; private set; }
@@ -58,6 +61,12 @@ namespace RaptorRally
         {
             WheelAngle=0;
             MotionHud?.Reset();
+            if(preparedLineup==Selected && Trucks.Count==4)
+            {
+                for(int i=0;i<Trucks.Count;i++) Trucks[i].ResetForRace(i);
+                return;
+            }
+            preparedLineup=Selected;
             foreach (var truck in Trucks) { truck.gameObject.SetActive(false); if (Application.isPlaying) Destroy(truck.gameObject); else DestroyImmediate(truck.gameObject); }
             Trucks.Clear();
             string[] names = { "YOU", "DUST DEVIL", "ROCKHOPPER", "SUNDOWN" };
@@ -117,9 +126,8 @@ namespace RaptorRally
         }
         public List<RaptorTruck> Standings()
         {
-            var ranked = new List<RaptorTruck>(Trucks);
-            ranked.Sort((a,b) => a.Finished && b.Finished ? a.FinishTime.CompareTo(b.FinishTime) : a.Finished ? -1 : b.Finished ? 1 : b.Progress.CompareTo(a.Progress));
-            return ranked;
+            rankedTrucks.Clear(); rankedTrucks.AddRange(Trucks); rankedTrucks.Sort(CompareTrucks);
+            return rankedTrucks;
         }
         public static string Clock(float t) => string.Format("{0:00}:{1:00.00}", (int)t / 60, t % 60);
         void LateUpdate()

@@ -109,3 +109,11 @@ The editable `Design/RacingHud/scene.rml`, licensed fonts, runtime contract and 
 The public browser build is published in [`drunknbass/misc`](https://github.com/drunknbass/misc/tree/main/raptor-rally) at [Raptor Rally](https://drunknbass.github.io/misc/raptor-rally/). `Assets/WebGLTemplates/RaptorPages/index.html` provides its loading screen, error display and fullscreen button.
 
 The build retains a `Resources/RacingSurface.mat` shader reference because the track and trucks create their materials at runtime; otherwise Unity can strip Standard from player builds. Web assets use hashed filenames. Browser controls require a keyboard; there are no touch controls yet.
+
+## Browser performance
+
+Static stadium props are combined into spatial chunks with original colors stored per vertex; the scene keeps all 768 independent barrier colliders for recovery. Trucks query a cached spatial index and reuse nearest-course samples. Starting/retrying the same lineup resets existing trucks instead of rebuilding their meshes.
+
+The stationary garage preview renders only when its selected model changes. Rive uses a 1600×900 surface and at most 30 updates/second in browser players; recovery, boost and motion-mode changes bypass that interval. Unchanged text bindings are not resent. The camera, input and steering-wheel indicator retain their display-rate updates. The browser canvas follows its layout while capping its drawing buffer at 1920×1080, including on Retina displays and after resizing.
+
+The public repository includes `performance/RESULTS.md`, measurements and a dependency-free Chrome DevTools benchmark. Simulated CPU slowdown results are comparisons on one machine, not promises for every browser/device.

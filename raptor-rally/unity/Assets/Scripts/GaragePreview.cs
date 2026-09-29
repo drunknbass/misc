@@ -38,6 +38,7 @@ namespace RaptorRally
         }
         public void Render(int vehicle)
         {
+            if(selected==vehicle && Texture.IsCreated()) return;
             if(selected!=vehicle)
             {
                 if(model!=null) { model.gameObject.SetActive(false); Object.Destroy(model.gameObject); }

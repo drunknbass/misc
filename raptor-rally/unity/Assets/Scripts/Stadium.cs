@@ -23,6 +23,13 @@ namespace RaptorRally
         public readonly Color Sand = new Color(.64f, .38f, .18f);
         public readonly Color Dark = new Color(.055f, .095f, .12f);
         TextMesh raceBoard;
+        readonly Dictionary<Vector2Int,List<int>> barrierCells=new Dictionary<Vector2Int,List<int>>();
+        Texture2D dirtTexture;
+        RallyGame.Phase boardPhase;
+        bool boardInitialized,boardPaused;
+        int boardLap;
+        string boardLeader;
+        public const float BarrierCellSize=12;
         public string BoardText => raceBoard.text;
 
         public Stadium(Transform parent)
@@ -32,6 +39,13 @@ namespace RaptorRally
             BuildCenterline();
             BuildTrack();
             BuildScenery();
+            for(int i=0;i<Barriers.Count;i++)
+            {
+                var cell=BarrierCell(Barriers[i].Center);
+                if(!barrierCells.TryGetValue(cell,out var indices)) barrierCells[cell]=indices=new List<int>();
+                indices.Add(i);
+            }
+            StadiumBatcher.Combine(Root);
         }
 
         void BuildCenterline()
@@ -83,9 +97,17 @@ namespace RaptorRally
             }
             return best;
         }
-        public float DistanceFromCourse(Vector3 position)
+        public static Vector2Int BarrierCell(Vector3 p) => new Vector2Int(Mathf.FloorToInt(p.x/BarrierCellSize),Mathf.FloorToInt(p.z/BarrierCellSize));
+        public void NearbyBarriers(Vector2Int cell,List<int> result)
         {
-            int near=Nearest(position); float best=float.MaxValue; position.y=0;
+            result.Clear();
+            for(int x=-1;x<=1;x++) for(int z=-1;z<=1;z++)
+                if(barrierCells.TryGetValue(cell+new Vector2Int(x,z),out var indices)) result.AddRange(indices);
+        }
+        public float DistanceFromCourse(Vector3 position,int near=-1)
+        {
+            if(near<0) near=Nearest(position);
+            float best=float.MaxValue; position.y=0;
             for(int offset=-1;offset<=0;offset++)
             {
                 Vector3 a=Points[Wrap(near+offset)],b=Points[Wrap(near+offset+1)]; a.y=b.y=0;
@@ -229,6 +251,8 @@ namespace RaptorRally
 
         Material DirtMaterial()
         {
+            if(dirtTexture==null)
+            {
             var texture=new Texture2D(256,512,TextureFormat.RGB24,false) { name="Original procedural stadium dirt",wrapMode=TextureWrapMode.Repeat };
             var pixels=new Color[256*512]; var random=new System.Random(931);
             for(int y=0;y<512;y++) for(int x=0;x<256;x++)
@@ -242,9 +266,10 @@ namespace RaptorRally
                 Color color=Color.Lerp(new Color(.77f,.56f,.29f),new Color(.61f,.40f,.19f),packed*.55f);
                 pixels[y*256+x]=color*(.88f+broad*.24f+grain*.13f-rut*.055f);
             }
-            texture.SetPixels(pixels); texture.Apply(false,true);
+            texture.SetPixels(pixels); texture.Apply(false,true); dirtTexture=texture;
+            }
             var material=new Material(Mat(Color.white)); material.name="Warm textured dirt";
-            material.mainTexture=texture; return material;
+            material.mainTexture=dirtTexture; return material;
         }
 
         TextMesh Sign(string name, string text, Vector3 position, float size, Color color)
@@ -259,6 +284,8 @@ namespace RaptorRally
 
         public void UpdateBoard(RallyGame.Phase state, bool paused, int lap, string leader)
         {
+            if(boardInitialized && boardPhase==state && boardPaused==paused && boardLap==lap && boardLeader==leader) return;
+            boardInitialized=true; boardPhase=state; boardPaused=paused; boardLap=lap; boardLeader=leader;
             string status=paused?"PAUSED":state==RallyGame.Phase.Garage?"READY TO RACE":
                 state==RallyGame.Phase.Countdown?"GET READY":state==RallyGame.Phase.Results?"FINISH":"LAP "+lap+" / 3";
             string value="COYOTE BASIN\n"+status+"\n"+(state==RallyGame.Phase.Garage?"RAPTOR RALLY":"P1  "+leader);

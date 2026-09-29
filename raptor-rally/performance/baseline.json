@@ -1,0 +1,101 @@
+{
+  "url": "http://127.0.0.1:8874/perf-baseline/",
+  "measuredAt": "2026-09-29T03:16:22.132Z",
+  "garage": {
+    "frames": 407,
+    "meanMs": 19.655036855036855,
+    "p50Ms": 16.699999999999818,
+    "p95Ms": 16.799999999999272,
+    "p99Ms": 16.80000000000109,
+    "framesOver33": 1,
+    "drawCallsMean": 4293.140049140049,
+    "drawCallsMax": 4325,
+    "longTasks": 1,
+    "longTaskTotalMs": 1249,
+    "metrics": {
+      "totalWASMHeapSize": 134021120,
+      "usedWASMHeapSize": 126663912,
+      "totalJSHeapSize": 37854045,
+      "usedJSHeapSize": 32898189,
+      "pageLoadTime": 1454,
+      "pageLoadTimeToFrame1": 1735,
+      "fps": 44.7538538038914,
+      "movingAverageFps": 44.7538538038914,
+      "assetLoadTime": 936,
+      "webAssemblyStartupTime": 1137,
+      "codeDownloadTime": 347,
+      "gameStartupTime": 598,
+      "numJankedFrames": 1
+    },
+    "canvas": [
+      1600,
+      852
+    ],
+    "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M2 Pro, Unspecified Version)"
+  },
+  "race": {
+    "frames": 900,
+    "meanMs": 16.666,
+    "p50Ms": 16.69999999999709,
+    "p95Ms": 16.700000000000728,
+    "p99Ms": 16.799999999999272,
+    "framesOver33": 0,
+    "drawCallsMean": 4215,
+    "drawCallsMax": 4215,
+    "longTasks": 0,
+    "longTaskTotalMs": 0,
+    "metrics": {
+      "totalWASMHeapSize": 134021120,
+      "usedWASMHeapSize": 127453400,
+      "totalJSHeapSize": 32905625,
+      "usedJSHeapSize": 32431297,
+      "pageLoadTime": 1454,
+      "pageLoadTimeToFrame1": 1735,
+      "fps": 58.02095090950811,
+      "movingAverageFps": 51.38740235669975,
+      "assetLoadTime": 936,
+      "webAssemblyStartupTime": 1137,
+      "codeDownloadTime": 347,
+      "gameStartupTime": 598,
+      "numJankedFrames": 2
+    },
+    "canvas": [
+      1600,
+      852
+    ],
+    "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M2 Pro, Unspecified Version)"
+  },
+  "follow": {
+    "frames": 600,
+    "meanMs": 16.665999999999997,
+    "p50Ms": 16.69999999999709,
+    "p95Ms": 16.799999999995634,
+    "p99Ms": 16.80000000000291,
+    "framesOver33": 0,
+    "drawCallsMean": 1155.2316666666666,
+    "drawCallsMax": 1213,
+    "longTasks": 0,
+    "longTaskTotalMs": 0,
+    "metrics": {
+      "totalWASMHeapSize": 134021120,
+      "usedWASMHeapSize": 127453408,
+      "totalJSHeapSize": 34118051,
+      "usedJSHeapSize": 33030675,
+      "pageLoadTime": 1454,
+      "pageLoadTimeToFrame1": 1735,
+      "fps": 60.00172666839333,
+      "movingAverageFps": 54.25884379393094,
+      "assetLoadTime": 936,
+      "webAssemblyStartupTime": 1137,
+      "codeDownloadTime": 347,
+      "gameStartupTime": 598,
+      "numJankedFrames": 2
+    },
+    "canvas": [
+      1600,
+      852
+    ],
+    "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M2 Pro, Unspecified Version)"
+  },
+  "errors": []
+}

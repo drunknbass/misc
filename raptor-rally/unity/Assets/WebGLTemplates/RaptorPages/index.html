@@ -24,6 +24,9 @@ a{color:#94aeb8;text-decoration:none}a:hover{color:#b9f26a}strong{font-size:13px
 </main>
 <script>
 const canvas=document.getElementById('unity-canvas'),loading=document.getElementById('loading'),progress=document.getElementById('progress'),status=document.getElementById('status'),fullscreen=document.getElementById('fullscreen');
+// Bound pixel work on Retina/4K displays and reevaluate when entering fullscreen.
+function resizeCanvas(){const r=canvas.getBoundingClientRect(),scale=Math.min(window.devicePixelRatio||1,1.25,1920/Math.max(1,r.width),1080/Math.max(1,r.height));const w=Math.max(1,Math.round(r.width*scale)),h=Math.max(1,Math.round(r.height*scale));if(canvas.width!==w)canvas.width=w;if(canvas.height!==h)canvas.height=h;}
+new ResizeObserver(resizeCanvas).observe(canvas);resizeCanvas();
 function showError(message){loading.hidden=false;progress.hidden=true;status.className='error';status.textContent='The game could not start. '+String(message);document.getElementById('retry').hidden=false;}
 document.getElementById('retry').onclick=()=>location.reload();
 const loader=document.createElement('script');loader.src='Build/{{{ LOADER_FILENAME }}}';loader.onerror=()=>showError('Check your connection and reload.');
@@ -38,7 +41,7 @@ frameworkUrl:'Build/{{{ FRAMEWORK_FILENAME }}}',
 #if USE_WASM
 codeUrl:'Build/{{{ CODE_FILENAME }}}',
 #endif
-streamingAssetsUrl:'StreamingAssets',companyName:{{{ JSON.stringify(COMPANY_NAME) }}},productName:{{{ JSON.stringify(PRODUCT_NAME) }}},productVersion:{{{ JSON.stringify(PRODUCT_VERSION) }}},devicePixelRatio:Math.min(window.devicePixelRatio||1,1.5),
+streamingAssetsUrl:'StreamingAssets',companyName:{{{ JSON.stringify(COMPANY_NAME) }}},productName:{{{ JSON.stringify(PRODUCT_NAME) }}},productVersion:{{{ JSON.stringify(PRODUCT_VERSION) }}},matchWebGLToCanvasSize:false,
 showBanner:(message,type)=>{if(type==='error')showError(message);else console.warn(message);}
 },value=>{progress.value=value;status.textContent=value<.9?'Loading the track… '+Math.round(value*100)+'%':'Starting engines…';}).then(instance=>{window.raptorGame=instance;loading.hidden=true;fullscreen.disabled=false;fullscreen.onclick=()=>{canvas.focus();instance.SetFullscreen(1);};canvas.focus();document.documentElement.dataset.gameReady='true';}).catch(showError);
 document.body.appendChild(loader);

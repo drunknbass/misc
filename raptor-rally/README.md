@@ -34,3 +34,7 @@ Original game code and procedural track/truck geometry are covered by the reposi
 Rive's official Unity runtime is MIT licensed ([notice](RIVE-LICENSE.txt)). Adobe Source Sans 3 is SIL OFL 1.1 ([notice](FONT-LICENSE.md)); font bytes are embedded in the Rive asset. Unity's generated player/runtime remains subject to Unity's applicable terms.
 
 See [validation](VALIDATION.md) for tested behavior and platform limits.
+
+## Performance update
+
+The browser build now batches static scenery, indexes nearby barriers, reuses trucks and cached garage graphics, limits Rive refresh work and caps Retina/fullscreen rendering resolution. See [before/after results and test method](performance/RESULTS.md).

@@ -10,6 +10,7 @@ Original editable racing HUD, authored with official Rive CLI 1.1.1.
 - String properties: `speedText`, `nitroText`, `position`, `lap`, `raceTime`, `truck`, `surface`.
 - Boolean: `boosting`; drives a 120 ms, non-looping warm highlight transition. No idle pulse.
 - No outgoing events, scripts, remote assets or account operations.
+- Browser players cap the native surface at 1600×900 and instrument redraws at 30 Hz, with immediate recovery/boost/motion-mode state updates. Unchanged text values are cached in the host. Camera, driving and steering-wheel updates remain at display rate.
 - Unity owns every value. Interpolated bars decorate exact numeric readouts; no fabricated speed, nitro refill, lap or finish events.
 - `M` toggles reduced motion: immediate meter updates and no boost highlight transition. Pause freezes presentation. Garage stops updating/rendering the race HUD. Race reset clears interpolation and repopulates all fields.
 - Keyboard/native IMGUI controls remain usable independently of the artwork, including pause, recovery and camera; a readable fallback HUD is retained if Rive initialization fails. Screen-reader support is not claimed or verified.
