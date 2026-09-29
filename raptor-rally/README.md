@@ -21,6 +21,8 @@ Off-course trucks can rejoin through barriers; collisions restore after the truc
 
 Glancing wall impacts now slide along the rail, and truck impacts transfer momentum with reduced spin. See [handling changes](HANDLING.md) and the [84 Play Mode contact checks](COLLISIONS.md).
 
+The on-screen Raptor wheel has 2.5 turns from center to either lock (±900°), five turns lock to lock. It keeps its fixed center while rotating and unwinds continuously when reversing. See [steering checks](STEERING.md).
+
 ## Source and rebuilding
 
 The complete editable Unity project is in [`unity/`](unity/), including the Rive source in `unity/Design/RacingHud/`. Open it with Unity **6000.6.3f1** plus official Web Build Support. Dependencies are pinned in the package manifest and lock file.

@@ -48,12 +48,12 @@ function resizeCanvas(){const r=canvas.getBoundingClientRect(),scale=Math.min(wi
 new ResizeObserver(resizeCanvas).observe(canvas);resizeCanvas();
 function showError(message){loading.hidden=false;progress.hidden=true;status.className='error';status.textContent='The game could not start. '+String(message);document.getElementById('retry').hidden=false;}
 document.getElementById('retry').onclick=()=>location.reload();
-const loader=document.createElement('script');loader.src='Build/07e1cd7c44124b9d2b887e0f37bc0465.loader.js';loader.onerror=()=>showError('Check your connection and reload.');
+const loader=document.createElement('script');loader.src='Build/e04e7d809736b58ec79a64f7fd478e70.loader.js';loader.onerror=()=>showError('Check your connection and reload.');
 loader.onload=()=>createUnityInstance(canvas,{
 arguments:[],
-dataUrl:'Build/4548eb32800d2585485109db8f2ab526.data.unityweb',
-frameworkUrl:'Build/9ad4d8a0cb3a7c6e66d82050373183ab.framework.js.unityweb',
-codeUrl:'Build/57eaf0dea5f3ea7d90f8db51746ed925.wasm.unityweb',
+dataUrl:'Build/a8d51cca292eb28ccbd1a6341c806445.data.unityweb',
+frameworkUrl:'Build/57b9baa28f062559358c941560c83483.framework.js.unityweb',
+codeUrl:'Build/0b1582396625c34e64ee6ac3a64e6462.wasm.unityweb',
 streamingAssetsUrl:'StreamingAssets',companyName:"RaptorRallyPrototype",productName:"Raptor Rally",productVersion:"1.0",matchWebGLToCanvasSize:false,
 showBanner:(message,type)=>{if(type==='error')showError(message);else console.warn(message);}
 },value=>{progress.value=value;status.textContent=value<.9?'Loading the track… '+Math.round(value*100)+'%':'Starting engines…';}).then(instance=>{window.raptorGame=instance;loading.hidden=true;fullscreen.disabled=false;fullscreen.onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else if(document.getElementById('stage').requestFullscreen)await document.getElementById('stage').requestFullscreen();}catch(error){console.warn('Fullscreen unavailable',error);}canvas.focus();};if(!document.fullscreenEnabled)fullscreen.hidden=true;canvas.focus();document.documentElement.dataset.gameReady='true';window.raptorTouch.connect(instance);}).catch(showError);

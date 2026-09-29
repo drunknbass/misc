@@ -33,6 +33,50 @@ public static class PrototypeBuilder
         PlayerSettings.colorSpace=ColorSpace.Linear;
         AssetDatabase.SaveAssets();
     }
+    [MenuItem("Raptor Rally/Verify steering wheel")]
+    public static void VerifySteeringWheel()
+    {
+        EditorSceneManager.OpenScene(ScenePath);
+        var game=UnityEngine.Object.FindAnyObjectByType<RallyGame>(); game.Initialize(); game.Verification=true;
+        game.StartRace(); game.Countdown=0; game.Tick(.02f);
+        var report=new System.Text.StringBuilder("# Steering wheel validation\n\n");
+        VerifyWheel(game,report);
+        File.WriteAllText(Path.Combine(Output,"STEERING.md"),report.ToString());
+        Debug.Log("RAPTOR STEERING VERIFICATION PASSED\n"+report);
+    }
+    static void VerifyWheel(RallyGame game,System.Text.StringBuilder report)
+    {
+        game.Paused=false; game.Player.Steer=1; game.AdvanceWheel(1);
+        if(game.WheelAngle!=540) throw new Exception("Wheel did not rotate continuously past one full turn");
+        game.AdvanceWheel(1);
+        if(game.WheelAngle!=900) throw new Exception("Wheel right lock is not 2.5 turns");
+        game.Paused=true; game.Player.Steer=-1; game.AdvanceWheel(1);
+        if(game.WheelAngle!=900) throw new Exception("Paused wheel moved");
+        game.Paused=false; game.AdvanceWheel(1);
+        if(game.WheelAngle!=360) throw new Exception("Wheel reversal wrapped instead of unwinding through center");
+        game.AdvanceWheel(3);
+        if(game.WheelAngle!=-900) throw new Exception("Wheel left lock is not 2.5 turns");
+        game.Player.Steer=-2; game.AdvanceWheel(1);
+        if(game.WheelAngle!=-900) throw new Exception("Wheel exceeded left lock");
+        game.Player.Steer=2; game.AdvanceWheel(4);
+        if(game.WheelAngle!=900) throw new Exception("Wheel exceeded right lock");
+        game.Player.Steer=.5f; game.AdvanceWheel(1);
+        if(game.WheelAngle!=450) throw new Exception("Half steering is not 1.25 turns");
+        game.Player.Steer=0; game.AdvanceWheel(1);
+        if(game.WheelAngle!=0) throw new Exception("Wheel failed to center");
+        report.AppendLine("- PASS: +/-900 degree locks (2.5 turns each way, 5 total), proportional half steering, clamping, continuous unwrapped reversal, pause and return to center. Animation remains 540 degrees/second.");
+        foreach(float scale in new[]{.75f,1f,2.093333f}) foreach(float angle in new[]{-900f,-720f,-450f,-90f,0f,90f,450f,720f,900f})
+        {
+            var canvas=Matrix4x4.TRS(new Vector3(125,38,0),Quaternion.identity,Vector3.one*scale);
+            var center=new Vector3(1470,747,0);
+            var rotated=SteeringWheelHud.RotationMatrix(canvas,center,angle);
+            if(Vector3.Distance(canvas.MultiplyPoint3x4(center),rotated.MultiplyPoint3x4(center))>.002f)
+                throw new Exception("Steering wheel pivot drifts under HUD scaling");
+            float radius=Vector3.Distance(rotated.MultiplyPoint3x4(center+Vector3.up*80),canvas.MultiplyPoint3x4(center));
+            if(Mathf.Abs(radius-80*scale)>.002f) throw new Exception("Steering wheel radius changed during rotation");
+        }
+        report.AppendLine("- PASS: steering wheel center and radius stay fixed at nine angles across three HUD scales with letterboxing.");
+    }
     [MenuItem("Raptor Rally/Verify race simulation")]
     public static void Verify()
     {
@@ -100,26 +144,7 @@ public static class PrototypeBuilder
             game.Paused=true; game.RefreshBoard();
             if(!game.Track.BoardText.Contains("PAUSED")) throw new Exception("Scoreboard pause mismatch");
             report.AppendLine("- PASS: scoreboard garage, countdown, lap, pause, finish and leader agree with race state.");
-            game.Paused=false; game.Player.Steer=1; game.AdvanceWheel(1);
-            if(game.WheelAngle!=135) throw new Exception("Wheel right-turn direction or limit incorrect");
-            game.Paused=true; game.Player.Steer=-1; game.AdvanceWheel(1);
-            if(game.WheelAngle!=135) throw new Exception("Paused wheel moved");
-            game.Paused=false; game.AdvanceWheel(1);
-            if(game.WheelAngle!=-135) throw new Exception("Wheel left-turn direction incorrect");
-            game.Player.Steer=0; game.AdvanceWheel(1);
-            if(game.WheelAngle!=0) throw new Exception("Wheel failed to center");
-            report.AppendLine("- PASS: steering wheel turns left/right, respects its limit and pause, and returns to center.");
-            foreach(float scale in new[]{.75f,1f,2.093333f}) foreach(float angle in new[]{-135f,-90f,0f,90f,135f})
-            {
-                var canvas=Matrix4x4.TRS(new Vector3(125,38,0),Quaternion.identity,Vector3.one*scale);
-                var center=new Vector3(1470,747,0);
-                var rotated=SteeringWheelHud.RotationMatrix(canvas,center,angle);
-                if(Vector3.Distance(canvas.MultiplyPoint3x4(center),rotated.MultiplyPoint3x4(center))>.002f)
-                    throw new Exception("Steering wheel pivot drifts under HUD scaling");
-                float radius=Vector3.Distance(rotated.MultiplyPoint3x4(center+Vector3.up*80),canvas.MultiplyPoint3x4(center));
-                if(Mathf.Abs(radius-80*scale)>.002f) throw new Exception("Steering wheel radius changed during rotation");
-            }
-            report.AppendLine("- PASS: steering wheel center and radius stay fixed at five angles across three HUD scales with letterboxing.");
+            VerifyWheel(game,report);
             game.FollowPlayer=true; game.UpdateCamera(.02f,true);
             if(game.View.orthographicSize>25) throw new Exception("Follow camera did not zoom in");
             Vector3 framed=game.View.WorldToViewportPoint(game.Player.transform.position);

@@ -34,6 +34,7 @@ namespace RaptorRally
         public RiveRaceHud MotionHud { get; private set; }
         public bool ReducedMotion;
         public bool FollowPlayer;
+        public const float WheelLockDegrees = 2.5f * 360f;
         public float WheelAngle { get; private set; }
         public bool TouchControls { get; private set; }
         int touchInput;
@@ -223,7 +224,8 @@ namespace RaptorRally
         public void AdvanceWheel(float dt)
         {
             if(Paused || Trucks.Count==0) return;
-            float target=State==Phase.Racing?Mathf.Clamp(Player.Steer,-1,1)*135:0;
+            float target=State==Phase.Racing?Mathf.Clamp(Player.Steer,-1,1)*WheelLockDegrees:0;
+            // Keep the angle unwrapped so reversals travel through all five turns.
             WheelAngle=Mathf.MoveTowards(WheelAngle,target,540*Mathf.Max(0,dt));
         }
         public void RefreshBoard()

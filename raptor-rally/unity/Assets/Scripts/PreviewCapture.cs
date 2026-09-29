@@ -46,13 +46,13 @@ namespace RaptorRally
             Time.timeScale=0;
             foreach(float steering in new[]{-1f,0f,1f})
             {
-                game.Player.Steer=steering; game.AdvanceWheel(1);
+                game.Player.Steer=steering; game.AdvanceWheel(4);
                 yield return new WaitForSecondsRealtime(.15f);
                 string pose=steering<0?"left":steering>0?"right":"center";
                 ScreenCapture.CaptureScreenshot(Path.Combine(output,"wheel-"+pose+".png"));
                 yield return new WaitForSecondsRealtime(.15f);
             }
-            game.Player.Steer=savedSteer; game.AdvanceWheel(1); Time.timeScale=1;
+            game.Player.Steer=savedSteer; game.AdvanceWheel(4); Time.timeScale=1;
             game.FollowPlayer=true;
             yield return new WaitForSeconds(2);
             ScreenCapture.CaptureScreenshot(Path.Combine(output,"prototype-follow.png"));
