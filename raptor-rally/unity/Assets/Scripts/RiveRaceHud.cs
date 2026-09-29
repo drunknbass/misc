@@ -15,7 +15,7 @@ namespace RaptorRally
         Rive.RenderQueue queue;
         Rive.Renderer renderer;
         CommandBuffer commands;
-        RenderTexture raw, display;
+        RenderTexture raw;
         Material conversion;
         ViewModelInstanceNumberProperty speed,nitro,recovery;
         ViewModelInstanceBooleanProperty boosting;
@@ -47,9 +47,9 @@ namespace RaptorRally
                 if(speed==null || nitro==null || recovery==null || boosting==null || speedText==null || nitroText==null || position==null || lap==null || raceTime==null || truck==null || surface==null)
                     throw new InvalidOperationException("RaceHUD view-model contract is incomplete.");
                 int pixelScale=!browser && Screen.width>=2400 && Screen.height>=1350?2:1;
-                raw=new RenderTexture(TextureHelper.Descriptor(1600*pixelScale,900*pixelScale)) { name="Rive HUD native surface" };
+                float scale=browser?Mathf.Clamp(Mathf.Min(Screen.width/1600f,Screen.height/900f),.5f,.8f):pixelScale;
+                raw=new RenderTexture(TextureHelper.Descriptor(Mathf.RoundToInt(1600*scale),Mathf.RoundToInt(900*scale))) { name="Rive HUD native surface" };
                 raw.Create();
-                display=new RenderTexture(raw.width,raw.height,0,RenderTextureFormat.ARGB32,RenderTextureReadWrite.Linear) { name="Rive HUD IMGUI surface" }; display.Create();
                 conversion=new Material(Resources.Load<Shader>("HUD/RiveToGUI"));
                 conversion.SetFloat("_FlipY",TextureHelper.ShouldFlipTexture()?1:0);
                 queue=new Rive.RenderQueue(raw); renderer=queue.Renderer();
@@ -89,20 +89,25 @@ namespace RaptorRally
             SetText(surface,ref previousSurface,player.OffCourse?"RETURN TO TRACK":player.Boosting?"NITRO ENGAGED":!player.Grounded?"AIRBORNE":"PACKED DIRT");
             machine.Advance(game.Paused?0:dt);
             Graphics.ExecuteCommandBuffer(commands);
-            bool srgb=GL.sRGBWrite; GL.sRGBWrite=false;
-            Graphics.Blit(raw,display,conversion); GL.sRGBWrite=srgb;
             rendered=true;
         }
         static void SetText(ViewModelInstanceStringProperty property,ref string previous,string value)
         { if(previous==value) return; property.Value=value; previous=value; }
-        public void Draw() { if(Ready && rendered) GUI.DrawTexture(new Rect(0,0,1600,900),display,ScaleMode.StretchToFill,true); }
+        public void Draw()
+        {
+            if(!Ready || !rendered || Event.current.type!=EventType.Repaint) return;
+            float scale=Mathf.Min(Screen.width/1600f,Screen.height/900f);
+            Matrix4x4 saved=GUI.matrix; GUI.matrix=Matrix4x4.identity;
+            Graphics.DrawTexture(new Rect((Screen.width-1600*scale)*.5f,(Screen.height-900*scale)*.5f,1600*scale,900*scale),raw,conversion);
+            GUI.matrix=saved;
+        }
         public void Reset() { displayedSpeed=0; displayedNitro=100; pendingTime=0; rendered=false; }
         public void Dispose()
         {
             Ready=false; commands?.Dispose(); commands=null; queue?.Dispose(); queue=null;
             machine?.Dispose(); machine=null; data?.Dispose(); data=null; artboard?.Dispose(); artboard=null; file?.Dispose(); file=null;
-            foreach(var texture in new[]{raw,display}) if(texture!=null) { texture.Release(); UnityEngine.Object.Destroy(texture); }
-            raw=display=null; if(conversion!=null) UnityEngine.Object.Destroy(conversion); conversion=null;
+            foreach(var texture in new[]{raw}) if(texture!=null) { texture.Release(); UnityEngine.Object.Destroy(texture); }
+            raw=null; if(conversion!=null) UnityEngine.Object.Destroy(conversion); conversion=null;
         }
     }
 }

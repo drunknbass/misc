@@ -25,7 +25,7 @@ a{color:#94aeb8;text-decoration:none}a:hover{color:#b9f26a}strong{font-size:13px
 <script>
 const canvas=document.getElementById('unity-canvas'),loading=document.getElementById('loading'),progress=document.getElementById('progress'),status=document.getElementById('status'),fullscreen=document.getElementById('fullscreen');
 // Bound pixel work on Retina/4K displays and reevaluate when entering fullscreen.
-function resizeCanvas(){const r=canvas.getBoundingClientRect(),scale=Math.min(window.devicePixelRatio||1,1.25,1920/Math.max(1,r.width),1080/Math.max(1,r.height));const w=Math.max(1,Math.round(r.width*scale)),h=Math.max(1,Math.round(r.height*scale));if(canvas.width!==w)canvas.width=w;if(canvas.height!==h)canvas.height=h;}
+function resizeCanvas(){const r=canvas.getBoundingClientRect(),scale=Math.min(window.devicePixelRatio||1,1,1600/Math.max(1,r.width),900/Math.max(1,r.height));const w=Math.max(1,Math.round(r.width*scale)),h=Math.max(1,Math.round(r.height*scale));if(canvas.width!==w)canvas.width=w;if(canvas.height!==h)canvas.height=h;}
 new ResizeObserver(resizeCanvas).observe(canvas);resizeCanvas();
 function showError(message){loading.hidden=false;progress.hidden=true;status.className='error';status.textContent='The game could not start. '+String(message);document.getElementById('retry').hidden=false;}
 document.getElementById('retry').onclick=()=>location.reload();

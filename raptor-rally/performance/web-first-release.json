@@ -1,0 +1,14 @@
+{
+  "url": "http://127.0.0.1:8874/outputs/Web/",
+  "initial": {
+    "width": 1600,
+    "height": 880,
+    "fullscreen": false
+  },
+  "fullscreen": {
+    "width": 1600,
+    "height": 900,
+    "fullscreen": true
+  },
+  "errors": []
+}

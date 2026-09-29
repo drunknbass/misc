@@ -4,7 +4,7 @@ Shader "RaptorRally/PackedDirt"
  SubShader {
  Tags { "RenderType"="Opaque" }
  CGPROGRAM
- #pragma surface surf Standard fullforwardshadows
+ #pragma surface surf Standard addshadow noforwardadd nolightmap nodynlightmap nometa nofog exclude_path:deferred
  #pragma target 3.0
  sampler2D _MainTex,_NoiseTex; fixed4 _Color; half _Course;
  struct Input { float2 uv_MainTex; float3 worldPos; };
@@ -26,5 +26,5 @@ Shader "RaptorRally/PackedDirt"
  }
  ENDCG
  }
- FallBack "Diffuse"
+ FallBack Off
 }

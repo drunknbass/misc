@@ -19,6 +19,8 @@ namespace RaptorRally
         public bool Verification;
         public Camera View;
         Camera garageBackground;
+        RenderTexture circuitPreview;
+        bool circuitDirty=true;
         float finishFlash;
         float[] best = new float[3];
         readonly Color ink = new Color(.025f,.055f,.078f,.97f);
@@ -45,6 +47,7 @@ namespace RaptorRally
             if(Application.isPlaying) { garagePreview=new GaragePreview(transform); MotionHud=new RiveRaceHud(); }
             var cameraObject = new GameObject("Stadium camera", typeof(Camera), typeof(AudioListener));
             cameraObject.transform.SetParent(transform); View = cameraObject.GetComponent<Camera>();
+            View.allowHDR=false;
             View.orthographic = true; View.orthographicSize = 49;
             View.backgroundColor = new Color(.035f,.065f,.09f); View.clearFlags = CameraClearFlags.SolidColor;
             View.transform.position = new Vector3(19, 84, -100); View.transform.LookAt(new Vector3(0, 0, 1));
@@ -55,13 +58,14 @@ namespace RaptorRally
             var light = new GameObject("Late afternoon sun", typeof(Light)); light.transform.SetParent(transform);
             light.transform.rotation = Quaternion.Euler(48, -35, 0);
             var sun = light.GetComponent<Light>(); sun.type = LightType.Directional; sun.intensity = 1.08f; sun.color=new Color(1,.91f,.78f); sun.cullingMask=~(1<<10);
-            sun.shadows = LightShadows.Soft; sun.shadowStrength = .88f; sun.shadowBias=.025f; sun.shadowNormalBias=.16f;
-            if(Application.isPlaying) { var dust=new GameObject("Shared tire dust"); dust.transform.SetParent(transform,false); dust.AddComponent<RallyDust>().Initialize(this); }
+            sun.shadows = LightShadows.Soft; sun.shadowCustomResolution=2048; sun.shadowStrength = .88f; sun.shadowBias=.025f; sun.shadowNormalBias=.16f;
+            if(Application.isPlaying) { var dust=new GameObject("Shared tire dust"); dust.transform.SetParent(transform,false); dust.layer=12; dust.AddComponent<RallyDust>().Initialize(this); }
             for (int i = 0; i < best.Length; i++) best[i] = PlayerPrefs.GetFloat("coyote-basin-v3-" + i, 0);
             PrepareGrid();
         }
         public void PrepareGrid()
         {
+            circuitDirty=true;
             WheelAngle=0;
             MotionHud?.Reset();
             if(preparedLineup==Selected && Trucks.Count==4)
@@ -139,13 +143,17 @@ namespace RaptorRally
             AdvanceWheel(Time.deltaTime);
             UpdateCamera(Time.unscaledDeltaTime);
             MotionHud?.Update(this,Time.deltaTime);
-            if(State==Phase.Garage) garagePreview?.Render(Selected);
+            if(State==Phase.Garage) {
+                garagePreview?.Render(Selected);
+                if(circuitDirty || circuitPreview==null || !circuitPreview.IsCreated()) RenderCircuitPreview();
+            }
         }
         public void UpdateCamera(float dt,bool snap=false)
         {
             float aspect = Mathf.Max(.5f, (float)Screen.width / Screen.height);
             bool tracking=FollowPlayer && State!=Phase.Garage && Trucks.Count>0;
             garageBackground.enabled=State==Phase.Garage;
+            View.enabled=State!=Phase.Garage;
             if(State==Phase.Garage) {
                 float s=Mathf.Min(Screen.width/1600f,Screen.height/900f),x=(Screen.width-1600*s)*.5f,y=(Screen.height-900*s)*.5f;
                 View.rect=new Rect((x+1110*s)/Screen.width,(Screen.height-y-735*s)/Screen.height,465*s/Screen.width,485*s/Screen.height);
@@ -157,6 +165,15 @@ namespace RaptorRally
             View.transform.position=Vector3.Lerp(View.transform.position,position,blend);
             View.transform.rotation=Quaternion.Slerp(View.transform.rotation,Quaternion.LookRotation(target-position),blend);
             View.orthographicSize=Mathf.Lerp(View.orthographicSize,size,blend);
+        }
+        void RenderCircuitPreview()
+        {
+            if(circuitPreview==null) circuitPreview=new RenderTexture(512,534,24,RenderTextureFormat.ARGB32) { name="Cached circuit preview",antiAliasing=2 };
+            UpdateCamera(0,true);
+            Rect rect=View.rect; int mask=View.cullingMask; View.cullingMask=mask & ~(1<<12);
+            View.rect=new Rect(0,0,1,1); View.targetTexture=circuitPreview;
+            View.Render(); View.targetTexture=null; View.rect=rect; View.cullingMask=mask;
+            circuitDirty=false;
         }
         public void AdvanceWheel(float dt)
         {
@@ -229,6 +246,7 @@ namespace RaptorRally
                 if(garagePreview!=null) GUI.DrawTexture(new Rect(428,190,660,462),garagePreview.Texture,ScaleMode.ScaleToFit,false);
                 Text(447,649,620,43,TruckSpec.Lineup[Selected].Name,heading);
                 Text(447,698,620,24,Selected==1?"RAPTOR FLARES  /  AMBER DRLs  /  37-INCH TIRES":Selected==0?"RAPTOR HOOD  /  FORD TAILGATE  /  35-INCH TIRES":"RAPTOR FENDERS  /  VENTED HOOD  /  33-INCH TIRES",small);
+                if(circuitPreview!=null) GUI.DrawTexture(new Rect(1110,250,465,485),circuitPreview,ScaleMode.StretchToFill,false);
                 Text(1120,156,450,34,"COYOTE BASIN",label);
                 Text(1120,195,450,24,"4 TRUCKS  /  3 LAPS  /  SWITCHBACKS",small);
                 Text(425,777,1100,30,"THREE RAPTORS. ALL DIRT.",heading);
@@ -291,6 +309,6 @@ namespace RaptorRally
             GUI.matrix=Matrix4x4.identity;
         }
         static string Ordinal(int n) => n==1?"ST":n==2?"ND":n==3?"RD":"TH";
-        void OnDestroy() { Time.timeScale=1; wheel?.Dispose(); garagePreview?.Dispose(); MotionHud?.Dispose(); }
+        void OnDestroy() { Time.timeScale=1; wheel?.Dispose(); garagePreview?.Dispose(); MotionHud?.Dispose(); if(circuitPreview!=null) { circuitPreview.Release(); Destroy(circuitPreview); } }
     }
 }

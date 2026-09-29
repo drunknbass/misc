@@ -18,6 +18,7 @@ namespace RaptorRally
             stage=new GameObject("Garage studio").transform; stage.SetParent(parent,false); stage.localPosition=new Vector3(0,-1000,0);
             var go=new GameObject("Garage detail camera",typeof(Camera)); go.transform.SetParent(stage,false);
             camera=go.GetComponent<Camera>(); camera.enabled=false; camera.cullingMask=1<<10;
+            camera.allowHDR=false;
             camera.clearFlags=CameraClearFlags.SolidColor; camera.backgroundColor=new Color(.025f,.045f,.06f);
             camera.orthographic=true; camera.orthographicSize=2.55f; camera.nearClipPlane=.1f; camera.farClipPlane=30;
             go.transform.localPosition=new Vector3(4.8f,2.5f,6.3f); go.transform.LookAt(stage.position+new Vector3(0,.35f,0));

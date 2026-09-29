@@ -4,6 +4,7 @@ Shader "Hidden/RaptorRally/RiveToGUI"
     SubShader
     {
         Cull Off ZWrite Off ZTest Always
+        Blend SrcAlpha OneMinusSrcAlpha
         Pass
         {
             CGPROGRAM

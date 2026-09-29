@@ -15,7 +15,8 @@ namespace RaptorRally
             RenderSettings.ambientGroundColor=new Color(.12f,.095f,.07f);
             QualitySettings.shadows=ShadowQuality.All;
             QualitySettings.shadowResolution=ShadowResolution.High;
-            QualitySettings.shadowCascades=2;
+            // The orthographic stadium needs one atlas; the near cascade was largely empty.
+            QualitySettings.shadowCascades=0;
             QualitySettings.shadowDistance=185;
             QualitySettings.shadowCascade2Split=.32f;
             QualitySettings.anisotropicFiltering=AnisotropicFiltering.ForceEnable;

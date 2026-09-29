@@ -132,6 +132,7 @@ public static class PrototypeBuilder
             report.AppendLine("- PASS: follow camera zooms, frames and tracks the player; switching back restores the complete stadium view.");
             VerifyRecoveryAndJumps(game,report);
             VerifyBarrierIndex(game,report);
+            VerifyRenderGeometry(game,report);
             var existing=game.Player;
             game.Player.Nitro=0; game.Player.FinishTime=42; game.Player.CompletedLaps=3;
             game.Garage(); game.StartRace();
@@ -252,6 +253,35 @@ public static class PrototypeBuilder
         if(renderers>80 || game.Track.Barriers.Count!=Stadium.Samples*2) throw new Exception("Static batching changed collider count or failed to reduce renderers");
         report.AppendLine("- PASS: spatial recovery matches exhaustive collision rules across 240 positions, cell boundaries and teleports; at most "+maxCandidates+" candidates instead of 768 per truck. Stadium has "+renderers+" mesh renderers with all 768 barriers retained.");
     }
+    static void VerifyRenderGeometry(RallyGame game,System.Text.StringBuilder report)
+    {
+        var rails=game.Track.Root.GetComponentsInChildren<MeshFilter>().Where(x=>x.name.StartsWith("Continuous rail ")).ToArray();
+        if(rails.Length!=2) throw new Exception("Expected two continuous rail ribbons");
+        foreach(var rail in rails) {
+            var mesh=rail.sharedMesh; var v=mesh.vertices; var n=mesh.normals;
+            if(v.Length!=Stadium.Samples*40 || mesh.triangles.Length!=Stadium.Samples*60) throw new Exception("Rail includes extra overlapping sections or caps");
+            for(int segment=0;segment<Stadium.Samples;segment++) for(int edge=0;edge<10;edge++) {
+                int a=segment*40+edge*4,b=Stadium.Wrap(segment+1)*40+edge*4;
+                if(v[a+1]!=v[b] || v[a+2]!=v[b+3] || Vector3.Distance(n[a+1],n[b])>.0001f)
+                    throw new Exception("Open or discontinuous rail seam at "+segment);
+                if(Vector3.Cross(v[a+1]-v[a],v[a+2]-v[a]).sqrMagnitude<.00000001f) throw new Exception("Degenerate rail face");
+            }
+        }
+        foreach(var truck in game.Trucks) {
+            var renderers=truck.GetComponentsInChildren<MeshRenderer>();
+            if(renderers.Length<5 || renderers.Length>6 || renderers.Select(x=>x.sharedMaterial).Distinct().Count()!=1)
+                throw new Exception("Truck materials failed to consolidate per articulated part");
+            foreach(var filter in truck.GetComponentsInChildren<MeshFilter>()) {
+                var mesh=filter.sharedMesh;
+                if(mesh.subMeshCount!=1 || mesh.colors.Length!=mesh.vertexCount || mesh.normals.Length!=mesh.vertexCount)
+                    throw new Exception("Batched model lost vertex shading data");
+                var properties=new System.Collections.Generic.List<Vector4>();mesh.GetUVs(0,properties);
+                if(properties.Count!=mesh.vertexCount || properties.Any(x=>x.x<0 || x.x>1 || x.y<0 || x.y>1))
+                    throw new Exception("Invalid vertex material parameters");
+            }
+        }
+        report.AppendLine("- PASS: both rail ribbons close exactly at every cross-section with continuous normals, nondegenerate faces and no end caps; all 768 colliders retained. Each truck uses one shared material across five or six articulated meshes, with valid color, metallic, roughness and normal data.");
+    }
     static void ConfigureWheelTexture()
     {
         const string path="Assets/Resources/HUD/RaptorSteeringWheel.png";
@@ -297,6 +327,8 @@ public static class PrototypeBuilder
     }
     static void Build(BuildTarget target,string relative)
     {
+        PlayerSettings.SplashScreen.show=false;
+        PlayerSettings.SplashScreen.showUnityLogo=false;
         if(!File.Exists(ScenePath)) CreateScene();
         // Procedural materials have no scene references. Keep the opaque Standard
         // shader in players through a material asset so Shader.Find works there.

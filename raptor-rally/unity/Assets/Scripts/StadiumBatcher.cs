@@ -17,7 +17,7 @@ namespace RaptorRally
                 var renderer=filter.GetComponent<MeshRenderer>();
                 if(renderer==null || filter.sharedMesh==null || renderer.sharedMaterials.Length!=1) continue;
                 var material=renderer.sharedMaterial;
-                if(material==null || material.mainTexture!=null || material.shader.name!="Standard") continue;
+                if(material==null || material.shader.name!="Standard" || material.mainTexture!=null) continue;
                 Vector3 center=root.InverseTransformPoint(renderer.bounds.center);
                 var cell=new Vector2Int(Mathf.FloorToInt(center.x/24),Mathf.FloorToInt(center.z/24));
                 if(!groups.TryGetValue(cell,out var group)) groups[cell]=group=new List<CombineInstance>();

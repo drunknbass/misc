@@ -25,7 +25,6 @@ namespace RaptorRally
         TextMesh raceBoard;
         readonly Dictionary<Vector2Int,List<int>> barrierCells=new Dictionary<Vector2Int,List<int>>();
         Texture2D dirtTexture;
-        Mesh barrierMesh;
         RallyGame.Phase boardPhase;
         bool boardInitialized,boardPaused;
         int boardLap;
@@ -185,11 +184,15 @@ namespace RaptorRally
                     Color c = (i / 3) % 2 == 0 ? new Color(.84f, .88f, .82f) : new Color(.66f, .095f, .055f);
                     var wall = Box("Safety barrier", (p + q) / 2 + Vector3.up * .65f, new Vector3(.55f, 1.3f, Vector3.Distance(p, q) + .1f), c, true);
                     wall.transform.rotation = Quaternion.LookRotation(q - p);
-                    wall.GetComponent<MeshFilter>().sharedMesh=BarrierMesh();
+                    // Collider overlaps are intentional for physical containment;
+                    // the separate continuous ribbon has no overlapping visible faces.
+                    Object.DestroyImmediate(wall.GetComponent<MeshRenderer>());
+                    Object.DestroyImmediate(wall.GetComponent<MeshFilter>());
                     wall.layer=11; // Walls must never count as drivable ground in suspension raycasts.
                     Barriers.Add(new Barrier(wall.GetComponent<Collider>(),(p+q)*.5f,((Side(i)+Side(i+1))*.5f*sign).normalized));
                 }
             }
+            BuildRailRibbon(-1); BuildRailRibbon(1);
             for (int row = 0; row < 2; row++)
                 for (int col = 0; col < 10; col++)
                     Box("Start / finish check", Gate(0) + Vector3.up * .03f + Tangent(0) * (row * .6f) + Side(0) * (col - 4.5f), new Vector3(.6f, .04f, 1), (row + col) % 2 == 0 ? Color.white : Dark);
@@ -200,22 +203,35 @@ namespace RaptorRally
                 mark.transform.rotation = Quaternion.LookRotation(Tangent(i)) * Quaternion.Euler(0, 35, 0);
             }
         }
-        Mesh BarrierMesh()
+        void BuildRailRibbon(int side)
         {
-            if(barrierMesh!=null) return barrierMesh;
-            var ring=new[]{new Vector2(-.5f,-.5f),new Vector2(-.5f,-.18f),new Vector2(-.30f,.16f),new Vector2(-.30f,.47f),new Vector2(-.23f,.5f),new Vector2(.23f,.5f),new Vector2(.30f,.47f),new Vector2(.30f,.16f),new Vector2(.5f,-.18f),new Vector2(.5f,-.5f)};
-            var v=new List<Vector3>(); var t=new List<int>();
-            for(int i=0;i<ring.Length;i++) {
-                Vector2 a=ring[i],b=ring[(i+1)%ring.Length]; int n=v.Count;
-                v.Add(new Vector3(a.x,a.y,-.5f)); v.Add(new Vector3(a.x,a.y,.5f)); v.Add(new Vector3(b.x,b.y,.5f)); v.Add(new Vector3(b.x,b.y,-.5f));
-                t.AddRange(new[]{n,n+1,n+2,n,n+2,n+3});
-                foreach(int sign in new[]{-1,1}) {
-                    n=v.Count; v.Add(new Vector3(0,0,sign*.5f)); v.Add(new Vector3(a.x,a.y,sign*.5f)); v.Add(new Vector3(b.x,b.y,sign*.5f));
-                    t.AddRange(sign==1?new[]{n,n+2,n+1}:new[]{n,n+1,n+2});
+            // All neighboring sections meet at identical cross-sections, including
+            // the closing seam. Color boundaries duplicate vertices, never faces.
+            var profile=new[]{new Vector2(-.5f,-.5f),new Vector2(-.5f,-.18f),new Vector2(-.30f,.16f),new Vector2(-.30f,.47f),new Vector2(-.23f,.5f),new Vector2(.23f,.5f),new Vector2(.30f,.47f),new Vector2(.30f,.16f),new Vector2(.5f,-.18f),new Vector2(.5f,-.5f)};
+            var vertices=new List<Vector3>(); var normals=new List<Vector3>(); var colors=new List<Color>(); var indices=new List<int>();
+            for(int i=0;i<Samples;i++)
+            {
+                int next=Wrap(i+1);
+                Color color=(i/3)%2==0?new Color(.84f,.88f,.82f):new Color(.66f,.095f,.055f);
+                if(QualitySettings.activeColorSpace==ColorSpace.Linear) color=color.linear;
+                for(int edge=0;edge<profile.Length;edge++)
+                {
+                    Vector2 a=profile[edge],b=profile[(edge+1)%profile.Length];
+                    int start=vertices.Count;
+                    vertices.Add(RailPoint(i,side,a)); vertices.Add(RailPoint(next,side,a));
+                    vertices.Add(RailPoint(next,side,b)); vertices.Add(RailPoint(i,side,b));
+                    Vector3 n0=Vector3.Cross(Points[Wrap(i+1)]-Points[Wrap(i-1)],Side(i)*(b.x-a.x)*.55f+Vector3.up*(b.y-a.y)*1.3f).normalized;
+                    Vector3 n1=Vector3.Cross(Points[Wrap(next+1)]-Points[Wrap(next-1)],Side(next)*(b.x-a.x)*.55f+Vector3.up*(b.y-a.y)*1.3f).normalized;
+                    normals.AddRange(new[]{n0,n1,n1,n0}); colors.AddRange(new[]{color,color,color,color});
+                    indices.AddRange(new[]{start,start+1,start+2,start,start+2,start+3});
                 }
             }
-            barrierMesh=new Mesh { name="Chamfered concrete Jersey wall" }; barrierMesh.SetVertices(v); barrierMesh.SetTriangles(t,0); barrierMesh.RecalculateNormals(); return barrierMesh;
+            var mesh=new Mesh { name="Continuous rail "+side }; mesh.SetVertices(vertices); mesh.SetNormals(normals); mesh.SetColors(colors); mesh.SetTriangles(indices,0); mesh.RecalculateBounds();
+            var rail=new GameObject(mesh.name,typeof(MeshFilter),typeof(MeshRenderer)); rail.transform.SetParent(Root,false);
+            rail.GetComponent<MeshFilter>().sharedMesh=mesh;
+            rail.GetComponent<MeshRenderer>().sharedMaterial=new Material(Resources.Load<Shader>("StadiumVertexColor"));
         }
+        Vector3 RailPoint(int index,int side,Vector2 profile) => Points[index]+Side(index)*(HalfWidth*side+profile.x*.55f)+Vector3.up*((profile.y+.5f)*1.3f);
         void BuildRecoveryShoulders()
         {
             // A drivable taper lets a truck return beside a raised jump as well as on flat dirt.

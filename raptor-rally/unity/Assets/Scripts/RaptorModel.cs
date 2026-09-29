@@ -10,7 +10,7 @@ namespace RaptorRally
         public readonly Transform Body;
         public readonly Transform[] Wheels=new Transform[4], Pivots=new Transform[4];
         readonly Dictionary<Material, Geometry> parts=new Dictionary<Material, Geometry>();
-        readonly Material paint, trim, glass, metal, alloy, rubber, light, amber, red;
+        readonly Material paint, trim, glass, metal, alloy, rubber, light, amber, red, surface;
         readonly float length, width, axle, tire;
         readonly int type;
         readonly RaptorModelResources resources;
@@ -29,6 +29,7 @@ namespace RaptorRally
             rubber=Material(new Color(.018f,.023f,.027f),0,.1f);
             light=Material(new Color(.90f,.97f,1),.05f,.7f);
             amber=Material(new Color(1,.32f,.025f),.05f,.5f); red=Material(new Color(.68f,.025f,.015f),.1f,.55f);
+            surface=new Material(Resources.Load<Shader>("RaptorVertexSurface")) { name="Raptor shared vertex surface" }; resources.Items.Add(surface);
             BuildBody(); BuildFace(); BuildDetails(player); BuildFinishDetails();
             Flush(Body);
             for(int side=-1;side<=1;side+=2) for(int front=-1;front<=1;front+=2)
@@ -62,14 +63,24 @@ namespace RaptorRally
         { Box(material,(a+b)*.5f,new Vector3(width,depth,Vector3.Distance(a,b)),Quaternion.LookRotation(b-a)); }
         void Flush(Transform parent)
         {
+            var vertices=new List<Vector3>(); var normals=new List<Vector3>();
+            var triangles=new List<int>(); var colors=new List<Color>(); var properties=new List<Vector4>();
             foreach(var pair in parts)
             {
-                var go=new GameObject("Sculpted mesh",typeof(MeshFilter),typeof(MeshRenderer)); go.transform.SetParent(parent,false);
-                var mesh=new Mesh { name="Raptor body / wheel mesh" }; mesh.SetVertices(pair.Value.vertices); mesh.SetTriangles(pair.Value.triangles,0);
-                resources.Items.Add(mesh);
-                mesh.SetNormals(pair.Value.normals); mesh.RecalculateBounds(); go.GetComponent<MeshFilter>().sharedMesh=mesh;
-                go.GetComponent<MeshRenderer>().sharedMaterial=pair.Key;
+                int offset=vertices.Count;
+                vertices.AddRange(pair.Value.vertices); normals.AddRange(pair.Value.normals);
+                foreach(int index in pair.Value.triangles) triangles.Add(index+offset);
+                Color color=QualitySettings.activeColorSpace==ColorSpace.Linear?pair.Key.color.linear:pair.Key.color;
+                var values=new Vector4(pair.Key.GetFloat("_Metallic"),pair.Key.GetFloat("_Glossiness"),pair.Key==paint?1:0,0);
+                for(int i=0;i<pair.Value.vertices.Count;i++) { colors.Add(color); properties.Add(values); }
             }
+            var mesh=new Mesh { name="Raptor articulated single-surface mesh" };
+            if(vertices.Count>65535) mesh.indexFormat=UnityEngine.Rendering.IndexFormat.UInt32;
+            mesh.SetVertices(vertices); mesh.SetNormals(normals); mesh.SetColors(colors); mesh.SetUVs(0,properties); mesh.SetTriangles(triangles,0); mesh.RecalculateBounds();
+            if(Application.isPlaying) mesh.UploadMeshData(true);
+            resources.Items.Add(mesh);
+            var go=new GameObject("Batched bodywork / wheel",typeof(MeshFilter),typeof(MeshRenderer)); go.transform.SetParent(parent,false);
+            go.GetComponent<MeshFilter>().sharedMesh=mesh; go.GetComponent<MeshRenderer>().sharedMaterial=surface;
             parts.Clear();
         }
 

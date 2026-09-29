@@ -1,0 +1,28 @@
+{
+  "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.0 Safari/605.1.15",
+  "visibility": "visible",
+  "canvas": [
+    1920,
+    898
+  ],
+  "frames": 215,
+  "meanMs": 69.95813953488373,
+  "p95Ms": 72,
+  "framesOver33": 215,
+  "draws": 523,
+  "metrics": {
+    "totalWASMHeapSize": 150011904,
+    "usedWASMHeapSize": 131038008,
+    "totalJSHeapSize": null,
+    "usedJSHeapSize": null,
+    "pageLoadTime": 1040,
+    "pageLoadTimeToFrame1": 1062,
+    "fps": 43.251316972889626,
+    "movingAverageFps": 43.251316972889626,
+    "assetLoadTime": 812,
+    "webAssemblyStartupTime": 600,
+    "codeDownloadTime": 262,
+    "gameStartupTime": 462,
+    "numJankedFrames": 14
+  }
+}
