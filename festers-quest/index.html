@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101819">
+  <title>Fester's Quest · Rive demo</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./runtime/rive.js" defer></script>
+  <script src="./app.js" type="module"></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="masthead">
+      <div><p class="eyebrow">Rive ROM demo</p><h1>Fester's Quest</h1></div>
+      <p class="intro">The original game state, with alternate graphics you can switch on while playing.</p>
+    </header>
+
+    <div class="play-layout">
+      <section class="game-panel" aria-label="Game display">
+        <div class="screen-frame">
+          <div class="screen" id="screen">
+            <canvas id="game" width="768" height="720" aria-label="Fester's Quest game display"></canvas>
+            <div class="load-cover" id="load-cover" role="status" aria-live="polite">
+              <span class="load-mark" aria-hidden="true"></span>
+              <strong id="load-title">Loading the game…</strong>
+              <span id="load-detail">The Rive file is about 23 MB. Please wait.</span>
+            </div>
+          </div>
+        </div>
+        <div class="status-row">
+          <span class="status-light" id="status-light" aria-hidden="true"></span>
+          <span id="status-text" role="status" aria-live="polite">Loading game</span>
+          <span class="status-right" id="theme-label">Original graphics</span>
+        </div>
+      </section>
+
+      <section class="controls" aria-label="Game controls">
+        <div class="toolbar">
+          <button type="button" id="theme-button" disabled>Modern graphics <small>T</small></button>
+          <button type="button" id="mute-button" disabled>Sound on <small>M</small></button>
+          <button type="button" id="pause-button" disabled>Pause <small>P</small></button>
+        </div>
+        <div class="pad">
+          <div class="direction-pad" id="direction-pad" aria-label="Direction buttons">
+            <button type="button" class="control direction up" data-bit="16" aria-label="Up" disabled>▲</button>
+            <button type="button" class="control direction left" data-bit="64" aria-label="Left" disabled>◀</button>
+            <button type="button" class="control direction down" data-bit="32" aria-label="Down" disabled>▼</button>
+            <button type="button" class="control direction right" data-bit="128" aria-label="Right" disabled>▶</button>
+          </div>
+          <div class="action-pad">
+            <button type="button" class="control action b" data-bit="2" aria-label="B button" disabled>B</button>
+            <button type="button" class="control action a" data-bit="1" aria-label="A button" disabled>A</button>
+          </div>
+        </div>
+        <div class="system-pad">
+          <button type="button" class="control system" data-bit="4" disabled>Select</button>
+          <button type="button" class="control system" data-bit="8" disabled>Start</button>
+        </div>
+        <p class="help">Keyboard: arrows move · Z = A · X = B · Enter = Start · Shift = Select · T = graphics · M = sound · P = pause. On the title screens, press Start again when each screen is ready.</p>
+      </section>
+    </div>
+    <footer>Experimental Rive game demo. Graphics replacements currently cover the opening environment, Fester, and one crawler; other art stays original.</footer>
+  </main>
+</body>
+</html>
