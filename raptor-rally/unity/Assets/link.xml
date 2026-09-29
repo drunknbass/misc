@@ -1,0 +1,8 @@
+<linker>
+  <!-- CreatePrimitive adds these natively before scenery removes them.
+       The procedural scene has no serialized references to retain them. -->
+  <assembly fullname="UnityEngine.PhysicsModule">
+    <type fullname="UnityEngine.SphereCollider" preserve="all" />
+    <type fullname="UnityEngine.CapsuleCollider" preserve="all" />
+  </assembly>
+</linker>

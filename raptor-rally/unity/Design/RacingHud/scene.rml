@@ -1,0 +1,793 @@
+<?xml version="1.0" ?>
+<Rive version="1" kind="fragment">
+  <Artboard name="RaceHUD" id="0:2" width="1600" height="900" styleId="0:5" defaultStateMachineId="0:7" viewModelId="0:40" viewModelInstanceId="0:41">
+    <LayoutComponentStyle id="0:5"/>
+    <Node name="Off-course guidance" opacity="0">
+      <DataBindContext sourcePathIds="0:40-0:60" propertyKey="18"/>
+      <Text name="Recovery help" id="0:209" x="614" y="161" width="406" height="21.6" sizingValue="fixed" overflowValue="fitFontSize" wrapValue="noWrap">
+        <TextStylePaint id="0:210" fontSize="16" fontAssetId="0:80">
+          <Fill>
+            <SolidColor colorValue="FFE9F0F2"/>
+          </Fill>
+        </TextStylePaint>
+        <TextValueRun name="Recovery helpRun" styleId="0:210" text="Drive through a barrier to rejoin the track."/>
+      </Text>
+      <Text name="Recovery title" id="0:207" x="614" y="136" width="360" height="24.3" sizingValue="fixed" overflowValue="fitFontSize" wrapValue="noWrap">
+        <TextStylePaint id="0:208" fontSize="18" fontAssetId="0:81">
+          <Fill>
+            <SolidColor colorValue="FFFFB75E"/>
+          </Fill>
+        </TextStylePaint>
+        <TextValueRun name="Recovery titleRun" styleId="0:208" text="OFF COURSE"/>
+      </Text>
+      <Shape id="0:206" name="Recovery dot" x="586" y="160">
+        <Rectangle width="2" height="2" originX="0" originY="0" cornerRadiusTL="0"/>
+        <Fill>
+          <SolidColor colorValue="FF172129"/>
+        </Fill>
+      </Shape>
+      <Shape id="0:205" name="Recovery mark" x="586" y="150">
+        <Rectangle width="2" height="7" originX="0" originY="0" cornerRadiusTL="0"/>
+        <Fill>
+          <SolidColor colorValue="FF172129"/>
+        </Fill>
+      </Shape>
+      <Shape name="Recovery icon" id="0:204">
+        <PointsPath isClosed="true">
+          <StraightVertex x="575.000" y="165.000"/>
+          <StraightVertex x="587.000" y="143.000"/>
+          <StraightVertex x="600.000" y="165.000"/>
+        </PointsPath>
+        <Fill>
+          <SolidColor colorValue="FFFFB75E"/>
+        </Fill>
+      </Shape>
+      <Shape id="0:203" name="Recovery edge" x="556" y="138">
+        <Rectangle width="4" height="44" originX="0" originY="0" cornerRadiusTL="0"/>
+        <Fill>
+          <SolidColor colorValue="FFFFB75E"/>
+        </Fill>
+      </Shape>
+      <Shape name="Recovery backing" id="0:202">
+        <PointsPath isClosed="true">
+          <StraightVertex x="556.000" y="126.000"/>
+          <StraightVertex x="1028.000" y="126.000"/>
+          <StraightVertex x="1044.000" y="142.000"/>
+          <StraightVertex x="1044.000" y="196.000"/>
+          <StraightVertex x="572.000" y="196.000"/>
+          <StraightVertex x="556.000" y="180.000"/>
+        </PointsPath>
+        <Fill>
+          <SolidColor colorValue="FF192026"/>
+        </Fill>
+      </Shape>
+    </Node>
+    <Text name="Selected truck" id="0:200" x="45" y="605" width="273" height="21.6" sizingValue="fixed" overflowValue="fitFontSize" wrapValue="noWrap">
+      <TextStylePaint id="0:201" fontSize="16" fontAssetId="0:81">
+        <Fill>
+          <SolidColor colorValue="FFE9F0F2"/>
+        </Fill>
+      </TextStylePaint>
+      <TextValueRun name="Selected truckRun" styleId="0:201" text="F-150 RAPTOR">
+        <DataBindContext sourcePathIds="0:40-0:58" propertyKey="268"/>
+      </TextValueRun>
+    </Text>
+    <Shape name="Truck label plate" id="0:199">
+      <PointsPath isClosed="true">
+        <StraightVertex x="28.000" y="600.000"/>
+        <StraightVertex x="316.000" y="600.000"/>
+        <StraightVertex x="332.000" y="616.000"/>
+        <StraightVertex x="332.000" y="631.000"/>
+        <StraightVertex x="44.000" y="631.000"/>
+        <StraightVertex x="28.000" y="615.000"/>
+      </PointsPath>
+      <Fill>
+        <SolidColor colorValue="FF0B161D"/>
+      </Fill>
+    </Shape>
+    <Text name="Speed scale 80" id="0:197" x="416" y="815" width="25" height="13.5" sizingValue="fixed" overflowValue="fitFontSize" wrapValue="noWrap">
+      <TextStylePaint id="0:198" fontSize="10" fontAssetId="0:80">
+        <Fill>
+          <SolidColor colorValue="FF94AEB8"/>
+        </Fill>
+      </TextStylePaint>
+      <TextValueRun name="Speed scale 80Run" styleId="0:198" text="80"/>
+    </Text>
+    <Text name="Speed scale 60" id="0:195" x="324" y="815" width="25" height="13.5" sizingValue="fixed" overflowValue="fitFontSize" wrapValue="noWrap">
+      <TextStylePaint id="0:196" fontSize="10" fontAssetId="0:80">
+        <Fill>
+          <SolidColor colorValue="FF94AEB8"/>
+        </Fill>
+      </TextStylePaint>
+      <TextValueRun name="Speed scale 60Run" styleId="0:196" text="60"/>
+    </Text>
+    <Text name="Speed scale 40" id="0:193" x="232" y="815" width="25" height="13.5" sizingValue="fixed" overflowValue="fitFontSize" wrapValue="noWrap">
+      <TextStylePaint id="0:194" fontSize="10" fontAssetId="0:80">
+        <Fill>
+          <SolidColor colorValue="FF94AEB8"/>
+        </Fill>
+      </TextStylePaint>
+      <TextValueRun name="Speed scale 40Run" styleId="0:194" text="40"/>
+    </Text>
+    <Text name="Speed scale 20" id="0:191" x="140" y="815" width="25" height="13.5" sizingValue="fixed" overflowValue="fitFontSize" wrapValue="noWrap">
+      <TextStylePaint id="0:192" fontSize="10" fontAssetId="0:80">
+        <Fill>
+          <SolidColor colorValue="FF94AEB8"/>
+        </Fill>
+      </TextStylePaint>
+      <TextValueRun name="Speed scale 20Run" styleId="0:192" text="20"/>
+    </Text>
+    <Text name="Speed scale 0" id="0:189" x="48" y="815" width="25" height="13.5" sizingValue="fixed" overflowValue="fitFontSize" wrapValue="noWrap">
+      <TextStylePaint id="0:190" fontSize="10" fontAssetId="0:80">
+        <Fill>
+          <SolidColor colorValue="FF94AEB8"/>
+        </Fill>
+      </TextStylePaint>
+      <TextValueRun name="Speed scale 0Run" styleId="0:190" text="0"/>
+    </Text>
+    <Shape id="0:188" name="Speed notch 14" x="428" y="798">
+      <Rectangle width="2" height="15" originX="0" originY="0" cornerRadiusTL="0"/>
+      <Fill>
+        <SolidColor colorValue="FF0B161D"/>
+      </Fill>
+    </Shape>
+    <Shape id="0:187" name="Speed notch 13" x="401" y="798">
+      <Rectangle width="2" height="15" originX="0" originY="0" cornerRadiusTL="0"/>
+      <Fill>
+        <SolidColor colorValue="FF0B161D"/>
+      </Fill>
+    </Shape>
+    <Shape id="0:186" name="Speed notch 12" x="374" y="798">
+      <Rectangle width="2" height="15" originX="0" originY="0" cornerRadiusTL="0"/>
+      <Fill>
+        <SolidColor colorValue="FF0B161D"/>
+      </Fill>
+    </Shape>
+    <Shape id="0:185" name="Speed notch 11" x="347" y="798">
+      <Rectangle width="2" height="15" originX="0" originY="0" cornerRadiusTL="0"/>
+      <Fill>
+        <SolidColor colorValue="FF0B161D"/>
+      </Fill>
+    </Shape>
+    <Shape id="0:184" name="Speed notch 10" x="320" y="798">
+      <Rectangle width="2" height="15" originX="0" originY="0" cornerRadiusTL="0"/>
+      <Fill>
+        <SolidColor colorValue="FF0B161D"/>
+      </Fill>
+    </Shape>
+    <Shape id="0:183" name="Speed notch 9" x="293" y="798">
+      <Rectangle width="2" height="15" originX="0" originY="0" cornerRadiusTL="0"/>
+      <Fill>
+        <SolidColor colorValue="FF0B161D"/>
+      </Fill>
+    </Shape>
+    <Shape id="0:182" name="Speed notch 8" x="266" y="798">
+      <Rectangle width="2" height="15" originX="0" originY="0" cornerRadiusTL="0"/>
+      <Fill>
+        <SolidColor colorValue="FF0B161D"/>
+      </Fill>
+    </Shape>
+    <Shape id="0:181" name="Speed notch 7" x="239" y="798">
+      <Rectangle width="2" height="15" originX="0" originY="0" cornerRadiusTL="0"/>
+      <Fill>
+        <SolidColor colorValue="FF0B161D"/>
+      </Fill>
+    </Shape>
+    <Shape id="0:180" name="Speed notch 6" x="212" y="798">
+      <Rectangle width="2" height="15" originX="0" originY="0" cornerRadiusTL="0"/>
+      <Fill>
+        <SolidColor colorValue="FF0B161D"/>
+      </Fill>
+    </Shape>
+    <Shape id="0:179" name="Speed notch 5" x="185" y="798">
+      <Rectangle width="2" height="15" originX="0" originY="0" cornerRadiusTL="0"/>
+      <Fill>
+        <SolidColor colorValue="FF0B161D"/>
+      </Fill>
+    </Shape>
+    <Shape id="0:178" name="Speed notch 4" x="158" y="798">
+      <Rectangle width="2" height="15" originX="0" originY="0" cornerRadiusTL="0"/>
+      <Fill>
+        <SolidColor colorValue="FF0B161D"/>
+      </Fill>
+    </Shape>
+    <Shape id="0:177" name="Speed notch 3" x="131" y="798">
+      <Rectangle width="2" height="15" originX="0" originY="0" cornerRadiusTL="0"/>
+      <Fill>
+        <SolidColor colorValue="FF0B161D"/>
+      </Fill>
+    </Shape>
+    <Shape id="0:176" name="Speed notch 2" x="104" y="798">
+      <Rectangle width="2" height="15" originX="0" originY="0" cornerRadiusTL="0"/>
+      <Fill>
+        <SolidColor colorValue="FF0B161D"/>
+      </Fill>
+    </Shape>
+    <Shape id="0:175" name="Speed notch 1" x="77" y="798">
+      <Rectangle width="2" height="15" originX="0" originY="0" cornerRadiusTL="0"/>
+      <Fill>
+        <SolidColor colorValue="FF0B161D"/>
+      </Fill>
+    </Shape>
+    <Shape id="0:174" name="Speed notch 0" x="50" y="798">
+      <Rectangle width="2" height="15" originX="0" originY="0" cornerRadiusTL="0"/>
+      <Fill>
+        <SolidColor colorValue="FF0B161D"/>
+      </Fill>
+    </Shape>
+    <Shape id="0:173" name="Speed fill" x="50" y="803">
+      <Rectangle width="0" height="5" originX="0" originY="0" cornerRadiusTL="2">
+        <DataBindContext sourcePathIds="0:40-0:51" propertyKey="20" converterId="0:71"/>
+      </Rectangle>
+      <Fill>
+        <SolidColor colorValue="FFB9F26A"/>
+      </Fill>
+    </Shape>
+    <Shape id="0:172" name="Speed rail" x="50" y="803">
+      <Rectangle width="380" height="5" originX="0" originY="0" cornerRadiusTL="2"/>
+      <Fill>
+        <SolidColor colorValue="FF263B47"/>
+      </Fill>
+    </Shape>
+    <Shape name="Nitro engaged rim" id="0:171">
+      <PointsPath isClosed="true">
+        <StraightVertex x="28.000" y="640.000"/>
+        <StraightVertex x="438.000" y="640.000"/>
+        <StraightVertex x="454.000" y="656.000"/>
+        <StraightVertex x="454.000" y="834.000"/>
+        <StraightVertex x="44.000" y="834.000"/>
+        <StraightVertex x="28.000" y="818.000"/>
+      </PointsPath>
+      <Fill>
+        <SolidColor colorValue="18FF933F"/>
+      </Fill>
+    </Shape>
+    <Shape name="Boost bolt" id="0:170">
+      <PointsPath isClosed="true">
+        <StraightVertex x="418.000" y="678.000"/>
+        <StraightVertex x="407.000" y="696.000"/>
+        <StraightVertex x="415.000" y="696.000"/>
+        <StraightVertex x="410.000" y="706.000"/>
+        <StraightVertex x="426.000" y="688.000"/>
+        <StraightVertex x="417.000" y="688.000"/>
+      </PointsPath>
+      <Fill>
+        <SolidColor colorValue="FF79D9E8"/>
+      </Fill>
+    </Shape>
+    <Text name="Boost key" id="0:168" x="272" y="769" width="158" height="14.850000000000001" sizingValue="fixed" overflowValue="fitFontSize" wrapValue="noWrap">
+      <TextStylePaint id="0:169" fontSize="11" fontAssetId="0:80">
+        <Fill>
+          <SolidColor colorValue="FF94AEB8"/>
+        </Fill>
+      </TextStylePaint>
+      <TextValueRun name="Boost keyRun" styleId="0:169" text="SPACE  /  BOOST"/>
+    </Text>
+    <Shape id="0:167" name="Nitro available" x="271" y="752">
+      <Rectangle width="152" height="7" originX="0" originY="0" cornerRadiusTL="3">
+        <DataBindContext sourcePathIds="0:40-0:53" propertyKey="20" converterId="0:72"/>
+      </Rectangle>
+      <Fill>
+        <SolidColor colorValue="FF79D9E8"/>
+      </Fill>
+    </Shape>
+    <Shape id="0:166" name="Nitro reservoir" x="271" y="752">
+      <Rectangle width="152" height="7" originX="0" originY="0" cornerRadiusTL="3"/>
+      <Fill>
+        <SolidColor colorValue="FF263B47"/>
+      </Fill>
+    </Shape>
+    <Text name="Nitro remaining" id="0:164" x="270" y="704" width="162" height="43.2" sizingValue="fixed" overflowValue="fitFontSize" wrapValue="noWrap">
+      <TextStylePaint id="0:165" fontSize="32" fontAssetId="0:81">
+        <Fill>
+          <SolidColor colorValue="FFE9F0F2"/>
+        </Fill>
+      </TextStylePaint>
+      <TextValueRun name="Nitro remainingRun" styleId="0:165" text="100%">
+        <DataBindContext sourcePathIds="0:40-0:54" propertyKey="268"/>
+      </TextValueRun>
+    </Text>
+    <Text name="Nitro label" id="0:162" x="271" y="678" width="155" height="18.900000000000002" sizingValue="fixed" overflowValue="fitFontSize" wrapValue="noWrap">
+      <TextStylePaint id="0:163" fontSize="14" fontAssetId="0:81">
+        <Fill>
+          <SolidColor colorValue="FF94AEB8"/>
+        </Fill>
+      </TextStylePaint>
+      <TextValueRun name="Nitro labelRun" styleId="0:163" text="NITRO"/>
+    </Text>
+    <Shape id="0:161" name="Boost divider" x="248" y="692">
+      <Rectangle width="1" height="80" originX="0" originY="0" cornerRadiusTL="0"/>
+      <Fill>
+        <SolidColor colorValue="FF304650"/>
+      </Fill>
+    </Shape>
+    <Text name="Speed units" id="0:159" x="186" y="742" width="60" height="24.3" sizingValue="fixed" overflowValue="fitFontSize" wrapValue="noWrap">
+      <TextStylePaint id="0:160" fontSize="18" fontAssetId="0:81">
+        <Fill>
+          <SolidColor colorValue="FF94AEB8"/>
+        </Fill>
+      </TextStylePaint>
+      <TextValueRun name="Speed unitsRun" styleId="0:160" text="MPH"/>
+    </Text>
+    <Text name="Speed digits" id="0:157" x="47" y="666" width="160" height="139.05" sizingValue="fixed" overflowValue="fitFontSize" wrapValue="noWrap">
+      <TextStylePaint id="0:158" fontSize="103" fontAssetId="0:81">
+        <Fill>
+          <SolidColor colorValue="FFE9F0F2"/>
+        </Fill>
+      </TextStylePaint>
+      <TextValueRun name="Speed digitsRun" styleId="0:158" text="00">
+        <DataBindContext sourcePathIds="0:40-0:52" propertyKey="268"/>
+      </TextValueRun>
+    </Text>
+    <Text name="Surface label" id="0:155" x="50" y="654" width="260" height="17.55" sizingValue="fixed" overflowValue="fitFontSize" wrapValue="noWrap">
+      <TextStylePaint id="0:156" fontSize="13" fontAssetId="0:80">
+        <Fill>
+          <SolidColor colorValue="FFB9F26A"/>
+        </Fill>
+      </TextStylePaint>
+      <TextValueRun name="Surface labelRun" styleId="0:156" text="PACKED DIRT">
+        <DataBindContext sourcePathIds="0:40-0:59" propertyKey="268"/>
+      </TextValueRun>
+    </Text>
+    <Shape name="Panel diagonal 17" id="0:154">
+      <PointsPath isClosed="false">
+        <StraightVertex x="447.000" y="643.000"/>
+        <StraightVertex x="437.000" y="673.000"/>
+      </PointsPath>
+      <Stroke thickness="1" cap="round" join="round">
+        <SolidColor colorValue="183E5867"/>
+      </Stroke>
+    </Shape>
+    <Shape name="Panel diagonal 16" id="0:153">
+      <PointsPath isClosed="false">
+        <StraightVertex x="438.000" y="643.000"/>
+        <StraightVertex x="428.000" y="673.000"/>
+      </PointsPath>
+      <Stroke thickness="1" cap="round" join="round">
+        <SolidColor colorValue="183E5867"/>
+      </Stroke>
+    </Shape>
+    <Shape name="Panel diagonal 15" id="0:152">
+      <PointsPath isClosed="false">
+        <StraightVertex x="429.000" y="643.000"/>
+        <StraightVertex x="419.000" y="673.000"/>
+      </PointsPath>
+      <Stroke thickness="1" cap="round" join="round">
+        <SolidColor colorValue="183E5867"/>
+      </Stroke>
+    </Shape>
+    <Shape name="Panel diagonal 14" id="0:151">
+      <PointsPath isClosed="false">
+        <StraightVertex x="420.000" y="643.000"/>
+        <StraightVertex x="410.000" y="673.000"/>
+      </PointsPath>
+      <Stroke thickness="1" cap="round" join="round">
+        <SolidColor colorValue="183E5867"/>
+      </Stroke>
+    </Shape>
+    <Shape name="Panel diagonal 13" id="0:150">
+      <PointsPath isClosed="false">
+        <StraightVertex x="411.000" y="643.000"/>
+        <StraightVertex x="401.000" y="673.000"/>
+      </PointsPath>
+      <Stroke thickness="1" cap="round" join="round">
+        <SolidColor colorValue="183E5867"/>
+      </Stroke>
+    </Shape>
+    <Shape name="Panel diagonal 12" id="0:149">
+      <PointsPath isClosed="false">
+        <StraightVertex x="402.000" y="643.000"/>
+        <StraightVertex x="392.000" y="673.000"/>
+      </PointsPath>
+      <Stroke thickness="1" cap="round" join="round">
+        <SolidColor colorValue="183E5867"/>
+      </Stroke>
+    </Shape>
+    <Shape name="Panel diagonal 11" id="0:148">
+      <PointsPath isClosed="false">
+        <StraightVertex x="393.000" y="643.000"/>
+        <StraightVertex x="383.000" y="673.000"/>
+      </PointsPath>
+      <Stroke thickness="1" cap="round" join="round">
+        <SolidColor colorValue="183E5867"/>
+      </Stroke>
+    </Shape>
+    <Shape name="Panel diagonal 10" id="0:147">
+      <PointsPath isClosed="false">
+        <StraightVertex x="384.000" y="643.000"/>
+        <StraightVertex x="374.000" y="673.000"/>
+      </PointsPath>
+      <Stroke thickness="1" cap="round" join="round">
+        <SolidColor colorValue="183E5867"/>
+      </Stroke>
+    </Shape>
+    <Shape name="Panel diagonal 9" id="0:146">
+      <PointsPath isClosed="false">
+        <StraightVertex x="375.000" y="643.000"/>
+        <StraightVertex x="365.000" y="673.000"/>
+      </PointsPath>
+      <Stroke thickness="1" cap="round" join="round">
+        <SolidColor colorValue="183E5867"/>
+      </Stroke>
+    </Shape>
+    <Shape name="Panel diagonal 8" id="0:145">
+      <PointsPath isClosed="false">
+        <StraightVertex x="366.000" y="643.000"/>
+        <StraightVertex x="356.000" y="673.000"/>
+      </PointsPath>
+      <Stroke thickness="1" cap="round" join="round">
+        <SolidColor colorValue="183E5867"/>
+      </Stroke>
+    </Shape>
+    <Shape name="Panel diagonal 7" id="0:144">
+      <PointsPath isClosed="false">
+        <StraightVertex x="357.000" y="643.000"/>
+        <StraightVertex x="347.000" y="673.000"/>
+      </PointsPath>
+      <Stroke thickness="1" cap="round" join="round">
+        <SolidColor colorValue="183E5867"/>
+      </Stroke>
+    </Shape>
+    <Shape name="Panel diagonal 6" id="0:143">
+      <PointsPath isClosed="false">
+        <StraightVertex x="348.000" y="643.000"/>
+        <StraightVertex x="338.000" y="673.000"/>
+      </PointsPath>
+      <Stroke thickness="1" cap="round" join="round">
+        <SolidColor colorValue="183E5867"/>
+      </Stroke>
+    </Shape>
+    <Shape name="Panel diagonal 5" id="0:142">
+      <PointsPath isClosed="false">
+        <StraightVertex x="339.000" y="643.000"/>
+        <StraightVertex x="329.000" y="673.000"/>
+      </PointsPath>
+      <Stroke thickness="1" cap="round" join="round">
+        <SolidColor colorValue="183E5867"/>
+      </Stroke>
+    </Shape>
+    <Shape name="Panel diagonal 4" id="0:141">
+      <PointsPath isClosed="false">
+        <StraightVertex x="330.000" y="643.000"/>
+        <StraightVertex x="320.000" y="673.000"/>
+      </PointsPath>
+      <Stroke thickness="1" cap="round" join="round">
+        <SolidColor colorValue="183E5867"/>
+      </Stroke>
+    </Shape>
+    <Shape name="Panel diagonal 3" id="0:140">
+      <PointsPath isClosed="false">
+        <StraightVertex x="321.000" y="643.000"/>
+        <StraightVertex x="311.000" y="673.000"/>
+      </PointsPath>
+      <Stroke thickness="1" cap="round" join="round">
+        <SolidColor colorValue="183E5867"/>
+      </Stroke>
+    </Shape>
+    <Shape name="Panel diagonal 2" id="0:139">
+      <PointsPath isClosed="false">
+        <StraightVertex x="312.000" y="643.000"/>
+        <StraightVertex x="302.000" y="673.000"/>
+      </PointsPath>
+      <Stroke thickness="1" cap="round" join="round">
+        <SolidColor colorValue="183E5867"/>
+      </Stroke>
+    </Shape>
+    <Shape name="Panel diagonal 1" id="0:138">
+      <PointsPath isClosed="false">
+        <StraightVertex x="303.000" y="643.000"/>
+        <StraightVertex x="293.000" y="673.000"/>
+      </PointsPath>
+      <Stroke thickness="1" cap="round" join="round">
+        <SolidColor colorValue="183E5867"/>
+      </Stroke>
+    </Shape>
+    <Shape name="Panel diagonal 0" id="0:137">
+      <PointsPath isClosed="false">
+        <StraightVertex x="294.000" y="643.000"/>
+        <StraightVertex x="284.000" y="673.000"/>
+      </PointsPath>
+      <Stroke thickness="1" cap="round" join="round">
+        <SolidColor colorValue="183E5867"/>
+      </Stroke>
+    </Shape>
+    <Shape id="0:136" name="Driver top border" x="44" y="640">
+      <Rectangle width="104" height="3" originX="0" originY="0" cornerRadiusTL="0"/>
+      <Fill>
+        <SolidColor colorValue="FFB9F26A"/>
+      </Fill>
+    </Shape>
+    <Shape name="Driver panel" id="0:135">
+      <PointsPath isClosed="true">
+        <StraightVertex x="28.000" y="640.000"/>
+        <StraightVertex x="438.000" y="640.000"/>
+        <StraightVertex x="454.000" y="656.000"/>
+        <StraightVertex x="454.000" y="834.000"/>
+        <StraightVertex x="44.000" y="834.000"/>
+        <StraightVertex x="28.000" y="818.000"/>
+      </PointsPath>
+      <Fill>
+        <SolidColor colorValue="FF0B161D"/>
+      </Fill>
+    </Shape>
+    <Shape name="Driver panel shadow" id="0:134">
+      <PointsPath isClosed="true">
+        <StraightVertex x="32.000" y="650.000"/>
+        <StraightVertex x="442.000" y="650.000"/>
+        <StraightVertex x="458.000" y="666.000"/>
+        <StraightVertex x="458.000" y="844.000"/>
+        <StraightVertex x="48.000" y="844.000"/>
+        <StraightVertex x="32.000" y="828.000"/>
+      </PointsPath>
+      <Fill>
+        <SolidColor colorValue="48000000"/>
+      </Fill>
+    </Shape>
+    <Text name="Session label" id="0:132" x="1271" y="59" width="180" height="14.850000000000001" sizingValue="fixed" overflowValue="fitFontSize" wrapValue="noWrap">
+      <TextStylePaint id="0:133" fontSize="11" fontAssetId="0:80">
+        <Fill>
+          <SolidColor colorValue="FF94AEB8"/>
+        </Fill>
+      </TextStylePaint>
+      <TextValueRun name="Session labelRun" styleId="0:133" text="FOUR TRUCKS. ALL DIRT."/>
+    </Text>
+    <Text name="Event type" id="0:130" x="1270" y="31" width="178" height="28.35" sizingValue="fixed" overflowValue="fitFontSize" wrapValue="noWrap">
+      <TextStylePaint id="0:131" fontSize="21" fontAssetId="0:81">
+        <Fill>
+          <SolidColor colorValue="FFE9F0F2"/>
+        </Fill>
+      </TextStylePaint>
+      <TextValueRun name="Event typeRun" styleId="0:131" text="STADIUM / 01"/>
+    </Text>
+    <Shape name="Event badge" id="0:129">
+      <PointsPath isClosed="true">
+        <StraightVertex x="1250.000" y="24.000"/>
+        <StraightVertex x="1442.000" y="24.000"/>
+        <StraightVertex x="1458.000" y="40.000"/>
+        <StraightVertex x="1458.000" y="82.000"/>
+        <StraightVertex x="1266.000" y="82.000"/>
+        <StraightVertex x="1250.000" y="66.000"/>
+      </PointsPath>
+      <Fill>
+        <SolidColor colorValue="FF0B161D"/>
+      </Fill>
+    </Shape>
+    <Text name="Race clock" id="0:127" x="865" y="55" width="167" height="40.5" sizingValue="fixed" overflowValue="fitFontSize" wrapValue="noWrap">
+      <TextStylePaint id="0:128" fontSize="30" fontAssetId="0:81">
+        <Fill>
+          <SolidColor colorValue="FFE9F0F2"/>
+        </Fill>
+      </TextStylePaint>
+      <TextValueRun name="Race clockRun" styleId="0:128" text="00:00.00">
+        <DataBindContext sourcePathIds="0:40-0:57" propertyKey="268"/>
+      </TextValueRun>
+    </Text>
+    <Text name="Race clock label" id="0:125" x="868" y="32" width="135" height="16.200000000000003" sizingValue="fixed" overflowValue="fitFontSize" wrapValue="noWrap">
+      <TextStylePaint id="0:126" fontSize="12" fontAssetId="0:80">
+        <Fill>
+          <SolidColor colorValue="FF94AEB8"/>
+        </Fill>
+      </TextStylePaint>
+      <TextValueRun name="Race clock labelRun" styleId="0:126" text="RACE TIME"/>
+    </Text>
+    <Shape id="0:124" name="Clock divider" x="846" y="43">
+      <Rectangle width="1" height="46" originX="0" originY="0" cornerRadiusTL="0"/>
+      <Fill>
+        <SolidColor colorValue="FF304650"/>
+      </Fill>
+    </Shape>
+    <Text name="Lap total" id="0:122" x="788" y="65" width="55" height="24.3" sizingValue="fixed" overflowValue="fitFontSize" wrapValue="noWrap">
+      <TextStylePaint id="0:123" fontSize="18" fontAssetId="0:80">
+        <Fill>
+          <SolidColor colorValue="FF94AEB8"/>
+        </Fill>
+      </TextStylePaint>
+      <TextValueRun name="Lap totalRun" styleId="0:123" text="/ 03"/>
+    </Text>
+    <Text name="Lap value" id="0:120" x="730" y="45" width="70" height="58.050000000000004" sizingValue="fixed" overflowValue="fitFontSize" wrapValue="noWrap">
+      <TextStylePaint id="0:121" fontSize="43" fontAssetId="0:81">
+        <Fill>
+          <SolidColor colorValue="FFE9F0F2"/>
+        </Fill>
+      </TextStylePaint>
+      <TextValueRun name="Lap valueRun" styleId="0:121" text="01">
+        <DataBindContext sourcePathIds="0:40-0:56" propertyKey="268"/>
+      </TextValueRun>
+    </Text>
+    <Text name="Lap label" id="0:118" x="733" y="32" width="90" height="16.200000000000003" sizingValue="fixed" overflowValue="fitFontSize" wrapValue="noWrap">
+      <TextStylePaint id="0:119" fontSize="12" fontAssetId="0:80">
+        <Fill>
+          <SolidColor colorValue="FF94AEB8"/>
+        </Fill>
+      </TextStylePaint>
+      <TextValueRun name="Lap labelRun" styleId="0:119" text="LAP"/>
+    </Text>
+    <Shape id="0:117" name="Lap divider" x="709" y="43">
+      <Rectangle width="1" height="46" originX="0" originY="0" cornerRadiusTL="0"/>
+      <Fill>
+        <SolidColor colorValue="FF304650"/>
+      </Fill>
+    </Shape>
+    <Text name="Field size" id="0:115" x="642" y="65" width="55" height="24.3" sizingValue="fixed" overflowValue="fitFontSize" wrapValue="noWrap">
+      <TextStylePaint id="0:116" fontSize="18" fontAssetId="0:80">
+        <Fill>
+          <SolidColor colorValue="FF94AEB8"/>
+        </Fill>
+      </TextStylePaint>
+      <TextValueRun name="Field sizeRun" styleId="0:116" text="/ 04"/>
+    </Text>
+    <Text name="Position value" id="0:113" x="584" y="45" width="70" height="58.050000000000004" sizingValue="fixed" overflowValue="fitFontSize" wrapValue="noWrap">
+      <TextStylePaint id="0:114" fontSize="43" fontAssetId="0:81">
+        <Fill>
+          <SolidColor colorValue="FFB9F26A"/>
+        </Fill>
+      </TextStylePaint>
+      <TextValueRun name="Position valueRun" styleId="0:114" text="01">
+        <DataBindContext sourcePathIds="0:40-0:55" propertyKey="268"/>
+      </TextValueRun>
+    </Text>
+    <Text name="Position label" id="0:111" x="586" y="32" width="100" height="16.200000000000003" sizingValue="fixed" overflowValue="fitFontSize" wrapValue="noWrap">
+      <TextStylePaint id="0:112" fontSize="12" fontAssetId="0:80">
+        <Fill>
+          <SolidColor colorValue="FF94AEB8"/>
+        </Fill>
+      </TextStylePaint>
+      <TextValueRun name="Position labelRun" styleId="0:112" text="POSITION"/>
+    </Text>
+    <Shape id="0:110" name="Position stripe" x="566" y="40">
+      <Rectangle width="3" height="48" originX="0" originY="0" cornerRadiusTL="0"/>
+      <Fill>
+        <SolidColor colorValue="FFB9F26A"/>
+      </Fill>
+    </Shape>
+    <Shape name="Timing backing" id="0:109">
+      <PointsPath isClosed="true">
+        <StraightVertex x="566.000" y="24.000"/>
+        <StraightVertex x="1026.000" y="24.000"/>
+        <StraightVertex x="1042.000" y="40.000"/>
+        <StraightVertex x="1042.000" y="106.000"/>
+        <StraightVertex x="582.000" y="106.000"/>
+        <StraightVertex x="566.000" y="90.000"/>
+      </PointsPath>
+      <Fill>
+        <SolidColor colorValue="FF0B161D"/>
+      </Fill>
+    </Shape>
+    <Text name="Circuit" id="0:107" x="84" y="72" width="285" height="17.55" sizingValue="fixed" overflowValue="fitFontSize" wrapValue="noWrap">
+      <TextStylePaint id="0:108" fontSize="13" fontAssetId="0:80">
+        <Fill>
+          <SolidColor colorValue="FF94AEB8"/>
+        </Fill>
+      </TextStylePaint>
+      <TextValueRun name="CircuitRun" styleId="0:108" text="COYOTE BASIN  /  DIRT SERIES"/>
+    </Text>
+    <Text name="Brand" id="0:105" x="82" y="32" width="305" height="41.85" sizingValue="fixed" overflowValue="fitFontSize" wrapValue="noWrap">
+      <TextStylePaint id="0:106" fontSize="31" fontAssetId="0:81">
+        <Fill>
+          <SolidColor colorValue="FFE9F0F2"/>
+        </Fill>
+      </TextStylePaint>
+      <TextValueRun name="BrandRun" styleId="0:106" text="RAPTOR / RALLY"/>
+    </Text>
+    <Shape name="Rally crest trail" id="0:104">
+      <PointsPath isClosed="true">
+        <StraightVertex x="43.000" y="72.000"/>
+        <StraightVertex x="62.000" y="72.000"/>
+        <StraightVertex x="68.000" y="78.000"/>
+        <StraightVertex x="50.000" y="78.000"/>
+      </PointsPath>
+      <Fill>
+        <SolidColor colorValue="FF728C96"/>
+      </Fill>
+    </Shape>
+    <Shape name="Rally crest" id="0:103">
+      <PointsPath isClosed="true">
+        <StraightVertex x="44.000" y="66.000"/>
+        <StraightVertex x="56.000" y="43.000"/>
+        <StraightVertex x="68.000" y="66.000"/>
+        <StraightVertex x="63.000" y="66.000"/>
+        <StraightVertex x="56.000" y="53.000"/>
+        <StraightVertex x="49.000" y="66.000"/>
+      </PointsPath>
+      <Fill>
+        <SolidColor colorValue="FFB9F26A"/>
+      </Fill>
+    </Shape>
+    <Shape id="0:102" name="Brand top keyline" x="44" y="24">
+      <Rectangle width="115" height="3" originX="0" originY="0" cornerRadiusTL="0"/>
+      <Fill>
+        <SolidColor colorValue="FFB9F26A"/>
+      </Fill>
+    </Shape>
+    <Shape name="Brand backing" id="0:101">
+      <PointsPath isClosed="true">
+        <StraightVertex x="28.000" y="24.000"/>
+        <StraightVertex x="382.000" y="24.000"/>
+        <StraightVertex x="398.000" y="40.000"/>
+        <StraightVertex x="398.000" y="106.000"/>
+        <StraightVertex x="44.000" y="106.000"/>
+        <StraightVertex x="28.000" y="90.000"/>
+      </PointsPath>
+      <Fill>
+        <SolidColor colorValue="FF0B161D"/>
+      </Fill>
+    </Shape>
+    <StateMachine name="RaceHUD" id="0:7">
+      <StateMachineLayer name="Boost response">
+        <AnyState x="200" y="-100"/>
+        <ExitState x="400" y="-100"/>
+        <EntryState x="0" y="0">
+          <StateTransition stateToId="0:12"/>
+        </EntryState>
+        <AnimationState id="0:12" animationId="0:20" x="200" y="0">
+          <StateTransition stateToId="0:13" duration="120">
+            <TransitionViewModelCondition>
+              <TransitionPropertyViewModelComparator>
+                <BindablePropertyBoolean>
+                  <DataBindContext sourcePathIds="0:40-0:61" propertyKey="634"/>
+                </BindablePropertyBoolean>
+              </TransitionPropertyViewModelComparator>
+              <TransitionValueBooleanComparator value="true"/>
+            </TransitionViewModelCondition>
+          </StateTransition>
+        </AnimationState>
+        <AnimationState id="0:13" animationId="0:21" x="400" y="0">
+          <StateTransition stateToId="0:12" duration="120">
+            <TransitionViewModelCondition>
+              <TransitionPropertyViewModelComparator>
+                <BindablePropertyBoolean>
+                  <DataBindContext sourcePathIds="0:40-0:61" propertyKey="634"/>
+                </BindablePropertyBoolean>
+              </TransitionPropertyViewModelComparator>
+              <TransitionValueBooleanComparator value="false"/>
+            </TransitionViewModelCondition>
+          </StateTransition>
+        </AnimationState>
+      </StateMachineLayer>
+    </StateMachine>
+    <LinearAnimation name="Ready" id="0:20" duration="12">
+      <KeyedObject objectId="0:171">
+        <KeyedProperty propertyKey="18">
+          <KeyFrameDouble value="0" frame="0"/>
+        </KeyedProperty>
+      </KeyedObject>
+    </LinearAnimation>
+    <LinearAnimation name="Boost" id="0:21" duration="12">
+      <KeyedObject objectId="0:171">
+        <KeyedProperty propertyKey="18">
+          <KeyFrameDouble value="1" frame="0"/>
+        </KeyedProperty>
+      </KeyedObject>
+    </LinearAnimation>
+  </Artboard>
+  <ViewModel name="RaceHUD" id="0:40" defaultInstanceId="0:41">
+    <ViewModelPropertyNumber name="speed" id="0:51"/>
+    <ViewModelPropertyString name="speedText" id="0:52"/>
+    <ViewModelPropertyNumber name="nitro" id="0:53"/>
+    <ViewModelPropertyString name="nitroText" id="0:54"/>
+    <ViewModelPropertyString name="position" id="0:55"/>
+    <ViewModelPropertyString name="lap" id="0:56"/>
+    <ViewModelPropertyString name="raceTime" id="0:57"/>
+    <ViewModelPropertyString name="truck" id="0:58"/>
+    <ViewModelPropertyString name="surface" id="0:59"/>
+    <ViewModelPropertyNumber name="recovery" id="0:60"/>
+    <ViewModelPropertyBoolean name="boosting" id="0:61"/>
+    <ViewModelInstance name="Default" id="0:41" exports="true">
+      <ViewModelInstanceNumber viewModelPropertyId="0:51" propertyValue="0"/>
+      <ViewModelInstanceString viewModelPropertyId="0:52" propertyValue="00"/>
+      <ViewModelInstanceNumber viewModelPropertyId="0:53" propertyValue="100"/>
+      <ViewModelInstanceString viewModelPropertyId="0:54" propertyValue="100%"/>
+      <ViewModelInstanceString viewModelPropertyId="0:55" propertyValue="01"/>
+      <ViewModelInstanceString viewModelPropertyId="0:56" propertyValue="01"/>
+      <ViewModelInstanceString viewModelPropertyId="0:57" propertyValue="00:00.00"/>
+      <ViewModelInstanceString viewModelPropertyId="0:58" propertyValue="F-150 RAPTOR"/>
+      <ViewModelInstanceString viewModelPropertyId="0:59" propertyValue="PACKED DIRT"/>
+      <ViewModelInstanceNumber viewModelPropertyId="0:60" propertyValue="0"/>
+      <ViewModelInstanceBoolean viewModelPropertyId="0:61" propertyValue="false"/>
+    </ViewModelInstance>
+  </ViewModel>
+  <DataConverterRangeMapper id="0:71" name="Speed width" minInput="0" maxInput="80" minOutput="0" maxOutput="380" clampLower="true" clampUpper="true"/>
+  <DataConverterRangeMapper id="0:72" name="Nitro width" minInput="0" maxInput="100" minOutput="0" maxOutput="152" clampLower="true" clampUpper="true"/>
+  <FontAsset name="Source Sans 3 Regular" id="0:80" file="SourceSans3-Regular.ttf"/>
+  <FontAsset name="Source Sans 3 Bold" id="0:81" file="SourceSans3-Bold.ttf"/>
+</Rive>

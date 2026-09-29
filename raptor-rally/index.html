@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b161d">
+<meta name="description" content="Race three Ford Raptor-inspired trucks through Coyote Basin. Four trucks, three laps, all dirt.">
+<title>Raptor Rally · Coyote Basin</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b161d'/%3E%3Cpath d='M7 24L16 7l9 17h-5l-4-9-4 9z' fill='%23b9f26a'/%3E%3C/svg%3E">
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:#081117;color:#e9f0f2;font:14px/1.4 system-ui,-apple-system,sans-serif;overflow:hidden}
+header{height:48px;display:flex;align-items:center;gap:20px;padding:0 20px;border-bottom:1px solid #263b47;background:#0b161d}
+a{color:#94aeb8;text-decoration:none}a:hover{color:#b9f26a}strong{font-size:13px;letter-spacing:.09em}header span{color:#94aeb8;font-size:12px}button{margin-left:auto;background:#152630;color:#e9f0f2;border:1px solid #304650;padding:6px 14px;font:600 12px system-ui;cursor:pointer}button:hover{border-color:#b9f26a}button:disabled{opacity:.45;cursor:wait}button:focus-visible,a:focus-visible{outline:2px solid #b9f26a;outline-offset:3px}
+#stage{position:relative;width:100%;height:calc(100% - 48px)}#unity-canvas{display:block;width:100%;height:100%;background:#081117;outline:none}
+#loading{position:absolute;inset:0;display:grid;place-content:center;gap:18px;padding:28px;background:radial-gradient(ellipse at 50% 30%,#193541,#081117 65%);text-align:center}#loading[hidden]{display:none}.eyebrow{color:#b9f26a;font-size:12px;letter-spacing:.22em}h1{font-size:clamp(36px,7vw,76px);line-height:1;margin:0;letter-spacing:-.05em}#loading p{color:#94aeb8;margin:0}progress{width:min(380px,80vw);height:5px;accent-color:#b9f26a;margin:12px auto}#status{font-variant-numeric:tabular-nums;max-width:600px}#status.error{color:#ffb75e}.keyboard-note{display:none;color:#ffb75e!important}#retry{margin:0 auto}#retry[hidden]{display:none}
+@media(max-width:720px){header{gap:12px;padding:0 12px}header span{display:none}header strong{font-size:11px}}@media(pointer:coarse){.keyboard-note{display:block}}
+</style>
+</head>
+<body>
+<header><a href="../" aria-label="Back to misc experiments">← misc</a><strong>RAPTOR / RALLY</strong><span>COYOTE BASIN · KEYBOARD RACING</span><button id="fullscreen" disabled>Full screen</button></header>
+<main id="stage">
+<canvas id="unity-canvas" width="1600" height="900" tabindex="0" aria-label="Raptor Rally racing game. Use WASD or arrows to drive, Space for nitro, C for camera, R to recover, Escape to pause and M for reduced motion."></canvas>
+<div id="loading"><div class="eyebrow">FOUR TRUCKS. ALL DIRT.</div><h1>RAPTOR / RALLY</h1><p>Three Raptors. Three laps. One dusty stadium.</p><progress id="progress" max="1" value="0" aria-label="Game loading progress"></progress><p id="status" role="status">Preparing the track…</p><p>WASD / arrows to drive · Space for nitro · C to follow your truck</p><p class="keyboard-note">A keyboard is required to play this build.</p><button id="retry" hidden>Reload game</button></div>
+</main>
+<script>
+const canvas=document.getElementById('unity-canvas'),loading=document.getElementById('loading'),progress=document.getElementById('progress'),status=document.getElementById('status'),fullscreen=document.getElementById('fullscreen');
+function showError(message){loading.hidden=false;progress.hidden=true;status.className='error';status.textContent='The game could not start. '+String(message);document.getElementById('retry').hidden=false;}
+document.getElementById('retry').onclick=()=>location.reload();
+const loader=document.createElement('script');loader.src='Build/c9c0098f1577ee52a0f0d7aa3795dd79.loader.js';loader.onerror=()=>showError('Check your connection and reload.');
+loader.onload=()=>createUnityInstance(canvas,{
+arguments:[],
+dataUrl:'Build/b5b2e7cdddc3e2c981454c56e623f6fb.data.unityweb',
+frameworkUrl:'Build/ebd0be7f0e6f3481fca8210afcb682d0.framework.js.unityweb',
+codeUrl:'Build/439c2bab341fccbda17a9492addc8090.wasm.unityweb',
+streamingAssetsUrl:'StreamingAssets',companyName:"RaptorRallyPrototype",productName:"Raptor Rally",productVersion:"1.0",devicePixelRatio:Math.min(window.devicePixelRatio||1,1.5),
+showBanner:(message,type)=>{if(type==='error')showError(message);else console.warn(message);}
+},value=>{progress.value=value;status.textContent=value<.9?'Loading the track… '+Math.round(value*100)+'%':'Starting engines…';}).then(instance=>{window.raptorGame=instance;loading.hidden=true;fullscreen.disabled=false;fullscreen.onclick=()=>{canvas.focus();instance.SetFullscreen(1);};canvas.focus();document.documentElement.dataset.gameReady='true';}).catch(showError);
+document.body.appendChild(loader);
+canvas.addEventListener('click',()=>canvas.focus());
+canvas.addEventListener('keydown',event=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(event.code))event.preventDefault();});
+</script>
+</body>
+</html>

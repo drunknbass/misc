@@ -1,0 +1,24 @@
+{
+  "unity": "6000.6.3f1",
+  "target": "WebGL",
+  "compression": "gzip with decompression fallback",
+  "threads": false,
+  "files": {
+    "Build/439c2bab341fccbda17a9492addc8090.wasm.unityweb": {
+      "bytes": 6316401,
+      "sha256": "281014213a6e73850ae5fa00fdf9cb14d3d775db6c2bc0c9c6852e89ac728a47"
+    },
+    "Build/b5b2e7cdddc3e2c981454c56e623f6fb.data.unityweb": {
+      "bytes": 3138760,
+      "sha256": "733a4b9a85c8845f37166dabde614b47779653558c73b5e95917019858e00c42"
+    },
+    "Build/c9c0098f1577ee52a0f0d7aa3795dd79.loader.js": {
+      "bytes": 48540,
+      "sha256": "24a089e14ae6daa5b702f91401bc177e69994e1f996a1f1d71ada013b11d3018"
+    },
+    "Build/ebd0be7f0e6f3481fca8210afcb682d0.framework.js.unityweb": {
+      "bytes": 82320,
+      "sha256": "26caf35e3ad923274adc5ffb6b43fc0ce77d4c880398044b2af894d2134f3e80"
+    }
+  }
+}
