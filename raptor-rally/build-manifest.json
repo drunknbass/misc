@@ -5,8 +5,8 @@
   "threads": false,
   "files": {
     "index.html": {
-      "bytes": 13914,
-      "sha256": "6b5a143d60c21979e2fdd0d88c8ae5465dd98246cf3b3014b01dfc25d41c44af"
+      "bytes": 13735,
+      "sha256": "207750110207e075c8bc18d46b1aef0b110be83dec2ae2780fc87b2d5d920594"
     },
     "touch-controls.css": {
       "bytes": 8242,

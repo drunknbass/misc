@@ -22,7 +22,7 @@ body.intro-pending header{display:none}body.intro-pending #stage{height:100dvh}b
 <body class="intro-pending">
 <header><a href="../" aria-label="Back to misc experiments">← misc</a><strong>RAPTOR RODEO</strong><span>COYOTE BASIN · ALL DIRT</span><button id="open-builder" disabled>Track builder</button><button id="fullscreen" disabled>Full screen</button></header>
 <main id="stage">
-<canvas id="unity-canvas" width="{{{ WIDTH }}}" height="{{{ HEIGHT }}}" tabindex="0" aria-label="Raptor Rodeo racing game. Use WASD or arrows to drive, Space for nitro, C to cycle camera views, R to recover, Escape to pause and M for reduced motion."></canvas>
+<canvas id="unity-canvas" width="1600" height="900" tabindex="0" aria-label="Raptor Rodeo racing game. Use WASD or arrows to drive, Space for nitro, C to cycle camera views, R to recover, Escape to pause and M for reduced motion."></canvas>
 <div id="touch-ui" hidden>
   <section id="touch-intro" aria-label="Opening logos"><button id="intro-skip" data-action="skip" hidden>Skip intro ›</button></section>
   <section id="touch-garage" aria-label="Choose your Raptor" hidden>
@@ -83,19 +83,13 @@ function resizeCanvas(){const r=canvas.getBoundingClientRect(),scale=Math.min(wi
 new ResizeObserver(resizeCanvas).observe(canvas);resizeCanvas();
 function showError(message){loading.hidden=false;progress.hidden=true;status.className='error';status.textContent='The game could not start. '+String(message);document.getElementById('retry').hidden=false;}
 document.getElementById('retry').onclick=()=>location.reload();
-const loader=document.createElement('script');loader.src='Build/{{{ LOADER_FILENAME }}}';loader.onerror=()=>showError('Check your connection and reload.');
+const loader=document.createElement('script');loader.src='Build/b36a9201f6b7fa48f78fc9265bbe33d0.loader.js';loader.onerror=()=>showError('Check your connection and reload.');
 loader.onload=()=>createUnityInstance(canvas,{
 arguments:[],
-#if PROGRESSIVE_ASSET_LOADING
-primaryDataUrls:{{{ JSON.stringify(PRIMARY_DATA_FILES) }}},secondaryDataUrls:{{{ JSON.stringify(SECONDARY_DATA_FILES) }}},
-#else
-dataUrl:'Build/{{{ DATA_FILENAME }}}',
-#endif
-frameworkUrl:'Build/{{{ FRAMEWORK_FILENAME }}}',
-#if USE_WASM
-codeUrl:'Build/{{{ CODE_FILENAME }}}',
-#endif
-streamingAssetsUrl:'StreamingAssets',companyName:{{{ JSON.stringify(COMPANY_NAME) }}},productName:{{{ JSON.stringify(PRODUCT_NAME) }}},productVersion:{{{ JSON.stringify(PRODUCT_VERSION) }}},matchWebGLToCanvasSize:false,
+dataUrl:'Build/25f7250a0b88f83861c2c63c2eb08b0f.data.unityweb',
+frameworkUrl:'Build/377cb8c67e280c9fa4894569e7cb26a6.framework.js.unityweb',
+codeUrl:'Build/65aa77d48d0d7b5ef862a6bd81ad8805.wasm.unityweb',
+streamingAssetsUrl:'StreamingAssets',companyName:"RaptorRallyPrototype",productName:"Raptor Rally",productVersion:"1.0",matchWebGLToCanvasSize:false,
 showBanner:(message,type)=>{if(type==='error')showError(message);else console.warn(message);}
 },value=>{progress.value=value;status.textContent=value<.9?'Loading the track… '+Math.round(value*100)+'%':'Starting engines…';}).then(instance=>{window.raptorGame=instance;loading.hidden=true;fullscreen.disabled=false;fullscreen.onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else if(document.getElementById('stage').requestFullscreen)await document.getElementById('stage').requestFullscreen();}catch(error){console.warn('Fullscreen unavailable',error);}canvas.focus();};if(!document.fullscreenEnabled)fullscreen.hidden=true;canvas.focus();document.documentElement.dataset.gameReady='true';window.raptorTouch.connect(instance);window.raptorBuilder.connect(instance);}).catch(showError);
 document.body.appendChild(loader);

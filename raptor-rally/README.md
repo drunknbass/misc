@@ -68,3 +68,7 @@ The browser build now batches static scenery, indexes nearby barriers, reuses tr
 The latest [visual quality pass](performance/VISUAL-QUALITY.md) adds revised truck proportions, material/lighting detail, original dirt artwork, shaped barriers, pooled dust, contact shadows and corrected garage presentation while retaining the browser performance gains.
 
 See [header and builder loading checks](NAV-BUILDER-CHECKS.md) for the garage badge alignment fix and transition feedback.
+
+### Publish verification
+
+Run `node raptor-rally/tests/check-published-shell.cjs` from the repository root before publishing web changes. It checks the actual deployed HTML, parses its startup JavaScript, and verifies the referenced Unity build files. Also load the complete game through to the garage; an editor-only fixture cannot verify startup. Never copy `unity/Assets/WebGLTemplates/RaptorPages/index.html` directly over the published `index.html`: the template contains Unity preprocessing directives and must be compiled or have its existing compiled startup block preserved.
