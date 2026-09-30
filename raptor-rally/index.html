@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0b161d">
 <meta name="description" content="Race three Ford Raptor-inspired trucks through Coyote Basin. Four trucks, three laps, all dirt.">
 <title>Raptor Rodeo · Coyote Basin</title>
-<link rel="stylesheet" href="touch-controls.css?v=5">
+<link rel="stylesheet" href="touch-controls.css?v=6">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b161d'/%3E%3Cpath d='M7 24L16 7l9 17h-5l-4-9-4 9z' fill='%23b9f26a'/%3E%3C/svg%3E">
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:#081117;color:#e9f0f2;font:14px/1.4 system-ui,-apple-system,sans-serif;overflow:hidden}
@@ -46,7 +46,7 @@ body.intro-pending header{display:none}body.intro-pending #stage{height:100dvh}b
 </div>
 <div id="loading"><div class="eyebrow">FOUR TRUCKS. ALL DIRT.</div><h1>PREPARING THE RIDE</h1><p>The dirt can wait a moment.</p><progress id="progress" max="1" value="0" aria-label="Game loading progress"></progress><p id="status" role="status">Preparing the track…</p><p id="input-help">WASD / arrows to drive · Space for nitro · C to cycle camera views</p><button id="retry" hidden>Reload game</button></div>
 </main>
-<script src="touch-controls.js?v=5"></script>
+<script src="touch-controls.js?v=6"></script>
 <script>
 const canvas=document.getElementById('unity-canvas'),loading=document.getElementById('loading'),progress=document.getElementById('progress'),status=document.getElementById('status'),fullscreen=document.getElementById('fullscreen');
 // Bound pixel work on Retina/4K displays and reevaluate when entering fullscreen.

@@ -1,6 +1,20 @@
 (() => {
   'use strict';
   const root=document.getElementById('touch-ui'),byId=id=>document.getElementById(id);
+  // Suppress native text selection, image dragging, callouts and double-tap defaults.
+  // Do not stop propagation: Unity input and normal button clicks still receive events.
+  const suppressNative=event=>event.preventDefault();
+  for(const type of ['selectstart','contextmenu','dragstart','dblclick']){
+    document.body.addEventListener(type,suppressNative,{capture:true});
+  }
+  // Active touch listener also prevents Safari's press-and-hold loupe on the race
+  // surface. Action buttons keep their synthesized clicks; pedals use pointer events.
+  document.body.addEventListener('touchstart',event=>{
+    const target=event.target;
+    if(target.closest('#touch-race, #unity-canvas') && !target.closest('button:not([data-bit]), a')){
+      event.preventDefault();
+    }
+  },{capture:true,passive:false});
   // Use the same 116×96 cell grid and source crop as Unity's badge shader.
   // This is a display-only canvas; the supplied JPEG remains unchanged.
   const badge=document.getElementById('menu-badge'),badgeSource=new Image();

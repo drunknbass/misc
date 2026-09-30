@@ -1,3 +1,8 @@
+/* This page is a game surface: Safari must not select or call out HUD text. */
+html,body,body *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+body{touch-action:manipulation;overscroll-behavior:none}
+#stage,#stage *{touch-action:manipulation}
+#unity-canvas,#touch-race,#touch-race *{touch-action:none}
 body.touch-enabled{height:100dvh;overscroll-behavior:none;--header-height:48px}
 .touch-enabled header{height:calc(var(--header-height) + env(safe-area-inset-top));padding:env(safe-area-inset-top) max(12px,env(safe-area-inset-right)) 0 max(12px,env(safe-area-inset-left));gap:12px}
 .touch-enabled header span{display:none}.touch-enabled header strong{font-size:11px}
