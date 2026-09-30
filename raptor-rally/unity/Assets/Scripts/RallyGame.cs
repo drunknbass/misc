@@ -37,7 +37,20 @@ namespace RaptorRally
         GaragePreview garagePreview;
         public RiveRaceHud MotionHud { get; private set; }
         public bool ReducedMotion;
-        public bool FollowPlayer;
+        public enum RaceCamera { WholeTrack, Follow, DriverSeat }
+        public RaceCamera CameraMode;
+        // Preserve the existing editor verification/preview interface.
+        public bool FollowPlayer { get=>CameraMode==RaceCamera.Follow; set=>CameraMode=value?RaceCamera.Follow:RaceCamera.WholeTrack; }
+        public bool InCockpit => CameraMode==RaceCamera.DriverSeat && State!=Phase.Garage && !IntroActive;
+        public string CameraLabel => CameraMode==RaceCamera.WholeTrack?"WHOLE TRACK":CameraMode==RaceCamera.Follow?"FOLLOW TRUCK":"DRIVER SEAT";
+        RaceCamera renderedCamera=(RaceCamera)(-1);
+        RaptorTruck cameraTruck;
+        bool cameraChosen;
+        public void CycleCamera()
+        {
+            if(State==Phase.Garage || IntroActive) return;
+            CameraMode=(RaceCamera)(((int)CameraMode+1)%3); cameraChosen=true; nextTouchState=0;
+        }
         public const float WheelLockDegrees = 2.5f * 360f;
         public float WheelAngle { get; private set; }
         public bool TouchControls { get; private set; }
@@ -45,12 +58,12 @@ namespace RaptorRally
         float nextTouchState;
 #if UNITY_WEBGL && !UNITY_EDITOR
         [System.Runtime.InteropServices.DllImport("__Internal")]
-        static extern void RaptorTouchState(int phase,int paused,int selected,int rank,int lap,float time,int speed,float nitro,float countdown,int offCourse,int following,int reducedMotion,int introSkipVisible);
+        static extern void RaptorTouchState(int phase,int paused,int selected,int rank,int lap,float time,int speed,float nitro,float countdown,int offCourse,int cameraMode,int reducedMotion,int introSkipVisible);
 #endif
         public void SetTouchControls(float enabled)
         {
             TouchControls=enabled!=0; ClearTouchInput(); nextTouchState=0;
-            if(TouchControls) FollowPlayer=true;
+            if(TouchControls && !cameraChosen) CameraMode=RaceCamera.Follow;
 #if UNITY_WEBGL && !UNITY_EDITOR
             WebGLInput.captureAllKeyboardInput=!TouchControls;
 #endif
@@ -65,7 +78,7 @@ namespace RaptorRally
         {
             if(!TouchControls) return;
             if(IntroActive) { if(action=="skip") SkipIntro(); ClearTouchInput(); return; }
-            if(action=="camera" && State!=Phase.Garage) FollowPlayer=!FollowPlayer;
+            if(action=="camera" && State!=Phase.Garage) CycleCamera();
             else if(action=="recover" && State==Phase.Racing && !Paused) Player.Recover();
             else if(action=="pause" && State!=Phase.Garage) { ClearTouchInput(); Paused=!Paused; Time.timeScale=Paused?0:1; }
             else if(action=="resume") { ClearTouchInput(); Paused=false; Time.timeScale=1; }
@@ -80,7 +93,7 @@ namespace RaptorRally
 #if UNITY_WEBGL && !UNITY_EDITOR
             if(Time.unscaledTime<nextTouchState) return;
             nextTouchState=Time.unscaledTime+.1f;
-            RaptorTouchState((int)State,Paused?1:0,Selected,Standings().IndexOf(Player)+1,Mathf.Min(3,Player.CompletedLaps+1),Player.Finished?Player.FinishTime:RaceTime,Mathf.RoundToInt(Player.Speed*2.23694f),Player.Nitro,Countdown,Player.OffCourse?1:0,FollowPlayer?1:0,ReducedMotion?1:0,IntroActive && Intro.CurrentCard!=StartupIntro.Card.Black && Intro.Elapsed>.65f && Intro.Opacity>.2f?1:0);
+            RaptorTouchState((int)State,Paused?1:0,Selected,Standings().IndexOf(Player)+1,Mathf.Min(3,Player.CompletedLaps+1),Player.Finished?Player.FinishTime:RaceTime,Mathf.RoundToInt(Player.Speed*2.23694f),Player.Nitro,Countdown,Player.OffCourse?1:0,(int)CameraMode,ReducedMotion?1:0,IntroActive && Intro.CurrentCard!=StartupIntro.Card.Black && Intro.Elapsed>.65f && Intro.Opacity>.2f?1:0);
 #endif
         }
 
@@ -173,7 +186,7 @@ namespace RaptorRally
                 AdvanceIntro(Time.unscaledDeltaTime);
                 return; // A skip key can never also start a race in this frame.
             }
-            if(Input.GetKeyDown(KeyCode.C) && State!=Phase.Garage) FollowPlayer=!FollowPlayer;
+            if(Input.GetKeyDown(KeyCode.C) && State!=Phase.Garage) CycleCamera();
             if(Input.GetKeyDown(KeyCode.M)) ReducedMotion=!ReducedMotion;
             if (Input.GetKeyDown(KeyCode.Escape) && State != Phase.Garage) { Paused = !Paused; Time.timeScale = Paused ? 0 : 1; }
             if (Paused) return;
@@ -233,12 +246,35 @@ namespace RaptorRally
             if(IntroActive) { View.enabled=false; garageBackground.enabled=false; return; }
             float aspect = Mathf.Max(.5f, (float)Screen.width / Screen.height);
             bool tracking=FollowPlayer && State!=Phase.Garage && Trucks.Count>0;
+            bool driving=InCockpit && Trucks.Count>0;
+            foreach(var truck in Trucks) truck.Cockpit?.SetVisible(driving && truck==Player,WheelAngle);
+            View.cullingMask=driving?~(1<<DriverCockpit.ExteriorLayer):~(1<<DriverCockpit.InteriorLayer);
+            bool changed=renderedCamera!=CameraMode || cameraTruck!=Player || View.orthographic==driving;
+            renderedCamera=CameraMode; cameraTruck=Player;
+            // Projection changes cut directly; never fly through the bodywork.
+            snap|=changed;
+            View.orthographic=!driving;
+            View.nearClipPlane=driving?.04f:.3f;
             garageBackground.enabled=State==Phase.Garage;
             View.enabled=State!=Phase.Garage;
             if(State==Phase.Garage) {
                 float s=Mathf.Min(Screen.width/1600f,Screen.height/900f),x=(Screen.width-1600*s)*.5f,y=(Screen.height-900*s)*.5f;
                 View.rect=new Rect((x+1110*s)/Screen.width,(Screen.height-y-735*s)/Screen.height,465*s/Screen.width,485*s/Screen.height);
             } else View.rect=new Rect(0,0,1,1);
+            if(driving)
+            {
+                Vector3 eye=Player.transform.TransformPoint(Player.Cockpit.Eye);
+                float cockpitBlend=snap || ReducedMotion?1:1-Mathf.Exp(-Mathf.Max(0,dt)*18);
+                // Horizontal motion follows the interpolated chassis exactly.
+                // Bound vertical lag keeps the eye inside the cabin on jumps.
+                float y=snap?eye.y:Mathf.Clamp(Mathf.Lerp(View.transform.position.y,eye.y,cockpitBlend),eye.y-.055f,eye.y+.055f);
+                float heading=Player.transform.eulerAngles.y;
+                float yaw=snap?heading:Mathf.LerpAngle(View.transform.eulerAngles.y,heading,cockpitBlend);
+                yaw=heading+Mathf.Clamp(Mathf.DeltaAngle(heading,yaw),-3,3);
+                View.transform.SetPositionAndRotation(new Vector3(eye.x,y,eye.z),Quaternion.Euler(3,yaw,0));
+                View.fieldOfView=62;
+                return;
+            }
             Vector3 target=tracking?Player.transform.position+Player.transform.forward*2.5f+Vector3.up*.5f:new Vector3(0,0,1);
             Vector3 position=tracking?target+new Vector3(10,20,-25):new Vector3(19,84,-100);
             float size=tracking?(TouchControls?Mathf.Max(8.5f,8/aspect):Mathf.Max(10.5f,12/aspect)):State==Phase.Garage?73:Mathf.Max(58,76/aspect);
@@ -343,7 +379,7 @@ namespace RaptorRally
                 Text(1120,156,450,34,"COYOTE BASIN",label);
                 Text(1120,195,450,24,"4 TRUCKS  /  3 LAPS  /  SWITCHBACKS",small);
                 Text(425,777,1100,30,"THREE RAPTORS. ALL DIRT.",heading);
-                Text(427,817,1100,26,"C switches between the full stadium and a close view of your truck.",small);
+                Text(427,817,1100,26,"C cycles whole track, follow truck and driver seat views.",small);
             }
             else
             {
@@ -363,7 +399,7 @@ namespace RaptorRally
                 if(Player.OffCourse) Text(560,135,510,42,"OFF COURSE — drive through a barrier to rejoin",small,accent);
                 }
                 if (Button(new Rect(1490,24,78,46),Paused?"▶":"II")) { Paused=!Paused; Time.timeScale=Paused?0:1; }
-                wheel.Draw(WheelAngle,State==Phase.Results);
+                if(!InCockpit) wheel.Draw(WheelAngle,State==Phase.Results);
                 if (State == Phase.Countdown || (State==Phase.Racing && RaceTime<.8f))
                 {
                     Panel(new Rect(679,350,242,157),ink);
@@ -391,7 +427,7 @@ namespace RaptorRally
             Panel(new Rect(0,860,1600,40),ink);
             Text(30,864,1110,30,"WASD / ARROWS  Drive      SPACE  Nitro      R  Recover      ESC  Pause",small);
             if(Button(new Rect(1110,864,215,29),ReducedMotion?"M  MOTION OFF":"M  MOTION ON")) ReducedMotion=!ReducedMotion;
-            if(State!=Phase.Garage && Button(new Rect(1340,864,228,29),FollowPlayer?"C  WHOLE TRACK":"C  FOLLOW TRUCK")) FollowPlayer=!FollowPlayer;
+            if(State!=Phase.Garage && Button(new Rect(1340,864,228,29),"C  "+CameraLabel)) CycleCamera();
             if(Paused)
             {
                 Panel(new Rect(0,89,1600,771),new Color(0,0,0,.62f)); Panel(new Rect(575,260,450,310),ink);

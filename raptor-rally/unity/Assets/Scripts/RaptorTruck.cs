@@ -36,6 +36,7 @@ namespace RaptorRally
         Vector3 wallNormal;
         public int RecoveryCount;
         Transform visual;
+        public DriverCockpit Cockpit { get; private set; }
         readonly Transform[] wheels = new Transform[4];
         readonly Transform[] wheelPivots = new Transform[4];
         float wheelRoll;
@@ -74,6 +75,10 @@ namespace RaptorRally
             Body.solverIterations=8; Body.solverVelocityIterations=4;
             var model=new RaptorModel(transform,type,color,player);
             visual=model.Body;
+            if(player) {
+                foreach(var renderer in GetComponentsInChildren<Renderer>()) renderer.gameObject.layer=DriverCockpit.ExteriorLayer;
+                Cockpit=new DriverCockpit(transform,type,color);
+            }
             System.Array.Copy(model.Wheels,wheels,4);
             System.Array.Copy(model.Pivots,wheelPivots,4);
             trails = new TrailRenderer[2];

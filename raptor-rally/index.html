@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0b161d">
 <meta name="description" content="Race three Ford Raptor-inspired trucks through Coyote Basin. Four trucks, three laps, all dirt.">
 <title>Raptor Rodeo · Coyote Basin</title>
-<link rel="stylesheet" href="touch-controls.css?v=3">
+<link rel="stylesheet" href="touch-controls.css?v=4">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b161d'/%3E%3Cpath d='M7 24L16 7l9 17h-5l-4-9-4 9z' fill='%23b9f26a'/%3E%3C/svg%3E">
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:#081117;color:#e9f0f2;font:14px/1.4 system-ui,-apple-system,sans-serif;overflow:hidden}
@@ -21,7 +21,7 @@ body.intro-pending header{display:none}body.intro-pending #stage{height:100dvh}b
 <body class="intro-pending">
 <header><a href="../" aria-label="Back to misc experiments">← misc</a><strong>RAPTOR RODEO</strong><span>COYOTE BASIN · ALL DIRT</span><button id="fullscreen" disabled>Full screen</button></header>
 <main id="stage">
-<canvas id="unity-canvas" width="1600" height="900" tabindex="0" aria-label="Raptor Rodeo racing game. Use WASD or arrows to drive, Space for nitro, C for camera, R to recover, Escape to pause and M for reduced motion."></canvas>
+<canvas id="unity-canvas" width="1600" height="900" tabindex="0" aria-label="Raptor Rodeo racing game. Use WASD or arrows to drive, Space for nitro, C to cycle camera views, R to recover, Escape to pause and M for reduced motion."></canvas>
 <div id="touch-ui" hidden>
   <section id="touch-intro" aria-label="Opening logos"><button id="intro-skip" data-action="skip" hidden>Skip intro ›</button></section>
   <section id="touch-garage" aria-label="Choose your Raptor" hidden>
@@ -40,9 +40,9 @@ body.intro-pending header{display:none}body.intro-pending #stage{height:100dvh}b
   </section>
   <section id="touch-modal" hidden class="touch-modal" role="dialog" aria-modal="true" aria-labelledby="touch-modal-title"><div class="touch-glass"><span class="eyebrow">RAPTOR RODEO</span><h2 id="touch-modal-title">PAUSED</h2><p id="touch-result"></p><button id="touch-resume" data-action="resume" class="touch-primary">RESUME</button><button id="touch-again" data-action="start" class="touch-primary" hidden>RACE AGAIN</button><button data-action="garage">CHOOSE RAPTOR</button><button id="touch-motion" data-action="motion">Reduce motion: off</button></div></section>
 </div>
-<div id="loading"><div class="eyebrow">FOUR TRUCKS. ALL DIRT.</div><h1>PREPARING THE RIDE</h1><p>The dirt can wait a moment.</p><progress id="progress" max="1" value="0" aria-label="Game loading progress"></progress><p id="status" role="status">Preparing the track…</p><p id="input-help">WASD / arrows to drive · Space for nitro · C to follow your truck</p><button id="retry" hidden>Reload game</button></div>
+<div id="loading"><div class="eyebrow">FOUR TRUCKS. ALL DIRT.</div><h1>PREPARING THE RIDE</h1><p>The dirt can wait a moment.</p><progress id="progress" max="1" value="0" aria-label="Game loading progress"></progress><p id="status" role="status">Preparing the track…</p><p id="input-help">WASD / arrows to drive · Space for nitro · C to cycle camera views</p><button id="retry" hidden>Reload game</button></div>
 </main>
-<script src="touch-controls.js?v=3"></script>
+<script src="touch-controls.js?v=4"></script>
 <script>
 const canvas=document.getElementById('unity-canvas'),loading=document.getElementById('loading'),progress=document.getElementById('progress'),status=document.getElementById('status'),fullscreen=document.getElementById('fullscreen');
 // Bound pixel work on Retina/4K displays and reevaluate when entering fullscreen.
@@ -50,12 +50,12 @@ function resizeCanvas(){const r=canvas.getBoundingClientRect(),scale=Math.min(wi
 new ResizeObserver(resizeCanvas).observe(canvas);resizeCanvas();
 function showError(message){loading.hidden=false;progress.hidden=true;status.className='error';status.textContent='The game could not start. '+String(message);document.getElementById('retry').hidden=false;}
 document.getElementById('retry').onclick=()=>location.reload();
-const loader=document.createElement('script');loader.src='Build/169da38b7eacbd2891fa17cee990be46.loader.js';loader.onerror=()=>showError('Check your connection and reload.');
+const loader=document.createElement('script');loader.src='Build/242a525b96de43fc3b840bc49b540280.loader.js';loader.onerror=()=>showError('Check your connection and reload.');
 loader.onload=()=>createUnityInstance(canvas,{
 arguments:[],
-dataUrl:'Build/646dd56f93b26005839d2b3a888c77ef.data.unityweb',
-frameworkUrl:'Build/6791a895fbe628f5ce495a1870703973.framework.js.unityweb',
-codeUrl:'Build/9ff617cf1eff725e0b2ad4f9ac2af481.wasm.unityweb',
+dataUrl:'Build/0df54bc4850d4a336b5765b9eb7f876f.data.unityweb',
+frameworkUrl:'Build/7c666838e832cb14e506b1108fc92c39.framework.js.unityweb',
+codeUrl:'Build/260f4578115fc54f149f3e246d885e87.wasm.unityweb',
 streamingAssetsUrl:'StreamingAssets',companyName:"RaptorRallyPrototype",productName:"Raptor Rally",productVersion:"1.0",matchWebGLToCanvasSize:false,
 showBanner:(message,type)=>{if(type==='error')showError(message);else console.warn(message);}
 },value=>{progress.value=value;status.textContent=value<.9?'Loading the track… '+Math.round(value*100)+'%':'Starting engines…';}).then(instance=>{window.raptorGame=instance;loading.hidden=true;fullscreen.disabled=false;fullscreen.onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else if(document.getElementById('stage').requestFullscreen)await document.getElementById('stage').requestFullscreen();}catch(error){console.warn('Fullscreen unavailable',error);}canvas.focus();};if(!document.fullscreenEnabled)fullscreen.hidden=true;canvas.focus();document.documentElement.dataset.gameReady='true';window.raptorTouch.connect(instance);}).catch(showError);

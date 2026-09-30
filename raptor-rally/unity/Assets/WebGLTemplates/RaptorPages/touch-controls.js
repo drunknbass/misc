@@ -24,7 +24,7 @@
   function configure(){
     releaseAll();const next=mobile();
     document.body.classList.toggle('touch-enabled',next);
-    byId('input-help').textContent=next?'Touch controls • hold gas + steer • turn your phone for a wider view':'WASD / arrows to drive · Space for nitro · C to follow your truck';
+    byId('input-help').textContent=next?'Touch controls • hold gas + steer • turn your phone for a wider view':'WASD / arrows to drive · Space for nitro · C to cycle camera views';
     if(!instance)return;
     if(next!==enabled){enabled=next;root.hidden=!enabled;send('SetTouchControls',enabled?1:0);lastMask=-1;flush();}
   }
@@ -72,8 +72,11 @@
       text('touch-rank',state.rank+' / 4');text('touch-lap',state.lap+' / 3');text('touch-time',clock(state.time));
       text('touch-speed',String(state.speed).padStart(2,'0'));text('touch-nitro',Math.round(state.nitro*100)+'%');
       text('touch-surface',state.offCourse?'RETURN TO TRACK':'');
-      const camera=root.querySelector('[data-action="camera"]');camera.textContent=state.following?'Whole track':'Follow truck';
-      camera.setAttribute('aria-label',state.following?'Show whole track':'Follow your truck');
+      const camera=root.querySelector('[data-action="camera"]');
+      const views=['Whole track','Follow truck','Driver seat'],mode=state.cameraMode??0;
+      camera.textContent='View: '+views[mode];
+      camera.setAttribute('aria-label','Camera: '+views[mode]+'. Switch to '+views[(mode+1)%3]);
+      document.documentElement.dataset.cameraMode=String(mode);
       byId('touch-countdown').hidden=state.phase!==1 || state.paused;text('touch-countdown',Math.max(1,Math.ceil(state.countdown)));
     }
   };

@@ -18,7 +18,7 @@ The scene contains a bootstrap component. It constructs the stadium and truck ge
 | Space | Use limited nitro while grounded |
 | R | Recover at the last checkpoint |
 | Escape | Pause / resume |
-| C / footer camera button | Switch whole-track view / zoomed player tracking |
+| C / footer camera button | Cycle whole track → follow truck → driver seat |
 | M / footer motion button | Toggle reduced HUD motion |
 | 1 / 2 / 3 | Select truck in the garage |
 | Return | Start from the garage |
@@ -60,6 +60,7 @@ For unattended verification with the installed editor:
 - `Assets/Scripts/Stadium.cs`: course centerline, ribbon mesh, jumps, scenery, materials.
 - `Assets/Scripts/RaptorTruck.cs`: vehicle presets, driving, AI and checkpoint progress.
 - `Assets/Scripts/RaptorModel.cs`: shaped body meshes, wheel-well cutouts, flares, FORD grilles, distinct lights and treaded wheels.
+- `Assets/Scripts/DriverCockpit.cs`: per-truck driving shell, left-hand eye position, A-pillars, hood, dashboard and steering wheel.
 - `Assets/Scripts/GaragePreview.cs`: studio preview rendered from the same models used in races.
 - `Assets/Scripts/RallyGame.cs`: garage/countdown/race/results states, keyboard input, HUD and local best times.
 - `Assets/Scripts/RiveRaceHud.cs`: live race-state bindings, rendering, pause/reduced motion and disposal for the Rive instruments.
@@ -93,7 +94,7 @@ All three use **Raptor trim** as the exterior reference. The trim pass adds high
 
 References: Ford's official [F-150 Raptor](https://www.ford.com/trucks/f150/models/raptor/), [Bronco Raptor](https://www.ford.com/suvs/bronco/models/raptor/) and [Ranger Raptor](https://www.ford.com/trucks/ranger/models/raptor/) pages, plus the [Bronco Raptor launch description](https://media.ford.com/content/fordmedia/fna/ca/en/news/2022/01/24/bronco-raptor.html) for amber signature lighting. These are visual proportions in the arcade scale, not dimensionally exact replicas or a simulation of the production suspension.
 
-Press **C** or click the footer camera button during a race to transition smoothly between the complete stadium and a close view following your player truck. Tracking preserves the elevated viewing angle, includes a little look-ahead, and remains selected through retry. The garage always shows its studio layout. Desktop defaults to the whole-track overview; mobile defaults to player tracking.
+Press **C** or click the camera button to cycle **Whole track → Follow truck → Driver seat**. The button names the current mode; mobile accessibility text also names the next one. Camera selection remains through retry and garage visits. Driver seat uses a perspective view from the left side of each cabin, with its A-pillar, hood, dashboard and steering wheel visible. The horizon stays level, camera lag is bounded, and reduced motion removes cockpit lag. The external steering-wheel overlay is hidden only in driver-seat mode. The garage always shows its studio layout. Desktop defaults to whole track; mobile defaults to follow until you choose a camera. See `../COCKPIT.md` for validation and screenshots.
 
 ## Re-entry and jump handling
 

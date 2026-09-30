@@ -14,7 +14,7 @@ A rotating 3D pixel Ford emblem fades through black to Ford Performance, then th
 | --- | --- |
 | WASD / arrows | Drive and steer |
 | Space | Nitro |
-| C | Follow your truck / whole track |
+| C | Whole track → follow truck → driver seat |
 | R | Recover |
 | Escape | Pause |
 | M | Reduced HUD motion |
@@ -26,6 +26,10 @@ Off-course trucks can rejoin through barriers; collisions restore after the truc
 Glancing wall impacts now slide along the rail, and truck impacts transfer momentum with reduced spin. See [handling changes](HANDLING.md) and the [84 Play Mode contact checks](COLLISIONS.md).
 
 The on-screen Raptor wheel has 2.5 turns from center to either lock (±900°), five turns lock to lock. It keeps its fixed center while rotating and unwinds continuously when reversing. See [steering checks](STEERING.md).
+
+## Driver-seat view
+
+Press C or use the mobile camera button to cycle through whole-track, follow and driver-seat views. Each truck has a left-hand cockpit with an A-pillar, dashboard, hood and animated wheel. Camera choice persists across retries and truck changes. See [camera validation](COCKPIT.md).
 
 ## Source and rebuilding
 
