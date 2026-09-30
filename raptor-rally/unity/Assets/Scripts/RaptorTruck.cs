@@ -111,6 +111,7 @@ namespace RaptorRally
         public void Recover()
         {
             int index = CrossedStart ? Stadium.Wrap((NextGate - 1) * Stadium.Samples / Stadium.GateCount) : 0;
+            if(Track.HasCrossings && Track.SurfaceAt(index)==6) { while(Track.SurfaceAt(index)==6) index=Stadium.Wrap(index-1); index=Stadium.Wrap(index-8); }
             Vector3 p = Track.Points[index] + (CrossedStart ? 1 : -5) * Track.Tangent(index) + Vector3.up * 1.05f;
             SetPose(p, Track.Tangent(index)); stuckTime = 0; gateWait = 0; RecoveryCount++;
         }
@@ -206,7 +207,7 @@ namespace RaptorRally
             SampleCourse();
             if (Finished || OffCourse) return;
             Vector3 delta = Body.position - Track.Gate(NextGate);
-            if(Track.HasCrossings && Mathf.Abs(delta.y-.92f)>2.2f) return;
+            if(Track.HasCrossings && (delta.y-.92f < -2.2f || Track.Gate(NextGate).y<.5f && delta.y-.92f>2.2f)) return;
             delta.y = 0;
             // Sequential gates plus forward travel reject backwards laps and infield shortcuts.
             if (delta.sqrMagnitude > 7.2f * 7.2f || Vector3.Dot(Body.linearVelocity, Track.Tangent(NextGate * Stadium.Samples / Stadium.GateCount)) < .2f) return;
@@ -251,7 +252,7 @@ namespace RaptorRally
         {
             Vector3 p=Body.position;
             if(hasCourseSample && p==sampledPosition) return;
-            sampledPosition=p; hasCourseSample=true; nearestSample=Track.Nearest(p);
+            sampledPosition=p; hasCourseSample=true; nearestSample=Track.Nearest(p,Track.HasCrossings?NextGate*Stadium.Samples/Stadium.GateCount:-1);
             OffCourse=Track.DistanceFromCourse(p,nearestSample)>Stadium.HalfWidth;
         }
         public void UpdateBarrierRecovery(bool reset=false)

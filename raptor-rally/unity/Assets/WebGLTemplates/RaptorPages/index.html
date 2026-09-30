@@ -7,7 +7,7 @@
 <meta name="description" content="Race three Ford Raptor-inspired trucks through Coyote Basin. Four trucks, three laps, all dirt.">
 <title>Raptor Rodeo · Coyote Basin</title>
 <link rel="stylesheet" href="touch-controls.css?v=7">
-<link rel="stylesheet" href="track-builder.css?v=2">
+<link rel="stylesheet" href="track-builder.css?v=3">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b161d'/%3E%3Cpath d='M7 24L16 7l9 17h-5l-4-9-4 9z' fill='%23b9f26a'/%3E%3C/svg%3E">
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:#081117;color:#e9f0f2;font:14px/1.4 system-ui,-apple-system,sans-serif;overflow:hidden}
@@ -65,13 +65,13 @@ body.intro-pending header{display:none}body.intro-pending #stage{height:100dvh}b
       <div class="builder-board-caption"><b id="builder-loop">Closed circuit</b><span id="builder-count">12 / 48 tiles</span><span>16 m per tile</span></div>
       <p id="builder-status" role="status" aria-live="polite"></p>
     </div>
-    <div class="builder-details"><h2>YOUR CIRCUIT</h2><label>Course name<input id="builder-name" maxlength="28" autocomplete="off" spellcheck="false"></label><button id="builder-save">Save course</button><label>Saved on this device<select id="builder-library" aria-label="Saved courses"></select></label><button id="builder-preset">Starter circuit</button><button id="builder-eight">Figure eight · crossover</button><div class="builder-file-tools"><button id="builder-export">Export</button><button id="builder-import">Import</button><input id="builder-file" type="file" accept=".json,application/json" hidden></div><p id="builder-save-state">Draft saves on this device</p><p class="builder-key">Place pieces on straight tiles. Keep corners and the starting grid flat.<br><br>Mud slows your truck. Cyan pads refill nitro. Cross two straight routes to add an automatic jump bridge: east–west above north–south. Keep one straight, flat approach tile on each side.</p></div>
+    <div class="builder-details"><h2>YOUR CIRCUIT</h2><label>Course name<input id="builder-name" maxlength="28" autocomplete="off" spellcheck="false"></label><button id="builder-save">Save course</button><label>Saved on this device<select id="builder-library" aria-label="Saved courses"></select></label><button id="builder-preset">Starter circuit</button><button id="builder-eight">Figure eight · jump</button><div class="builder-file-tools"><button id="builder-export">Export</button><button id="builder-import">Import</button><input id="builder-file" type="file" accept=".json,application/json" hidden></div><p id="builder-save-state">Draft saves on this device</p><p class="builder-key">Place pieces on straight tiles. Keep corners and the starting grid flat.<br><br>Mud slows your truck. Cyan pads refill nitro. Cross two straight routes to add a dirt jump: east–west launches across an open gap over north–south. Carry speed to reach the landing ramp. Keep one straight, flat approach tile on each side.</p></div>
   </div>
   <div class="builder-footer"><p>Four trucks. Three laps.<br>Your rules for the dirt.</p><div><button id="builder-original">Race Coyote Basin</button><button id="builder-race">RACE THIS TRACK →</button></div></div>
 </section>
 <script src="touch-controls.js?v=7"></script>
-<script src="track-model.js?v=2"></script>
-<script src="track-builder.js?v=2"></script>
+<script src="track-model.js?v=3"></script>
+<script src="track-builder.js?v=3"></script>
 <script>
 const canvas=document.getElementById('unity-canvas'),loading=document.getElementById('loading'),progress=document.getElementById('progress'),status=document.getElementById('status'),fullscreen=document.getElementById('fullscreen');
 // Bound pixel work on Retina/4K displays and reevaluate when entering fullscreen.

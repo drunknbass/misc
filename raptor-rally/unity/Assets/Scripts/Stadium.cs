@@ -22,7 +22,9 @@ namespace RaptorRally
         public readonly TrackDesign Design;
         public string CourseName => Design==null?"COYOTE BASIN":Design.name.ToUpperInvariant();
         readonly int[] surfacePieces=new int[Samples];
-        readonly bool[] elevated=new bool[Samples];
+        readonly bool[] elevated=new bool[Samples], gaps=new bool[Samples];
+        public bool IsJumpGap(int index) => gaps[Wrap(index)];
+        bool GapSegment(int index) => gaps[Wrap(index)]||gaps[Wrap(index+1)];
         public bool HasCrossings { get; private set; }
         readonly List<Object> owned=new List<Object>();
         T Own<T>(T value) where T:Object { owned.Add(value); return value; }
@@ -51,9 +53,9 @@ namespace RaptorRally
             Design=design; HasCrossings=design!=null && design.HasCrossings;
             Root = new GameObject(CourseName).transform;
             Root.SetParent(parent);
-            if(Design==null) BuildCenterline(); else Design.Sample(Points,surfacePieces,elevated);
+            if(Design==null) BuildCenterline(); else Design.Sample(Points,surfacePieces,elevated,gaps);
             BuildTrack();
-            if(HasCrossings) BuildCrossovers();
+            if(HasCrossings) BuildJumpEarth();
             if(Design==null) BuildScenery(); else BuildCustomScenery();
             for(int i=0;i<Barriers.Count;i++)
             {
@@ -103,11 +105,12 @@ namespace RaptorRally
         public Vector3 Side(int index) => Vector3.Cross(Vector3.up, Tangent(index));
         public static int Wrap(int i) => (i % Samples + Samples) % Samples;
         public Vector3 Gate(int gate) => Points[Wrap(gate * Samples / GateCount)];
-        public int Nearest(Vector3 p)
+        public int Nearest(Vector3 p,int routeHint=-1)
         {
             int best = 0; float distance = float.MaxValue;
             for (int i = 0; i < Samples; i++)
             {
+                if(HasCrossings && routeHint>=0 && Mathf.Min(Wrap(i-routeHint),Wrap(routeHint-i))>32) continue;
                 Vector3 d = p - Points[i]; d.y = HasCrossings?(d.y-.92f)*2:0;
                 if (d.sqrMagnitude < distance) { best = i; distance = d.sqrMagnitude; }
             }
@@ -176,7 +179,7 @@ namespace RaptorRally
                 Vector3 p = Points[i % Samples], side = Side(i % Samples);
                 vertices.Add(p - side * HalfWidth); vertices.Add(p + side * HalfWidth);
                 uv.Add(new Vector2(0,i/32f)); uv.Add(new Vector2(1,i/32f));
-                if (i == Samples) continue;
+                if (i == Samples || GapSegment(i)) continue;
                 int v = i * 2;
                 triangles.AddRange(new[] { v, v + 2, v + 1, v + 1, v + 2, v + 3 });
             }
@@ -193,6 +196,7 @@ namespace RaptorRally
             BuildRacingLine();
             for (int i = 0; i < Samples; i++)
             {
+                if(GapSegment(i)) continue;
                 foreach (int sign in new[] { -1, 1 })
                 {
                     Vector3 p = Points[i] + Side(i) * HalfWidth * sign;
@@ -228,6 +232,7 @@ namespace RaptorRally
             for(int i=0;i<Samples;i++)
             {
                 int next=Wrap(i+1);
+                if(GapSegment(i)) continue;
                 Color color=(i/3)%2==0?new Color(.84f,.88f,.82f):new Color(.66f,.095f,.055f);
                 if(QualitySettings.activeColorSpace==ColorSpace.Linear) color=color.linear;
                 for(int edge=0;edge<profile.Length;edge++)
@@ -279,7 +284,7 @@ namespace RaptorRally
         {
             if(Design!=null) {
                 for(int i=0;i<Samples;i+=3) {
-                    int kind=surfacePieces[i]; if(kind==0) continue;
+                    int kind=surfacePieces[i]; if(kind==0 || GapSegment(i) || GapSegment(i-1)) continue;
                     Color color=kind==4?new Color(.26f,.15f,.07f):kind==5?new Color(.15f,.85f,.87f):new Color(.97f,.73f,.38f);
                     var mark=Box(kind==4?"Mud strip":kind==5?"Nitro recharge strip":"Jump stripe",Points[i]+Vector3.up*.04f,new Vector3(8.6f,.025f,kind>=4?.8f:.22f),color);
                     mark.transform.rotation=Quaternion.LookRotation(Points[Wrap(i+1)]-Points[Wrap(i-1)]);
@@ -346,21 +351,25 @@ namespace RaptorRally
             string value=CourseName+"\n"+status+"\n"+(state==RallyGame.Phase.Garage?"RAPTOR RALLY":"P1  "+leader);
             if(raceBoard.text!=value) raceBoard.text=value;
         }
-        void BuildCrossovers()
+        void BuildJumpEarth()
         {
-            // No sloped recovery shoulders here: they would seal the lower road.
+            // Dirt banks stop at the lips. No deck, collision surface, rails or supports span the jump.
+            var vertices=new List<Vector3>();var triangles=new List<int>();var uv=new List<Vector2>();
+            System.Action<Vector3,Vector3,Vector3,Vector3> quad=(a,b,c,d)=>{
+                int n=vertices.Count;vertices.AddRange(new[]{a,b,c,d});uv.AddRange(new[]{Vector2.zero,Vector2.right,Vector2.one,Vector2.up});
+                triangles.AddRange(new[]{n+2,n+1,n,n+3,n+2,n});
+            };
             for(int i=0;i<Samples;i++) {
-                int next=Wrap(i+1);
-                if(!elevated[i] || Points[i].y<4 || Points[next].y<4) continue;
-                var deck=Box("Crossover jump underside",(Points[i]+Points[next])*.5f-Vector3.up*.2f,new Vector3(HalfWidth*2,.35f,Vector3.Distance(Points[i],Points[next])+.04f),new Color(.24f,.22f,.17f));
-                deck.transform.rotation=Quaternion.LookRotation(Points[next]-Points[i]);
+                int next=Wrap(i+1);if(!elevated[i]||GapSegment(i))continue;
+                Vector3 a=Points[i]-Side(i)*HalfWidth,b=Points[i]+Side(i)*HalfWidth,c=Points[next]+Side(next)*HalfWidth,d=Points[next]-Side(next)*HalfWidth;
+                Vector3 ag=new Vector3(a.x,0,a.z),bg=new Vector3(b.x,0,b.z),cg=new Vector3(c.x,0,c.z),dg=new Vector3(d.x,0,d.z);
+                quad(a,d,dg,ag);quad(c,b,bg,cg);
+                if(GapSegment(next))quad(d,c,cg,dg);
+                if(GapSegment(i-1))quad(b,a,ag,bg);
             }
-            var roles=Design.CrossoverRoles();
-            for(int i=0;i<roles.Length;i++) if(roles[i]==2) {
-                Vector3 center=TrackDesign.Center(Design.cells[i]);
-                foreach(int x in new[]{-1,1}) foreach(int z in new[]{-1,1})
-                    Box("Crossover support",center+new Vector3(x*10,1.9f,z*6.3f),new Vector3(.65f,3.8f,.65f),new Color(.27f,.25f,.20f));
-            }
+            var mesh=Own(new Mesh {name="Packed dirt takeoff and landing banks"});mesh.SetVertices(vertices);mesh.SetTriangles(triangles,0);mesh.SetUVs(0,uv);mesh.RecalculateNormals();mesh.RecalculateTangents();mesh.RecalculateBounds();
+            var earth=new GameObject(mesh.name,typeof(MeshFilter),typeof(MeshRenderer));earth.transform.SetParent(Root,false);earth.layer=9;
+            earth.GetComponent<MeshFilter>().sharedMesh=mesh;earth.GetComponent<MeshRenderer>().sharedMaterial=DirtMaterial();
         }
         void BuildCustomScenery()
         {

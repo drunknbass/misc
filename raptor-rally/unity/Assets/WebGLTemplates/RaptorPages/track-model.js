@@ -38,7 +38,7 @@
   }
   function parse(raw){if(raw.length>8192)throw Error('Course files must be smaller than 8 KB.');const d=JSON.parse(raw),error=validate(d);if(error)throw Error(error);return {version:d.version,name:cleanName(d.name),cells:[...d.cells],pieces:[...d.pieces]};}
   function preset(){return {version:1,name:'Raptor rhythm',cells:[24,25,26,19,12,11,10,9,8,15,22,23],pieces:[0,1,0,4,0,2,0,5,0,3,0,0]};}
-  function figureEight(){return {version:2,name:'Crossover rodeo',cells:[29,28,21,14,15,16,17,18,19,20,13,6,5,4,3,10,17,24,31,30],pieces:Array(20).fill(0)};}
+  function figureEight(){return {version:2,name:'Junction jump',cells:[29,28,21,14,15,16,17,18,19,20,13,6,5,4,3,10,17,24,31,30],pieces:Array(20).fill(0)};}
   function rotate(d,index){return {...d,cells:d.cells.slice(index).concat(d.cells.slice(0,index)),pieces:d.pieces.slice(index).concat(d.pieces.slice(0,index))};}
   const api={adjacent,straight,cleanName,validate,parse,preset,figureEight,crossings,reserved,rotate};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.RaptorTrackModel=api;

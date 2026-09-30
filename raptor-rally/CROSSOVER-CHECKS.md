@@ -1,16 +1,16 @@
-# Crossover verification
+# Open jump verification
 
-- PASS: reserved approaches; legacy validation; separate upper/lower nearest routes; unobstructed lower surface and solid upper deck; gates reject the wrong deck.
-- PASS: three laps with four AI trucks: F-150 RAPTOR time=72.90 recoveries=0 airFrames=94 maxY=6.59 gate=1 laps=3
-- PASS: three laps with four AI trucks: BRONCO RAPTOR time=73.36 recoveries=0 airFrames=97 maxY=6.63 gate=1 laps=3
-- PASS: three laps with four AI trucks: RANGER RAPTOR time=75.66 recoveries=0 airFrames=147 maxY=7.89 gate=1 laps=3
-- PASS: 20 m/s approach with nitro held: F-150 RAPTOR cleared jump and landed on exit; max chassis height=6.61m.
-- PASS: 20 m/s approach with nitro held: BRONCO RAPTOR cleared jump and landed on exit; max chassis height=6.64m.
-- PASS: 20 m/s approach with nitro held: RANGER RAPTOR cleared jump and landed on exit; max chassis height=6.59m.
+- PASS: jump recovery restores the truck to solid ground before the takeoff run-up.
+- PASS: reserved approaches; legacy validation; separate upper/lower nearest routes; unobstructed lower surface and open jump gap; gates distinguish the airborne and ground-level routes.
+- PASS: three laps with four AI trucks: F-150 RAPTOR time=72.56 recoveries=0 airFrames=120 maxY=5.15 gate=1 laps=3
+- PASS: three laps with four AI trucks: BRONCO RAPTOR time=72.90 recoveries=0 airFrames=120 maxY=5.15 gate=1 laps=3
+- PASS: three laps with four AI trucks: RANGER RAPTOR time=73.70 recoveries=0 airFrames=119 maxY=5.16 gate=1 laps=3
+- PASS: 20 m/s approach with nitro held: F-150 RAPTOR cleared jump and landed on exit; max chassis height=5.30m.
+- PASS: 20 m/s approach with nitro held: BRONCO RAPTOR cleared jump and landed on exit; max chassis height=5.38m.
+- PASS: 20 m/s approach with nitro held: RANGER RAPTOR cleared jump and landed on exit; max chassis height=5.37m.
 
-- PASS: browser editor draws and closes a figure-eight from scratch, preserves both passes through its junction, rejects turning at the crossing and painting obstacles on its approaches, saves and restores the draft after reload, and exports/imports a version 2 course unchanged.
-- PASS: desktop and 390×844 layouts; actual built WebGL player generates and races the custom crossover with no browser warnings/errors observed.
-- PASS: JavaScript course validation and mobile pedal, gesture, splash and camera regression checks.
-- LIMIT: phone-sized browser testing is not physical iPhone/Safari verification. Crossovers require perpendicular straight routes with clear straight approaches; east–west always uses the upper jump bridge. Legacy version 1 files remain supported.
+The earlier bridge has been replaced by two dirt ramps with a genuinely open gap across the junction. Road triangles, rail meshes, barriers and surface markings all stop at the gap. Dirt banks have no bridge supports or deck. The center raycast reaches the lower track. Trucks use their sequential route when navigating the flight and recovery returns them to the run-up.
 
-Reproduce physics checks with the installed Unity editor: `-batchmode -nographics -projectPath /path/to/unity -buildTarget WebGL -executeMethod CrossoverVerification.VerifyAndBuild -quit`. Run `CrossoverVerification.VerifyNitro` separately for the boosted approach checks. JavaScript checks: `node tests/check-track-model.cjs` from this folder.
+JavaScript course rules and mobile pedal, gesture, splash and camera regression checks pass. The version 2 file format remains compatible: existing crossing courses now generate open jumps. No dependencies were added.
+
+Browser verification: the final WebGL build renders two dirt ramps and a visible open gap with clean ramp shading. The updated editor displays a dashed flight arc, the Figure eight · jump preset, and carry-speed guidance. No browser warnings/errors were observed. Physical iPhone testing was not repeated for this change.

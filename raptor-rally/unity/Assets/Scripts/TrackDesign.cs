@@ -15,7 +15,7 @@ namespace RaptorRally
         public const float CellSize=16;
         public static bool Adjacent(int a,int b) => Mathf.Abs(a%Columns-b%Columns)+Mathf.Abs(a/Columns-b/Columns)==1;
         public bool Straight(int i) => cells[(i+cells.Length-1)%cells.Length]+cells[(i+1)%cells.Length]==2*cells[i];
-        public const float CrossoverHeight=4.4f;
+        public const float CrossoverHeight=3.8f;
         public bool HasCrossings => cells!=null && new HashSet<int>(cells).Count!=cells.Length;
         public int[] CrossoverRoles()
         {
@@ -79,7 +79,7 @@ namespace RaptorRally
             if(piece==3) return Mathf.Pow(Mathf.Sin(3*Mathf.PI*t),2)*.35f;
             return 0;
         }
-        public void Sample(Vector3[] result,int[] surfaces,bool[] elevated=null)
+        public void Sample(Vector3[] result,int[] surfaces,bool[] elevated=null,bool[] gaps=null)
         {
             var path=new List<Vector3>(); var kinds=new List<int>(); var heights=new List<bool>(); var lengths=new List<float>();
             var roles=CrossoverRoles();
@@ -91,9 +91,9 @@ namespace RaptorRally
                     float t=j/16f;
                     Vector3 p=Straight(i)?Vector3.Lerp(start,end,t):arcCenter+Vector3.Slerp(start-arcCenter,end-arcCenter,t);
                     if(Straight(i)) p.y=Elevation(pieces[i],t);
-                    if(roles[i]==1) p.y=CrossoverHeight*Mathf.SmoothStep(0,1,t);
-                    if(roles[i]==2) p.y=CrossoverHeight+(t<.35f?Mathf.Pow(Mathf.Sin(Mathf.PI*t/.35f),2)*.85f:0);
-                    if(roles[i]==3) p.y=CrossoverHeight*Mathf.SmoothStep(1,0,t);
+                    if(roles[i]==1) p.y=3.2f*Mathf.Pow(t,1.5f);
+                    if(roles[i]==2) p.y=t<.125f?Mathf.Lerp(3.2f,CrossoverHeight,t/.125f):t>.875f?Mathf.Lerp(1.2f,1,(t-.875f)/.125f):Mathf.Lerp(CrossoverHeight,1.2f,(t-.125f)/.75f)+Mathf.Sin(Mathf.PI*(t-.125f)/.75f)*1.2f;
+                    if(roles[i]==3) p.y=Mathf.SmoothStep(1,0,t);
                     if(path.Count>0) length+=Vector3.Distance(new Vector3(p.x,0,p.z),new Vector3(path[path.Count-1].x,0,path[path.Count-1].z));
                     path.Add(p); kinds.Add(roles[i]>0?6:pieces[i]); heights.Add(roles[i]>0); lengths.Add(length);
                 }
@@ -107,6 +107,13 @@ namespace RaptorRally
                 result[i]=Vector3.Lerp(path[segment-1],path[segment],(d-lengths[segment-1])/(lengths[segment]-lengths[segment-1]));
                 surfaces[i]=kinds[segment-1];
                 if(elevated!=null) elevated[i]=heights[segment-1]||heights[segment];
+                if(gaps!=null) {
+                    gaps[i]=false;
+                    for(int tile=0;tile<roles.Length;tile++) if(roles[tile]==2 && kinds[segment-1]==6) {
+                        Vector3 delta=result[i]-Center(cells[tile]);
+                        if(Mathf.Abs(delta.x)<5.8f && Mathf.Abs(delta.z)<.1f) gaps[i]=true;
+                    }
+                }
             }
         }
     }
