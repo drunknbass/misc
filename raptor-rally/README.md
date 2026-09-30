@@ -49,6 +49,8 @@ Run **Raptor Rally → Build Browser**, or invoke the editor with `-batchmode -n
 
 The `RaptorPages` template supplies the loading screen and fullscreen button. Gzip with Unity's decompression fallback works without custom response headers. Native WebAssembly threads are disabled; no cross-origin-isolation headers or third-party hosting service are needed. Hashed build filenames prevent stale assets across deployments. GitHub Pages serves this folder from the repository's `main` branch.
 
+All three truck models have amber running-light signatures, with white headlamp projectors and fog lamps. The same geometry and colors are used in the garage and during races.
+
 ## Assets and notices
 
 Original game code and procedural track/truck geometry are covered by the repository MIT license. The wheel is generated reference-guided artwork; its provenance is in `unity/Assets/Resources/HUD/ART-PROVENANCE.md`. The models are stylized, not production CAD models. Ford names are used to identify the visual inspiration; this is an unofficial prototype.

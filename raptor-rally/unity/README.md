@@ -86,7 +86,7 @@ A detailed Bronco Raptor wheel with leather, carbon-fiber trim and button cluste
 
 The garage now shows a large live 3D preview of the selected truck, alongside a smaller circuit preview. The same model geometry runs on the track. F-150 has a long open bed, vented hood, C-shaped lamps and amber markers; Bronco has an upright enclosed cabin, round lamps, wider arches and a rear spare; Ranger has a smaller crew-cab pickup silhouette and its own grille/hood details. All models include shaped body panels with wheel cutouts, dark glazing, six-spoke wheels, tire tread, bumpers and skid plates. They remain stylized game models rather than detailed production replicas.
 
-All three use **Raptor trim** as the exterior reference. The trim pass adds higher-coverage flares, darker off-road wheels with thicker tire sidewalls, fog lamps and model-specific details:
+All three models use amber running-light signatures, with separate white headlamp projectors and white fog lamps. F-150 and Ranger use amber C-shaped strips; Bronco retains its amber rings and bars. All three use **Raptor trim** as the exterior reference. The trim pass adds higher-coverage flares, darker off-road wheels with thicker tire sidewalls, fog lamps and model-specific details:
 
 - **F-150 Raptor:** hood extractor, wide fenders, amber grille markers, dark FORD tailgate applique, dual exhaust, 17:35 wheel/tire proportions.
 - **Bronco Raptor:** wide angular body-color flares, amber circular running lights and flare markers, white projector centers, hood extractors, dark bash plate, rear spare, 17:37 wheel/tire proportions. Its grille correctly reads FORD.

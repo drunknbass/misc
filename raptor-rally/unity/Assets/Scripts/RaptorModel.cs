@@ -227,9 +227,12 @@ namespace RaptorRally
                 else
                 {
                     Box(trim,new Vector3(x,y+.05f,z+.06f),new Vector3(.36f,.49f,.04f));
-                    Box(light,new Vector3(x+side*.13f,y+.06f,z+.09f),new Vector3(.048f,.40f,.025f));
-                    foreach(int edge in new[]{-1,1}) Box(light,new Vector3(x,y+.06f+edge*.19f,z+.09f),new Vector3(.29f,.048f,.025f));
-                    Box(type==0?amber:light,new Vector3(x,.49f,z+.09f),new Vector3(.28f,.035f,.025f));
+                    Box(amber,new Vector3(x+side*.13f,y+.06f,z+.09f),new Vector3(.048f,.40f,.025f));
+                    foreach(int edge in new[]{-1,1}) Box(amber,new Vector3(x,y+.06f+edge*.19f,z+.09f),new Vector3(.29f,.048f,.025f));
+                    Box(amber,new Vector3(x,.49f,z+.09f),new Vector3(.28f,.035f,.025f));
+                    // Amber running-light signature surrounds the white headlamp projectors.
+                    foreach(float offset in new[]{-.07f,.07f})
+                        Ring(light,new Vector3(x-side*.03f,y+.06f+offset,z+.085f),.047f,0,Vector3.forward,16);
                 }
                 Box(red,new Vector3(side*width*.82f,.26f,-length*.5f-.045f),new Vector3(.17f,.41f,.07f));
                 Box(light,new Vector3(side*width*.82f,.21f,-length*.5f-.084f),new Vector3(.13f,.04f,.012f));
