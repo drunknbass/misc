@@ -4,7 +4,7 @@
   const holdButtons=[...root.querySelectorAll('[data-bit]')],pointers=new Map();
   const trucks=['F-150 RAPTOR','BRONCO RAPTOR','RANGER RAPTOR'];
   const descriptions=['Long wheelbase / strong boost','Short wheelbase / quick rotation','Light pickup / balanced grip'];
-  let instance=null,enabled=false,lastMask=-1,state={phase:0,paused:false,selected:0};
+  let instance=null,enabled=false,lastMask=-1,state={phase:4,paused:false,selected:0};
   const coarse=matchMedia('(pointer:coarse)');
   const mobile=()=>coarse.matches || navigator.maxTouchPoints>0 && innerWidth<=1100;
   const send=(method,value)=>{if(instance)instance.SendMessage('Raptor Rally',method,value);};
@@ -50,9 +50,12 @@
     update(next){
       const changed=state.phase!==next.phase || state.paused!==next.paused;
       state=next;if(changed)releaseAll();
-      const garage=state.phase===0,modal=state.paused || state.phase===3;
-      byId('touch-garage').hidden=!garage;byId('touch-race').hidden=garage;byId('touch-modal').hidden=!modal;
-      byId('touch-controller').hidden=modal || garage;
+      const intro=state.phase===4,garage=state.phase===0,modal=!intro && (state.paused || state.phase===3);
+      document.body.classList.toggle("intro-pending",intro);
+      document.documentElement.dataset.introActive=String(intro);
+      byId("touch-intro").hidden=!intro;byId("intro-skip").hidden=!intro || !state.introSkipVisible;
+      byId('touch-garage').hidden=!garage;byId('touch-race').hidden=garage || intro;byId('touch-modal').hidden=!modal;
+      byId('touch-controller').hidden=modal || garage || intro;
       for(const button of holdButtons)button.disabled=!canDrive();
       root.querySelector('.touch-tools').hidden=modal;
       byId('touch-resume').hidden=!state.paused;byId('touch-again').hidden=state.paused;

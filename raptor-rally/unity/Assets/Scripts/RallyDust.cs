@@ -29,7 +29,7 @@ namespace RaptorRally
         {
             if(game==null || game.Paused) return;
             float dt=Time.deltaTime; emission+=dt;
-            if(game.State==RallyGame.Phase.Garage) { for(int i=0;i<Capacity;i++) puffs[i].life=0; }
+            if((game.State==RallyGame.Phase.Garage || game.IntroActive)) { for(int i=0;i<Capacity;i++) puffs[i].life=0; }
             else if(emission>=.075f) {
                 emission=0;
                 foreach(var truck in game.Trucks) if(truck.Grounded && truck.Speed>4) for(int side=-1;side<=1;side+=2) {
@@ -42,7 +42,7 @@ namespace RaptorRally
             for(int i=0;i<Capacity;i++) {
                 if(i<4) {
                     int shadowVertex=i*4; bool visible=false;
-                    if(game.State!=RallyGame.Phase.Garage && i<game.Trucks.Count) {
+                    if(game.State!=RallyGame.Phase.Garage && !game.IntroActive && i<game.Trucks.Count) {
                         var truck=game.Trucks[i];
                         if(Physics.Raycast(truck.transform.position+Vector3.up,Vector3.down,out var hit,6,1<<9)) {
                             Vector3 f=Vector3.ProjectOnPlane(truck.transform.forward,hit.normal).normalized*truck.Spec.Length*.58f;

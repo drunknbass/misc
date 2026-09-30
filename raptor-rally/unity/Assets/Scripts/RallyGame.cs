@@ -6,7 +6,8 @@ namespace RaptorRally
 {
     public sealed class RallyGame : MonoBehaviour
     {
-        public enum Phase { Garage, Countdown, Racing, Results }
+        // Append Intro to preserve the existing mobile bridge phase values 0–3.
+        public enum Phase { Garage, Countdown, Racing, Results, Intro }
         public Phase State = Phase.Garage;
         [NonSerialized] public Stadium Track;
         public readonly List<RaptorTruck> Trucks = new List<RaptorTruck>();
@@ -27,7 +28,10 @@ namespace RaptorRally
         readonly Color muted = new Color(.57f,.68f,.71f);
         readonly Color accent = new Color(.64f,.90f,.35f);
         GUIStyle label, heading, small, number, button;
-        bool initialized;
+        bool initialized, startupSeen;
+        public StartupIntro Intro { get; private set; }
+        public BrandArtwork Branding { get; private set; }
+        public bool IntroActive => State==Phase.Intro;
         int preparedLineup=-1;
         SteeringWheelHud wheel;
         GaragePreview garagePreview;
@@ -41,7 +45,7 @@ namespace RaptorRally
         float nextTouchState;
 #if UNITY_WEBGL && !UNITY_EDITOR
         [System.Runtime.InteropServices.DllImport("__Internal")]
-        static extern void RaptorTouchState(int phase,int paused,int selected,int rank,int lap,float time,int speed,float nitro,float countdown,int offCourse,int following,int reducedMotion);
+        static extern void RaptorTouchState(int phase,int paused,int selected,int rank,int lap,float time,int speed,float nitro,float countdown,int offCourse,int following,int reducedMotion,int introSkipVisible);
 #endif
         public void SetTouchControls(float enabled)
         {
@@ -51,7 +55,7 @@ namespace RaptorRally
             WebGLInput.captureAllKeyboardInput=!TouchControls;
 #endif
         }
-        public void SetTouchInput(float value) { touchInput=TouchControls?Mathf.RoundToInt(value)&31:0; if(touchInput==0) ClearTouchInput(); }
+        public void SetTouchInput(float value) { touchInput=TouchControls && !IntroActive?Mathf.RoundToInt(value)&31:0; if(touchInput==0) ClearTouchInput(); }
         void ClearTouchInput()
         {
             touchInput=0;
@@ -60,6 +64,7 @@ namespace RaptorRally
         public void TouchAction(string action)
         {
             if(!TouchControls) return;
+            if(IntroActive) { if(action=="skip") SkipIntro(); ClearTouchInput(); return; }
             if(action=="camera" && State!=Phase.Garage) FollowPlayer=!FollowPlayer;
             else if(action=="recover" && State==Phase.Racing && !Paused) Player.Recover();
             else if(action=="pause" && State!=Phase.Garage) { ClearTouchInput(); Paused=!Paused; Time.timeScale=Paused?0:1; }
@@ -73,9 +78,9 @@ namespace RaptorRally
         void PublishTouchState()
         {
 #if UNITY_WEBGL && !UNITY_EDITOR
-            if(!TouchControls || Time.unscaledTime<nextTouchState) return;
+            if(Time.unscaledTime<nextTouchState) return;
             nextTouchState=Time.unscaledTime+.1f;
-            RaptorTouchState((int)State,Paused?1:0,Selected,Standings().IndexOf(Player)+1,Mathf.Min(3,Player.CompletedLaps+1),Player.Finished?Player.FinishTime:RaceTime,Mathf.RoundToInt(Player.Speed*2.23694f),Player.Nitro,Countdown,Player.OffCourse?1:0,FollowPlayer?1:0,ReducedMotion?1:0);
+            RaptorTouchState((int)State,Paused?1:0,Selected,Standings().IndexOf(Player)+1,Mathf.Min(3,Player.CompletedLaps+1),Player.Finished?Player.FinishTime:RaceTime,Mathf.RoundToInt(Player.Speed*2.23694f),Player.Nitro,Countdown,Player.OffCourse?1:0,FollowPlayer?1:0,ReducedMotion?1:0,IntroActive && Intro.CurrentCard!=StartupIntro.Card.Black && Intro.Elapsed>.65f && Intro.Opacity>.2f?1:0);
 #endif
         }
 
@@ -84,6 +89,7 @@ namespace RaptorRally
         {
             if (initialized) return; initialized = true;
             Application.targetFrameRate = 60;
+            Branding=new BrandArtwork();
             gameObject.AddComponent<RallyLighting>().Configure();
             Track = new Stadium(transform);
             wheel=new SteeringWheelHud();
@@ -105,6 +111,25 @@ namespace RaptorRally
             if(Application.isPlaying) { var dust=new GameObject("Shared tire dust"); dust.transform.SetParent(transform,false); dust.layer=12; dust.AddComponent<RallyDust>().Initialize(this); }
             for (int i = 0; i < best.Length; i++) best[i] = PlayerPrefs.GetFloat("coyote-basin-v3-" + i, 0);
             PrepareGrid();
+            if(Application.isPlaying) BeginStartupIntro();
+        }
+        public void BeginStartupIntro()
+        {
+            if(startupSeen) return;
+            startupSeen=true; ClearTouchInput(); Paused=false; Time.timeScale=1;
+            State=Phase.Intro; RaceTime=0; Countdown=0;
+            foreach(var truck in Trucks) truck.Body.isKinematic=true;
+            Intro=new StartupIntro(transform,Branding);
+            View.enabled=false; garageBackground.enabled=false;
+        }
+        public void SkipIntro() { if(IntroActive) Intro.Skip(); }
+        public void AdvanceIntro(float unscaledDt)
+        {
+            if(!IntroActive) return;
+            Intro.Advance(unscaledDt);
+            if(Intro.Active) return;
+            Intro.Dispose(); Intro=null; ClearTouchInput(); nextTouchState=0;
+            State=Phase.Garage; circuitDirty=true;
         }
         public void PrepareGrid()
         {
@@ -130,16 +155,24 @@ namespace RaptorRally
         }
         public void StartRace()
         {
+            if(IntroActive) return;
             ClearTouchInput(); nextTouchState=0;
             Time.timeScale = 1; Paused = false; PrepareGrid(); RaceTime = 0; Countdown = 3; finishFlash = 0; State = Phase.Countdown;
         }
         public void Garage()
         {
+            if(IntroActive) return;
             ClearTouchInput(); nextTouchState=0;
             Paused = false; Time.timeScale = 1; State = Phase.Garage; PrepareGrid();
         }
         void Update()
         {
+            if(IntroActive)
+            {
+                if(Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Space)) SkipIntro();
+                AdvanceIntro(Time.unscaledDeltaTime);
+                return; // A skip key can never also start a race in this frame.
+            }
             if(Input.GetKeyDown(KeyCode.C) && State!=Phase.Garage) FollowPlayer=!FollowPlayer;
             if(Input.GetKeyDown(KeyCode.M)) ReducedMotion=!ReducedMotion;
             if (Input.GetKeyDown(KeyCode.Escape) && State != Phase.Garage) { Paused = !Paused; Time.timeScale = Paused ? 0 : 1; }
@@ -160,7 +193,7 @@ namespace RaptorRally
         void FixedUpdate() { Tick(Time.fixedDeltaTime); }
         public void Tick(float dt)
         {
-            if (Paused || State == Phase.Garage) return;
+            if (Paused || State == Phase.Garage || IntroActive) return;
             if (State == Phase.Countdown)
             {
                 Countdown -= dt;
@@ -184,6 +217,7 @@ namespace RaptorRally
         public static string Clock(float t) => string.Format("{0:00}:{1:00.00}", (int)t / 60, t % 60);
         void LateUpdate()
         {
+            if(IntroActive) { Intro.Render(ReducedMotion); PublishTouchState(); return; }
             RefreshBoard();
             AdvanceWheel(Time.deltaTime);
             UpdateCamera(Time.unscaledDeltaTime);
@@ -196,6 +230,7 @@ namespace RaptorRally
         }
         public void UpdateCamera(float dt,bool snap=false)
         {
+            if(IntroActive) { View.enabled=false; garageBackground.enabled=false; return; }
             float aspect = Mathf.Max(.5f, (float)Screen.width / Screen.height);
             bool tracking=FollowPlayer && State!=Phase.Garage && Trucks.Count>0;
             garageBackground.enabled=State==Phase.Garage;
@@ -260,6 +295,7 @@ namespace RaptorRally
         void OnGUI()
         {
             if (!initialized || Trucks.Count == 0) return;
+            if(IntroActive) { Intro.Draw(TouchControls); return; }
             if(TouchControls) {
                 GUI.matrix=Matrix4x4.identity;
                 if(State==Phase.Garage && garagePreview!=null) {
@@ -276,8 +312,9 @@ namespace RaptorRally
             else {
             Panel(new Rect(0,0,1600,89), ink);
             Panel(new Rect(28,24,5,40), accent);
-            Text(48,13,420,41,"RAPTOR / RALLY",heading);
-            Text(50,54,420,22,"COYOTE BASIN     /     STADIUM CIRCUIT",small);
+            Branding.DrawBadge(new Rect(36,3,94,80));
+            Text(148,13,420,41,"RAPTOR RODEO",heading);
+            Text(150,54,420,22,"COYOTE BASIN     /     STADIUM CIRCUIT",small);
             }
             if (State == Phase.Garage)
             {
@@ -365,6 +402,6 @@ namespace RaptorRally
             GUI.matrix=Matrix4x4.identity;
         }
         static string Ordinal(int n) => n==1?"ST":n==2?"ND":n==3?"RD":"TH";
-        void OnDestroy() { Time.timeScale=1; wheel?.Dispose(); garagePreview?.Dispose(); MotionHud?.Dispose(); if(circuitPreview!=null) { circuitPreview.Release(); Destroy(circuitPreview); } }
+        void OnDestroy() { Time.timeScale=1; Intro?.Dispose(); Branding?.Dispose(); wheel?.Dispose(); garagePreview?.Dispose(); MotionHud?.Dispose(); if(circuitPreview!=null) { circuitPreview.Release(); Destroy(circuitPreview); } }
     }
 }

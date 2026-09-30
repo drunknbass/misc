@@ -1,8 +1,12 @@
-# Raptor Rally
+# Raptor Rodeo
 
 [Play in your browser](https://drunknbass.github.io/misc/raptor-rally/)
 
 An arcade racer with keyboard and mobile touch controls with three stylized Raptor-inspired trucks, four racers, three laps, an original dirt stadium, nitro, a following camera and live Rive instruments.
+
+## Opening sequence
+
+A rotating 3D pixel Ford emblem fades through black to Ford Performance, then the Raptor Off-Roadeo badge and garage. Press Enter, Escape or Space, or tap Skip, to skip the 11.7-second intro. Race retries do not replay it. See [implementation and validation](SPLASH.md).
 
 ## Controls
 
@@ -27,7 +31,7 @@ The on-screen Raptor wheel has 2.5 turns from center to either lock (±900°), f
 
 The complete editable Unity project is in [`unity/`](unity/), including the Rive source in `unity/Design/RacingHud/`. Open it with Unity **6000.6.3f1** plus official Web Build Support. Dependencies are pinned in the package manifest and lock file.
 
-Run **Raptor Rally → Build Browser**, or invoke the editor with `-batchmode -nographics -projectPath /absolute/path/to/unity -buildTarget WebGL -executeMethod PrototypeBuilder.BuildWeb -quit -logFile /absolute/path/to/build.log`. The build appears at `../Web/`. Copy its `index.html`, `touch-controls.css`, `touch-controls.js`, `Build/` and any `StreamingAssets/` into this directory, removing only obsolete generated build files.
+Run **Raptor Rally → Build Browser**, or invoke the editor with `-batchmode -nographics -projectPath /absolute/path/to/unity -buildTarget WebGL -executeMethod PrototypeBuilder.BuildWeb -quit -logFile /absolute/path/to/build.log`. The build appears at `../Web/`. Copy its `index.html`, `touch-controls.css`, `touch-controls.js`, `raptor-badge.jpg`, `Build/` and any `StreamingAssets/` into this directory, removing only obsolete generated build files.
 
 The `RaptorPages` template supplies the loading screen and fullscreen button. Gzip with Unity's decompression fallback works without custom response headers. Native WebAssembly threads are disabled; no cross-origin-isolation headers or third-party hosting service are needed. Hashed build filenames prevent stale assets across deployments. GitHub Pages serves this folder from the repository's `main` branch.
 
@@ -41,7 +45,7 @@ See [validation](VALIDATION.md) for tested behavior and platform limits.
 
 ## Performance update
 
-The latest [Safari and render-pass optimization](performance/WEB-FIRST.md) consolidates truck materials, removes overlapping rail faces, caches the garage circuit preview, reduces shadow/HUD work and applies a 1600×900 web pixel budget. The Unity splash screen and logo are disabled; startup uses the Raptor Rally loading page.
+The latest [Safari and render-pass optimization](performance/WEB-FIRST.md) consolidates truck materials, removes overlapping rail faces, caches the garage circuit preview, reduces shadow/HUD work and applies a 1600×900 web pixel budget. The Unity splash screen and logo are disabled; startup uses a black loading page followed by the Raptor Rodeo logo sequence.
 
 The browser build now batches static scenery, indexes nearby barriers, reuses trucks and cached garage graphics, limits Rive refresh work and caps Retina/fullscreen rendering resolution. See [before/after results and test method](performance/RESULTS.md).
 

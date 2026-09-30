@@ -67,7 +67,7 @@ namespace RaptorRally
         }
         public void Update(RallyGame game,float dt)
         {
-            if(!Ready || game.State==RallyGame.Phase.Garage || (game.Paused && rendered)) return;
+            if(!Ready || game.State==RallyGame.Phase.Garage || game.IntroActive || (game.Paused && rendered)) return;
             var player=game.Player;
             pendingTime+=Mathf.Max(0,dt);
             bool urgent=player.OffCourse!=lastOffCourse || player.Boosting!=lastBoost || game.ReducedMotion!=lastReducedMotion;

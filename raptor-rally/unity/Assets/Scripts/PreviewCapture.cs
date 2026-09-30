@@ -21,6 +21,7 @@ namespace RaptorRally
         {
             var game=Object.FindAnyObjectByType<RallyGame>(); game.Verification=true;
             string output=Path.GetFullPath(Path.Combine(Application.dataPath,"../.."));
+            while(game.IntroActive) yield return null;
             yield return new WaitForSeconds(3);
             if(game.MotionHud==null || !game.MotionHud.Ready) throw new System.Exception("Rive HUD runtime initialization failed");
             ScreenCapture.CaptureScreenshot(Path.Combine(output,"prototype-garage.png"));

@@ -1,4 +1,4 @@
-# Raptor Rally
+# Raptor Rodeo
 
 A Unity arcade-racing prototype inspired by the full-track stadium presentation of the supplied Super Truck Rally / Sidewinder reference. Three selectable stylized 3D vehicles represent the **Ford F-150 Raptor, Bronco Raptor, and Ranger Raptor**.
 
@@ -6,7 +6,7 @@ A Unity arcade-racing prototype inspired by the full-track stadium presentation 
 
 1. Open this folder with **Unity 6000.6.3f1** (the installed editor on the SanDisk volume).
 2. Open `Assets/Scenes/CoyoteBasin.unity`.
-3. Press Unity's Play button, choose a truck, then **Start Race**.
+3. Press Unity's Play button. The opening sequence runs for 11.7 seconds: rotating voxel Ford emblem, black, Ford Performance artwork, black, Raptor badge, then the garage. Press Return, Escape or Space, or use Skip intro, to fade straight to the garage. Choose a truck, then **Start Race**.
 
 The scene contains a bootstrap component. It constructs the stadium and truck geometry on entering Play mode; an empty edit-time scene is expected. Recreate the bootstrap scene through **Raptor Rally → Create or reset prototype scene** if needed. That menu action replaces the active scene.
 
@@ -54,6 +54,9 @@ For unattended verification with the installed editor:
 
 ## Source map
 
+- `Assets/Scripts/StartupIntro.cs`: extruded pixel emblem, black transitions, supplied artwork framing and skip fade. Gameplay is gated until completion; retries do not replay the intro.
+- `Assets/Resources/Brand/`: unchanged supplied JPEGs and dedicated artwork/emblem shaders.
+- `Assets/Scripts/SplashCapture.cs`: opt-in editor screenshot and runtime checks (`-raptorSplashPreview` with `PrototypeBuilder.Preview`).
 - `Assets/Scripts/Stadium.cs`: course centerline, ribbon mesh, jumps, scenery, materials.
 - `Assets/Scripts/RaptorTruck.cs`: vehicle presets, driving, AI and checkpoint progress.
 - `Assets/Scripts/RaptorModel.cs`: shaped body meshes, wheel-well cutouts, flares, FORD grilles, distinct lights and treaded wheels.

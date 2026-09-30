@@ -36,3 +36,9 @@ body.touch-enabled{height:100dvh;overscroll-behavior:none;--header-height:48px}
 @media(prefers-reduced-motion:reduce){#touch-ui .drive-button[aria-pressed=true]{transform:none}}
 
 .touch-enabled #stage:fullscreen #touch-ui{top:env(safe-area-inset-top)}
+
+/* Source JPEG is framed with CSS only; the original pixels are unchanged. */
+.brand-crop{position:absolute;right:0;top:0;width:72px;aspect-ratio:292/242;overflow:hidden;background:#000}
+.brand-crop img{position:absolute;width:116.096%;height:122.314%;left:-8.219%;top:-4.132%;max-width:none}
+.garage-heading{padding-right:82px}
+#touch-ui #intro-skip{position:absolute;right:max(24px,env(safe-area-inset-right));bottom:max(24px,env(safe-area-inset-bottom));background:transparent;border:0;color:#90959c;font-weight:400;min-width:100px;min-height:44px}
