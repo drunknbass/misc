@@ -41,7 +41,7 @@ public static class TrackBuilderVerification
         var report=new StringBuilder("# Track builder verification\n\n");
         var design=TrackDesign.Parse(Preset);
         Check(design.Validate()==null,"starter invalid");
-        foreach(string invalid in new[]{"{}","null","{bad",Preset.Replace("24,25","24,24"),Preset.Replace("24,25","24,20"),Preset.Replace("0,1,0,4","0,1,1,4"),Preset.Replace("\"version\":1","\"version\":2"),Preset.Replace("0,1,0,4","0,9,0,4")}) {
+        foreach(string invalid in new[]{"{}","null","{bad",Preset.Replace("24,25","24,24"),Preset.Replace("24,25","24,20"),Preset.Replace("0,1,0,4","0,1,1,4"),Preset.Replace("\"version\":1","\"version\":99"),Preset.Replace("0,1,0,4","0,9,0,4")}) {
             bool rejected=false; try { TrackDesign.Parse(invalid); } catch(ArgumentException) { rejected=true; } Check(rejected,"accepted invalid course: "+invalid);
         }
         var points=new Vector3[Stadium.Samples];var surfaces=new int[Stadium.Samples];design.Sample(points,surfaces);

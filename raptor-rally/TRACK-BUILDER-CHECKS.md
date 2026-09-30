@@ -1,10 +1,12 @@
 # Track builder verification
 
 - PASS: valid preset and all six pieces; rejects malformed, missing, duplicate, disconnected, corner-obstacle, unknown-piece and version-mismatched courses; finite nondegenerate closed geometry.
-- PASS: F-150 RAPTOR completed 3 laps with all 4 AI drivers; time=43.64s, recoveries=0, max air=2.21m.
-- PASS: BRONCO RAPTOR completed 3 laps with all 4 AI drivers; time=45.24s, recoveries=0, max air=2.18m.
-- PASS: RANGER RAPTOR completed 3 laps with all 4 AI drivers; time=44.14s, recoveries=0, max air=2.23m.
+- PASS: F-150 RAPTOR completed 3 laps with all 4 AI drivers; time=43.62s, recoveries=0, max air=2.21m.
+- PASS: BRONCO RAPTOR completed 3 laps with all 4 AI drivers; time=45.20s, recoveries=0, max air=2.19m.
+- PASS: RANGER RAPTOR completed 3 laps with all 4 AI drivers; time=44.08s, recoveries=0, max air=2.22m.
 - PASS: invalid edits leave current track intact; rebuild rebinds all trucks; closing keeps custom course; stock circuit restores and races.
+
+## Earlier builder checks (retained)
 
 - PASS: alternate 20-tile layout reaching every grid edge: F-150 completed three laps without recovery in 72.54s.
 - PASS: mud produces additional physical deceleration versus flat dirt; nitro pad refills the truck reservoir.

@@ -22,6 +22,8 @@ namespace RaptorRally
         public readonly TrackDesign Design;
         public string CourseName => Design==null?"COYOTE BASIN":Design.name.ToUpperInvariant();
         readonly int[] surfacePieces=new int[Samples];
+        readonly bool[] elevated=new bool[Samples];
+        public bool HasCrossings { get; private set; }
         readonly List<Object> owned=new List<Object>();
         T Own<T>(T value) where T:Object { owned.Add(value); return value; }
         public int SurfaceAt(int index) => surfacePieces[Wrap(index)];
@@ -46,11 +48,12 @@ namespace RaptorRally
 
         public Stadium(Transform parent,TrackDesign design=null)
         {
-            Design=design;
+            Design=design; HasCrossings=design!=null && design.HasCrossings;
             Root = new GameObject(CourseName).transform;
             Root.SetParent(parent);
-            if(Design==null) BuildCenterline(); else Design.Sample(Points,surfacePieces);
+            if(Design==null) BuildCenterline(); else Design.Sample(Points,surfacePieces,elevated);
             BuildTrack();
+            if(HasCrossings) BuildCrossovers();
             if(Design==null) BuildScenery(); else BuildCustomScenery();
             for(int i=0;i<Barriers.Count;i++)
             {
@@ -105,7 +108,7 @@ namespace RaptorRally
             int best = 0; float distance = float.MaxValue;
             for (int i = 0; i < Samples; i++)
             {
-                Vector3 d = p - Points[i]; d.y = 0;
+                Vector3 d = p - Points[i]; d.y = HasCrossings?(d.y-.92f)*2:0;
                 if (d.sqrMagnitude < distance) { best = i; distance = d.sqrMagnitude; }
             }
             return best;
@@ -258,7 +261,7 @@ namespace RaptorRally
                     Vector3 outside=Points[sample]+Side(sample)*(HalfWidth+3.4f)*sign; outside.y=0;
                     vertices.Add(sign==1?edge:outside); vertices.Add(sign==1?outside:edge);
                     uv.Add(new Vector2(0,i/32f)); uv.Add(new Vector2(1,i/32f));
-                    if(i<Samples) { int v=i*2; triangles.AddRange(new[]{v,v+2,v+1,v+1,v+2,v+3}); }
+                    if(i<Samples && !elevated[sample] && !elevated[Wrap(sample+1)]) { int v=i*2; triangles.AddRange(new[]{v,v+2,v+1,v+1,v+2,v+3}); }
                 }
                 var mesh=new Mesh { name="Sloped recovery verge",vertices=vertices.ToArray(),triangles=triangles.ToArray(),uv=uv.ToArray() };
                 Own(mesh); mesh.RecalculateNormals(); mesh.RecalculateTangents();
@@ -342,6 +345,22 @@ namespace RaptorRally
                 state==RallyGame.Phase.Countdown?"GET READY":state==RallyGame.Phase.Results?"FINISH":"LAP "+lap+" / 3";
             string value=CourseName+"\n"+status+"\n"+(state==RallyGame.Phase.Garage?"RAPTOR RALLY":"P1  "+leader);
             if(raceBoard.text!=value) raceBoard.text=value;
+        }
+        void BuildCrossovers()
+        {
+            // No sloped recovery shoulders here: they would seal the lower road.
+            for(int i=0;i<Samples;i++) {
+                int next=Wrap(i+1);
+                if(!elevated[i] || Points[i].y<4 || Points[next].y<4) continue;
+                var deck=Box("Crossover jump underside",(Points[i]+Points[next])*.5f-Vector3.up*.2f,new Vector3(HalfWidth*2,.35f,Vector3.Distance(Points[i],Points[next])+.04f),new Color(.24f,.22f,.17f));
+                deck.transform.rotation=Quaternion.LookRotation(Points[next]-Points[i]);
+            }
+            var roles=Design.CrossoverRoles();
+            for(int i=0;i<roles.Length;i++) if(roles[i]==2) {
+                Vector3 center=TrackDesign.Center(Design.cells[i]);
+                foreach(int x in new[]{-1,1}) foreach(int z in new[]{-1,1})
+                    Box("Crossover support",center+new Vector3(x*10,1.9f,z*6.3f),new Vector3(.65f,3.8f,.65f),new Color(.27f,.25f,.20f));
+            }
         }
         void BuildCustomScenery()
         {

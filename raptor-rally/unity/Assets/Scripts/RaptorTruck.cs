@@ -205,7 +205,9 @@ namespace RaptorRally
         {
             SampleCourse();
             if (Finished || OffCourse) return;
-            Vector3 delta = Body.position - Track.Gate(NextGate); delta.y = 0;
+            Vector3 delta = Body.position - Track.Gate(NextGate);
+            if(Track.HasCrossings && Mathf.Abs(delta.y-.92f)>2.2f) return;
+            delta.y = 0;
             // Sequential gates plus forward travel reject backwards laps and infield shortcuts.
             if (delta.sqrMagnitude > 7.2f * 7.2f || Vector3.Dot(Body.linearVelocity, Track.Tangent(NextGate * Stadium.Samples / Stadium.GateCount)) < .2f) return;
             if (NextGate == 0)
