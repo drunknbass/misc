@@ -132,7 +132,7 @@ namespace RaptorRally
             if(Time.unscaledTime<nextTouchState) return;
             nextTouchState=Time.unscaledTime+.1f;
             RaptorBuilderState((int)State,Track.Design!=null?1:0,Track.CourseName,BuilderError);
-            RaptorTouchState((int)State,Paused?1:0,Selected,Standings().IndexOf(Player)+1,Mathf.Min(3,Player.CompletedLaps+1),Player.Finished?Player.FinishTime:RaceTime,Mathf.RoundToInt(Player.Speed*2.23694f),Player.Nitro,Countdown,Player.OffCourse?1:0,(int)CameraMode,ReducedMotion?1:0,IntroActive && Intro.CurrentCard!=StartupIntro.Card.Black && Intro.Elapsed>.65f && Intro.Opacity>.2f?1:0);
+            RaptorTouchState((int)State,Paused?1:0,Selected,Standings().IndexOf(Player)+1,Mathf.Min(3,Player.CompletedLaps+1),Player.Finished?Player.FinishTime:RaceTime,Mathf.RoundToInt(Player.Speed*2.23694f),Player.Nitro,Countdown,Player.OffCourse?1:0,(int)CameraMode,ReducedMotion?1:0,IntroActive && Intro.SkipVisible?1:0);
 #endif
         }
 
@@ -276,7 +276,7 @@ namespace RaptorRally
         public static string Clock(float t) => string.Format("{0:00}:{1:00.00}", (int)t / 60, t % 60);
         void LateUpdate()
         {
-            if(IntroActive) { Intro.Render(ReducedMotion); PublishTouchState(); return; }
+            if(IntroActive) { PublishTouchState(); return; }
             if(State==Phase.Builder) { PublishTouchState(); return; }
             RefreshBoard();
             AdvanceWheel(Time.deltaTime);

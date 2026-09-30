@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0b161d">
 <meta name="description" content="Race three Ford Raptor-inspired trucks through Coyote Basin. Four trucks, three laps, all dirt.">
 <title>Raptor Rodeo · Coyote Basin</title>
-<link rel="stylesheet" href="touch-controls.css?v=7">
+<link rel="stylesheet" href="touch-controls.css?v=8">
 <link rel="stylesheet" href="track-builder.css?v=4">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b161d'/%3E%3Cpath d='M7 24L16 7l9 17h-5l-4-9-4 9z' fill='%23b9f26a'/%3E%3C/svg%3E">
 <style>
@@ -26,7 +26,7 @@ body.intro-pending header{display:none}body.intro-pending #stage{height:100dvh}b
 <div id="touch-ui" hidden>
   <section id="touch-intro" aria-label="Opening logos"><button id="intro-skip" data-action="skip" hidden>Skip intro ›</button></section>
   <section id="touch-garage" aria-label="Choose your Raptor" hidden>
-    <div class="garage-heading"><div class="brand-crop"><canvas id="menu-badge" width="116" height="96" role="img" aria-label="Bronco Off-Roadeo Raptor — Raptor Rodeo game logo"></canvas></div><span class="eyebrow">COYOTE BASIN / 3 LAPS</span><h2 id="touch-truck-name">F-150 RAPTOR</h2></div>
+    <div class="garage-heading"><div class="brand-crop"><canvas id="menu-badge" width="292" height="242" role="img" aria-label="Bronco Off-Roadeo Raptor — Raptor Rodeo game logo"></canvas></div><span class="eyebrow">COYOTE BASIN / 3 LAPS</span><h2 id="touch-truck-name">F-150 RAPTOR</h2></div>
     <div class="garage-actions touch-glass"><p id="touch-truck-description">Long wheelbase / strong boost</p><div class="truck-options" role="group" aria-label="Truck selection"><button data-action="truck0" aria-pressed="true">F-150</button><button data-action="truck1" aria-pressed="false">BRONCO</button><button data-action="truck2" aria-pressed="false">RANGER</button></div><button data-action="start" class="touch-primary">START RACE →</button><p class="touch-tip">Hold gas + steer. Slide gas → nitro → brake.<br>Nitro keeps accelerating. Brake reverses once stopped.</p></div>
   </section>
   <section id="touch-race" hidden aria-label="Race instruments">
@@ -71,7 +71,7 @@ body.intro-pending header{display:none}body.intro-pending #stage{height:100dvh}b
 </section>
 <div id="builder-busy" hidden role="status" aria-live="polite" aria-atomic="true"><div class="builder-busy-card"><span class="builder-spinner" aria-hidden="true"></span><h2 id="builder-busy-title">Opening track builder…</h2><p id="builder-busy-detail">Getting your saved circuit ready.</p></div></div>
 <p id="builder-feedback" hidden role="alert"></p>
-<script src="touch-controls.js?v=7"></script>
+<script src="touch-controls.js?v=8"></script>
 <script src="track-model.js?v=3"></script>
 <script src="track-builder.js?v=4"></script>
 <script>
@@ -81,12 +81,12 @@ function resizeCanvas(){const r=canvas.getBoundingClientRect(),scale=Math.min(wi
 new ResizeObserver(resizeCanvas).observe(canvas);resizeCanvas();
 function showError(message){loading.hidden=false;progress.hidden=true;status.className='error';status.textContent='The game could not start. '+String(message);document.getElementById('retry').hidden=false;}
 document.getElementById('retry').onclick=()=>location.reload();
-const loader=document.createElement('script');loader.src='Build/c311d63d566f2fcbd5fca16129bd689a.loader.js';loader.onerror=()=>showError('Check your connection and reload.');
+const loader=document.createElement('script');loader.src='Build/0d6e9bcfe8bff2474de56ac1a69c9e5c.loader.js';loader.onerror=()=>showError('Check your connection and reload.');
 loader.onload=()=>createUnityInstance(canvas,{
 arguments:[],
-dataUrl:'Build/62853c3eb52ba555e19bf9de3508648f.data.unityweb',
-frameworkUrl:'Build/631002012669f9fe33c30e9a01a73288.framework.js.unityweb',
-codeUrl:'Build/78c1cc4d61964a776101df8bc53e02bd.wasm.unityweb',
+dataUrl:'Build/e08c331e3f53ddf380eb574a56c3c1af.data.unityweb',
+frameworkUrl:'Build/c0aed9cadb8ceea9c9d29d0a2ea61d6a.framework.js.unityweb',
+codeUrl:'Build/60f9e3a0928a24f3ea4ba0fc5cc84217.wasm.unityweb',
 streamingAssetsUrl:'StreamingAssets',companyName:"RaptorRallyPrototype",productName:"Raptor Rally",productVersion:"1.0",matchWebGLToCanvasSize:false,
 showBanner:(message,type)=>{if(type==='error')showError(message);else console.warn(message);}
 },value=>{progress.value=value;status.textContent=value<.9?'Loading the track… '+Math.round(value*100)+'%':'Starting engines…';}).then(instance=>{window.raptorGame=instance;loading.hidden=true;fullscreen.disabled=false;fullscreen.onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else if(document.getElementById('stage').requestFullscreen)await document.getElementById('stage').requestFullscreen();}catch(error){console.warn('Fullscreen unavailable',error);}canvas.focus();};if(!document.fullscreenEnabled)fullscreen.hidden=true;canvas.focus();document.documentElement.dataset.gameReady='true';window.raptorTouch.connect(instance);window.raptorBuilder.connect(instance);}).catch(showError);

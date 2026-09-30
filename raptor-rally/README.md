@@ -6,7 +6,7 @@ An arcade racer with keyboard and mobile touch controls with three stylized Rapt
 
 ## Opening sequence
 
-A rotating 3D pixel Ford emblem fades through black to Ford Performance, then the Raptor Off-Roadeo badge and garage. Press Enter, Escape or Space, or tap Skip, to skip the 11.7-second intro. Race retries do not replay it. See [implementation and validation](SPLASH.md). The refined emblem has a solid rear surface, coarser pixels and a subtle rotation-dependent shimmer; both logo cards share the pixel style. See [refinement verification](SPLASH-REFINEMENT.md).
+The 6.6-second Ford-only intro fades in a sharp oval, wipes downward to reveal an 88×34 pixel version, then fades to black and enters the garage. Skip remains visible throughout; Enter, Escape and Space also skip. In-game Raptor badges use the original artwork without pixel filtering. Race retries do not replay the intro. See [intro validation](INTRO-WIPE-CHECKS.md) and [artwork provenance](unity/Design/Brand/PROVENANCE.md).
 
 ## Controls
 
@@ -59,7 +59,7 @@ See [validation](VALIDATION.md) for tested behavior and platform limits.
 
 ## Performance update
 
-The latest [Safari and render-pass optimization](performance/WEB-FIRST.md) consolidates truck materials, removes overlapping rail faces, caches the garage circuit preview, reduces shadow/HUD work and applies a 1600×900 web pixel budget. The Unity splash screen and logo are disabled; startup uses a black loading page followed by the Raptor Rodeo logo sequence.
+The latest [Safari and render-pass optimization](performance/WEB-FIRST.md) consolidates truck materials, removes overlapping rail faces, caches the garage circuit preview, reduces shadow/HUD work and applies a 1600×900 web pixel budget. The Unity splash screen and logo are disabled; startup uses a black loading page followed by the Ford sharp-to-pixel intro.
 
 The browser build now batches static scenery, indexes nearby barriers, reuses trucks and cached garage graphics, limits Rive refresh work and caps Retina/fullscreen rendering resolution. See [before/after results and test method](performance/RESULTS.md).
 

@@ -39,7 +39,7 @@ public static class SplashMeshVerification
         int badEdges=0; foreach(int count in edges.Values) if(count!=2) badEdges++;
         if(badEdges!=0) throw new Exception("Emblem has "+badEdges+" unsealed or non-manifold edges");
         if(cells<1000 || mesh.bounds.size.z<.4f) throw new Exception("Invalid solid emblem");
-        foreach(float time in new[]{4.9f,8f,11.5f}) if(StartupIntro.CardAt(time)!=StartupIntro.Card.Black || StartupIntro.OpacityAt(time)!=0) throw new Exception("Black transition changed");
+        foreach(float time in new[]{6.35f,6.4f,6.5f}) if(StartupIntro.CardAt(time)!=StartupIntro.Card.Black || StartupIntro.OpacityAt(time)!=0) throw new Exception("Black transition changed");
         string report="Original 104x40 brightness mask: "+holes.Count+" enclosed missing cells: "+string.Join("; ",holes)+"\nNew mesh: "+cells+" occupied cells; "+badEdges+" unsealed/non-manifold edges; depth "+mesh.bounds.size.z+". Black transition timing checks passed.\n";
         File.WriteAllText(Path.GetFullPath(Path.Combine(Application.dataPath,"../../splash-refinement-mesh.txt")),report);
         UnityEngine.Object.DestroyImmediate(mesh);

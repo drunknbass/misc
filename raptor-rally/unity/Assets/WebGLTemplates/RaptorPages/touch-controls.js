@@ -15,10 +15,10 @@
       event.preventDefault();
     }
   },{capture:true,passive:false});
-  // Use the same 116×96 cell grid and source crop as Unity's badge shader.
+  // Keep the menu badge at its original crop resolution; pixel styling belongs only to the intro.
   // This is a display-only canvas; the supplied JPEG remains unchanged.
   const badge=document.getElementById('menu-badge'),badgeSource=new Image();
-  badgeSource.onload=()=>{const context=badge.getContext('2d');context.imageSmoothingEnabled=false;context.drawImage(badgeSource,24,10,292,242,0,0,116,96);};
+  badgeSource.onload=()=>{const context=badge.getContext('2d');context.imageSmoothingEnabled=true;context.imageSmoothingQuality="high";context.drawImage(badgeSource,24,10,292,242,0,0,292,242);};
   badgeSource.src='raptor-badge.jpg';
   const holdButtons=[...root.querySelectorAll('[data-bit]')],pointers=new Map();
   const pedals=holdButtons.filter(button=>button.closest('.pedal-group'));
@@ -92,7 +92,7 @@
       const intro=state.phase===4,garage=state.phase===0,modal=!intro && (state.paused || state.phase===3);
       document.body.classList.toggle("intro-pending",intro);
       document.documentElement.dataset.introActive=String(intro);
-      byId("touch-intro").hidden=!intro;byId("intro-skip").hidden=!intro || !state.introSkipVisible;
+      byId("touch-intro").hidden=!intro;byId("intro-skip").hidden=!intro;
       byId('touch-garage').hidden=!garage;byId('touch-race').hidden=garage || intro;byId('touch-modal').hidden=!modal;
       byId('touch-controller').hidden=modal || garage || intro;
       for(const button of holdButtons)button.disabled=!canDrive();

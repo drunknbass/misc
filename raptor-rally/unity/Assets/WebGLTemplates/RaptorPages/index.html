@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0b161d">
 <meta name="description" content="Race three Ford Raptor-inspired trucks through Coyote Basin. Four trucks, three laps, all dirt.">
 <title>Raptor Rodeo · Coyote Basin</title>
-<link rel="stylesheet" href="touch-controls.css?v=7">
+<link rel="stylesheet" href="touch-controls.css?v=8">
 <link rel="stylesheet" href="track-builder.css?v=4">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b161d'/%3E%3Cpath d='M7 24L16 7l9 17h-5l-4-9-4 9z' fill='%23b9f26a'/%3E%3C/svg%3E">
 <style>
@@ -26,7 +26,7 @@ body.intro-pending header{display:none}body.intro-pending #stage{height:100dvh}b
 <div id="touch-ui" hidden>
   <section id="touch-intro" aria-label="Opening logos"><button id="intro-skip" data-action="skip" hidden>Skip intro ›</button></section>
   <section id="touch-garage" aria-label="Choose your Raptor" hidden>
-    <div class="garage-heading"><div class="brand-crop"><canvas id="menu-badge" width="116" height="96" role="img" aria-label="Bronco Off-Roadeo Raptor — Raptor Rodeo game logo"></canvas></div><span class="eyebrow">COYOTE BASIN / 3 LAPS</span><h2 id="touch-truck-name">F-150 RAPTOR</h2></div>
+    <div class="garage-heading"><div class="brand-crop"><canvas id="menu-badge" width="292" height="242" role="img" aria-label="Bronco Off-Roadeo Raptor — Raptor Rodeo game logo"></canvas></div><span class="eyebrow">COYOTE BASIN / 3 LAPS</span><h2 id="touch-truck-name">F-150 RAPTOR</h2></div>
     <div class="garage-actions touch-glass"><p id="touch-truck-description">Long wheelbase / strong boost</p><div class="truck-options" role="group" aria-label="Truck selection"><button data-action="truck0" aria-pressed="true">F-150</button><button data-action="truck1" aria-pressed="false">BRONCO</button><button data-action="truck2" aria-pressed="false">RANGER</button></div><button data-action="start" class="touch-primary">START RACE →</button><p class="touch-tip">Hold gas + steer. Slide gas → nitro → brake.<br>Nitro keeps accelerating. Brake reverses once stopped.</p></div>
   </section>
   <section id="touch-race" hidden aria-label="Race instruments">
@@ -71,7 +71,7 @@ body.intro-pending header{display:none}body.intro-pending #stage{height:100dvh}b
 </section>
 <div id="builder-busy" hidden role="status" aria-live="polite" aria-atomic="true"><div class="builder-busy-card"><span class="builder-spinner" aria-hidden="true"></span><h2 id="builder-busy-title">Opening track builder…</h2><p id="builder-busy-detail">Getting your saved circuit ready.</p></div></div>
 <p id="builder-feedback" hidden role="alert"></p>
-<script src="touch-controls.js?v=7"></script>
+<script src="touch-controls.js?v=8"></script>
 <script src="track-model.js?v=3"></script>
 <script src="track-builder.js?v=4"></script>
 <script>

@@ -25,8 +25,8 @@ namespace RaptorRally
             Check(game.IntroActive,"startup intro missing");
             Check(game.Branding.Performance.width==720 && game.Branding.Performance.height==1280,"source dimensions changed");
             Check(game.Branding.Badge.width==339 && game.Branding.Badge.height==296,"badge dimensions changed");
-            Check(game.Intro.VoxelCount>1000 && game.Intro.MeshBounds.size.z>.4f,"emblem has no solid depth");
-            foreach(float t in new[]{4.9f,8f,11.5f}) Check(StartupIntro.CardAt(t)==StartupIntro.Card.Black && StartupIntro.OpacityAt(t)==0,"black gap missing");
+            Check(game.Branding.Ford.width>=1024,"sharp Ford artwork missing");
+            Check(StartupIntro.RevealAt(1)==0 && StartupIntro.RevealAt(4)==1,"wipe timeline invalid");
             var position=game.Player.Body.position;
             game.StartRace(); game.Garage(); game.SetTouchControls(1); game.TouchAction("start"); game.SetTouchInput(31); game.Tick(5);
             Check(game.IntroActive && game.RaceTime==0 && game.Countdown==0 && game.Player.Throttle==0 && game.Player.Body.isKinematic && game.Player.Body.position==position,"gameplay escaped intro guard");
@@ -37,8 +37,8 @@ namespace RaptorRally
             yield return new WaitForSecondsRealtime(.2f);
             Check(game.Intro.Elapsed>before,"intro depends on simulation clock");
             Time.timeScale=1;
-            float[] times={.8f,1.65f,3.9f,4.85f,6.3f,8f,9.6f};
-            string[] names={"01-voxel","02-voxel-side","03-voxel-front","04-black","05-ford-performance","06-black","07-raptor-badge"};
+            float[] times={1f,2.3f,3f,3.7f,4.6f,5.8f,6.4f};
+            string[] names={"01-sharp","02-wipe-start","03-wipe-half","04-wipe-end","05-pixel","06-fade","07-black"};
             for(int i=0;i<times.Length;i++)
             {
                 while(game.IntroActive && game.Intro.Elapsed<times[i]) yield return null;
@@ -58,7 +58,7 @@ namespace RaptorRally
                 Check(intro.Active && intro.Opacity<1,"skip did not fade");
                 intro.Advance(.2f); Check(!intro.Active,"skip did not finish");
             }
-            File.WriteAllText(Path.Combine(output,"verification.txt"),"PASS: source dimensions, extruded voxel depth, black intervals, race entry and touch input guards, stationary truck, unscaled intro clock, automatic menu transition, no replay on retry, skip fade. Captured seven intro frames and menu.\n");
+            File.WriteAllText(Path.Combine(output,"verification.txt"),"PASS: source dimensions, single Ford card, vertical wipe, race entry and touch input guards, stationary truck, unscaled intro clock, automatic menu transition, no replay on retry, skip fade. Captured seven intro frames and menu.\n");
             Debug.Log("RAPTOR SPLASH QA PASSED");
             UnityEditor.EditorApplication.Exit(0);
         }
