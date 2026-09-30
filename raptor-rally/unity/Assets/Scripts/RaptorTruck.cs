@@ -143,6 +143,9 @@ namespace RaptorRally
             UpdateBarrierRecovery();
             if (!IsPlayer || Autopilot || Finished) DriveAI(dt);
             Grounded = HasGroundContact();
+            int surface=Track.SurfaceAt(nearestSample);
+            if(Grounded && !OffCourse && surface==4) Body.AddForce(-Vector3.ProjectOnPlane(Body.linearVelocity,Vector3.up)*1.5f,ForceMode.Acceleration);
+            if(Grounded && !OffCourse && surface==5) Nitro=Mathf.Min(1,Nitro+dt*.32f);
             bool slidingWall=wallContactTime>0;
             float contactGrip=slidingWall?.12f:Mathf.Lerp(1,.22f,Mathf.Clamp01(truckContactTime/.28f));
             wallContactTime=Mathf.Max(0,wallContactTime-dt); truckContactTime=Mathf.Max(0,truckContactTime-dt);

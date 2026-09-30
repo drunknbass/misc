@@ -3,7 +3,7 @@
   const root=document.getElementById('touch-ui'),byId=id=>document.getElementById(id);
   // Suppress native text selection, image dragging, callouts and double-tap defaults.
   // Do not stop propagation: Unity input and normal button clicks still receive events.
-  const suppressNative=event=>event.preventDefault();
+  const suppressNative=event=>{if(!event.target?.closest?.('input, textarea'))event.preventDefault();};
   for(const type of ['selectstart','contextmenu','dragstart','dblclick']){
     document.body.addEventListener(type,suppressNative,{capture:true});
   }
@@ -88,6 +88,7 @@
     update(next){
       const changed=state.phase!==next.phase || state.paused!==next.paused;
       state=next;if(changed)releaseAll();
+      root.hidden=!enabled || state.phase===5;
       const intro=state.phase===4,garage=state.phase===0,modal=!intro && (state.paused || state.phase===3);
       document.body.classList.toggle("intro-pending",intro);
       document.documentElement.dataset.introActive=String(intro);

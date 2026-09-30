@@ -8,7 +8,7 @@ namespace RaptorRally
     // share a draw call. Spatial chunks retain useful culling in the follow camera.
     public static class StadiumBatcher
     {
-        public static void Combine(Transform root)
+        public static void Combine(Transform root,List<Object> owned=null)
         {
             var groups=new Dictionary<Vector2Int,List<CombineInstance>>();
             var staged=new List<Mesh>();
@@ -31,9 +31,11 @@ namespace RaptorRally
                 Object.DestroyImmediate(renderer); Object.DestroyImmediate(filter);
             }
             var shared=new Material(Resources.Load<Shader>("StadiumVertexColor")) { name="Batched stadium colors" };
+            owned?.Add(shared);
             foreach(var pair in groups)
             {
                 var mesh=new Mesh { name="Stadium chunk "+pair.Key,indexFormat=IndexFormat.UInt32 };
+                owned?.Add(mesh);
                 mesh.CombineMeshes(pair.Value.ToArray(),true,true); mesh.RecalculateBounds(); mesh.UploadMeshData(true);
                 var go=new GameObject(mesh.name,typeof(MeshFilter),typeof(MeshRenderer));
                 go.transform.SetParent(root,false); go.GetComponent<MeshFilter>().sharedMesh=mesh;

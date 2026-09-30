@@ -31,11 +31,19 @@ The on-screen Raptor wheel has 2.5 turns from center to either lock (±900°), f
 
 Press C or use the mobile camera button to cycle through whole-track, follow and driver-seat views. Each truck has a left-hand cockpit with an A-pillar, dashboard, hood and animated wheel. Camera choice persists across retries and truck changes. See [camera validation](COCKPIT.md).
 
+## Track builder
+
+Open **Track builder** in the header. Draw a closed route on the 7×5 grid (8–34 tiles), then paint flat dirt, jumps, tabletops, rollers, mud or nitro recharge pads. **Race this track** generates the Unity terrain, barriers, AI racing line and checkpoints and starts a three-lap race. All three Raptors and camera views work on custom circuits. **Edit track** returns to your draft; **Race Coyote Basin** restores the original course.
+
+Corners and the two starting grid tiles must stay flat. Use **Start line** to choose two consecutive flat straights, and Undo/Redo to revise the layout. Drafts autosave locally; **Save course** stores up to 12 named courses in this browser (saving an existing name replaces it). Export/import `.raptor.json` files to move courses between devices. Files are validated in the browser and Unity; imports never run code. Custom times do not overwrite Coyote Basin records. The visual editor is part of the web shell; Unity consumes the same versioned course schema.
+
+See [physics validation](TRACK-BUILDER-CHECKS.md). Physical iPhone testing remains outstanding.
+
 ## Source and rebuilding
 
 The complete editable Unity project is in [`unity/`](unity/), including the Rive source in `unity/Design/RacingHud/`. Open it with Unity **6000.6.3f1** plus official Web Build Support. Dependencies are pinned in the package manifest and lock file.
 
-Run **Raptor Rally → Build Browser**, or invoke the editor with `-batchmode -nographics -projectPath /absolute/path/to/unity -buildTarget WebGL -executeMethod PrototypeBuilder.BuildWeb -quit -logFile /absolute/path/to/build.log`. The build appears at `../Web/`. Copy its `index.html`, `touch-controls.css`, `touch-controls.js`, `raptor-badge.jpg`, `Build/` and any `StreamingAssets/` into this directory, removing only obsolete generated build files.
+Run **Raptor Rally → Build Browser**, or invoke the editor with `-batchmode -nographics -projectPath /absolute/path/to/unity -buildTarget WebGL -executeMethod PrototypeBuilder.BuildWeb -quit -logFile /absolute/path/to/build.log`. The build appears at `../Web/`. Copy its `index.html`, `touch-controls.css`, `touch-controls.js`, `track-builder.css`, `track-builder.js`, `track-model.js`, `raptor-badge.jpg`, `Build/` and any `StreamingAssets/` into this directory, removing only obsolete generated build files.
 
 The `RaptorPages` template supplies the loading screen and fullscreen button. Gzip with Unity's decompression fallback works without custom response headers. Native WebAssembly threads are disabled; no cross-origin-isolation headers or third-party hosting service are needed. Hashed build filenames prevent stale assets across deployments. GitHub Pages serves this folder from the repository's `main` branch.
 

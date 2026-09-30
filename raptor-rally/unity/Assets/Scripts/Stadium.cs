@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace RaptorRally
 {
-    public sealed class Stadium
+    public sealed class Stadium : System.IDisposable
     {
         public const int Samples = 384;
         public const int GateCount = 48;
@@ -19,6 +19,18 @@ namespace RaptorRally
         }
         public static readonly int[] JumpCrests={25,182,269};
         public readonly Transform Root;
+        public readonly TrackDesign Design;
+        public string CourseName => Design==null?"COYOTE BASIN":Design.name.ToUpperInvariant();
+        readonly int[] surfacePieces=new int[Samples];
+        readonly List<Object> owned=new List<Object>();
+        T Own<T>(T value) where T:Object { owned.Add(value); return value; }
+        public int SurfaceAt(int index) => surfacePieces[Wrap(index)];
+        public void Dispose() {
+            Root.gameObject.SetActive(false);
+            if(Application.isPlaying) Object.Destroy(Root.gameObject); else Object.DestroyImmediate(Root.gameObject);
+            foreach(var resource in owned) { if(Application.isPlaying) Object.Destroy(resource); else Object.DestroyImmediate(resource); }
+            owned.Clear();
+        }
         readonly Dictionary<Color, Material> materials = new Dictionary<Color, Material>();
         public readonly Color Sand = new Color(.64f, .38f, .18f);
         public readonly Color Dark = new Color(.055f, .095f, .12f);
@@ -32,20 +44,21 @@ namespace RaptorRally
         public const float BarrierCellSize=12;
         public string BoardText => raceBoard.text;
 
-        public Stadium(Transform parent)
+        public Stadium(Transform parent,TrackDesign design=null)
         {
-            Root = new GameObject("Coyote Basin • original course").transform;
+            Design=design;
+            Root = new GameObject(CourseName).transform;
             Root.SetParent(parent);
-            BuildCenterline();
+            if(Design==null) BuildCenterline(); else Design.Sample(Points,surfacePieces);
             BuildTrack();
-            BuildScenery();
+            if(Design==null) BuildScenery(); else BuildCustomScenery();
             for(int i=0;i<Barriers.Count;i++)
             {
                 var cell=BarrierCell(Barriers[i].Center);
                 if(!barrierCells.TryGetValue(cell,out var indices)) barrierCells[cell]=indices=new List<int>();
                 indices.Add(i);
             }
-            StadiumBatcher.Combine(Root);
+            StadiumBatcher.Combine(Root,owned);
         }
 
         void BuildCenterline()
@@ -134,7 +147,7 @@ namespace RaptorRally
             if (!materials.TryGetValue(color, out Material mat))
             {
                 mat = new Material(Shader.Find("Standard")) { color = color };
-                mat.SetFloat("_Glossiness", .12f); materials[color] = mat;
+                Own(mat); mat.SetFloat("_Glossiness", .12f); materials[color] = mat;
             }
             return mat;
         }
@@ -165,11 +178,11 @@ namespace RaptorRally
                 triangles.AddRange(new[] { v, v + 2, v + 1, v + 1, v + 2, v + 3 });
             }
             Mesh mesh = new Mesh { name = "Closed dirt ribbon", vertices = vertices.ToArray(), triangles = triangles.ToArray(), uv=uv.ToArray() };
-            mesh.RecalculateNormals(); mesh.RecalculateTangents(); mesh.RecalculateBounds();
+            Own(mesh); mesh.RecalculateNormals(); mesh.RecalculateTangents(); mesh.RecalculateBounds();
             var road = new GameObject("Driveable dirt / jumps", typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider));
             road.transform.SetParent(Root); road.layer = 9;
             road.GetComponent<MeshCollider>().sharedMesh = mesh;
-            var visibleRoad=Object.Instantiate(mesh); visibleRoad.name="Dirt ribbon visible surface";
+            var visibleRoad=Own(Object.Instantiate(mesh)); visibleRoad.name="Dirt ribbon visible surface";
             for(int i=0;i<vertices.Count;i++) vertices[i]+=Vector3.up*.02f;
             visibleRoad.SetVertices(vertices); road.GetComponent<MeshFilter>().sharedMesh=visibleRoad;
             road.GetComponent<MeshRenderer>().sharedMaterial = DirtMaterial();
@@ -195,7 +208,7 @@ namespace RaptorRally
             BuildRailRibbon(-1); BuildRailRibbon(1);
             for (int row = 0; row < 2; row++)
                 for (int col = 0; col < 10; col++)
-                    Box("Start / finish check", Gate(0) + Vector3.up * .03f + Tangent(0) * (row * .6f) + Side(0) * (col - 4.5f), new Vector3(.6f, .04f, 1), (row + col) % 2 == 0 ? Color.white : Dark);
+                    Box("Start / finish check", Gate(0) + Vector3.up * .03f + Tangent(0) * (row * .6f) + Side(0) * (col - 4.5f), new Vector3(1, .04f, .6f), (row + col) % 2 == 0 ? Color.white : Dark).transform.rotation=Quaternion.LookRotation(Tangent(0));
             // Visual chevrons at the first approach make the race direction clear.
             for (int i = 4; i < 10; i += 2)
             {
@@ -226,10 +239,10 @@ namespace RaptorRally
                     indices.AddRange(new[]{start,start+1,start+2,start,start+2,start+3});
                 }
             }
-            var mesh=new Mesh { name="Continuous rail "+side }; mesh.SetVertices(vertices); mesh.SetNormals(normals); mesh.SetColors(colors); mesh.SetTriangles(indices,0); mesh.RecalculateBounds();
+            var mesh=new Mesh { name="Continuous rail "+side }; Own(mesh); mesh.SetVertices(vertices); mesh.SetNormals(normals); mesh.SetColors(colors); mesh.SetTriangles(indices,0); mesh.RecalculateBounds();
             var rail=new GameObject(mesh.name,typeof(MeshFilter),typeof(MeshRenderer)); rail.transform.SetParent(Root,false);
             rail.GetComponent<MeshFilter>().sharedMesh=mesh;
-            rail.GetComponent<MeshRenderer>().sharedMaterial=new Material(Resources.Load<Shader>("StadiumVertexColor"));
+            rail.GetComponent<MeshRenderer>().sharedMaterial=Own(new Material(Resources.Load<Shader>("StadiumVertexColor")));
         }
         Vector3 RailPoint(int index,int side,Vector2 profile) => Points[index]+Side(index)*(HalfWidth*side+profile.x*.55f)+Vector3.up*((profile.y+.5f)*1.3f);
         void BuildRecoveryShoulders()
@@ -248,11 +261,11 @@ namespace RaptorRally
                     if(i<Samples) { int v=i*2; triangles.AddRange(new[]{v,v+2,v+1,v+1,v+2,v+3}); }
                 }
                 var mesh=new Mesh { name="Sloped recovery verge",vertices=vertices.ToArray(),triangles=triangles.ToArray(),uv=uv.ToArray() };
-                mesh.RecalculateNormals(); mesh.RecalculateTangents();
+                Own(mesh); mesh.RecalculateNormals(); mesh.RecalculateTangents();
                 var go=new GameObject("Drivable recovery shoulder",typeof(MeshFilter),typeof(MeshCollider));
                 go.transform.SetParent(Root,false); go.layer=9;
                 go.GetComponent<MeshCollider>().sharedMesh=mesh;
-                var visible=Object.Instantiate(mesh); visible.name="Recovery verge surface";
+                var visible=Own(Object.Instantiate(mesh)); visible.name="Recovery verge surface";
                 for(int i=0;i<vertices.Count;i++) vertices[i]+=Vector3.up*.012f;
                 visible.SetVertices(vertices); go.GetComponent<MeshFilter>().sharedMesh=visible;
                 // Render with the same dirt as the circuit; outside the walls it reads as a graded bank.
@@ -261,6 +274,15 @@ namespace RaptorRally
         }
         void BuildRacingLine()
         {
+            if(Design!=null) {
+                for(int i=0;i<Samples;i+=3) {
+                    int kind=surfacePieces[i]; if(kind==0) continue;
+                    Color color=kind==4?new Color(.26f,.15f,.07f):kind==5?new Color(.15f,.85f,.87f):new Color(.97f,.73f,.38f);
+                    var mark=Box(kind==4?"Mud strip":kind==5?"Nitro recharge strip":"Jump stripe",Points[i]+Vector3.up*.04f,new Vector3(8.6f,.025f,kind>=4?.8f:.22f),color);
+                    mark.transform.rotation=Quaternion.LookRotation(Points[Wrap(i+1)]-Points[Wrap(i-1)]);
+                }
+                return;
+            }
             foreach(int peak in JumpCrests)
             {
                 // Crest markers sit on the sampled road and make both jumps readable.
@@ -296,9 +318,9 @@ namespace RaptorRally
                 float grain=(float)random.NextDouble()-.5f;
                 pixels[y*256+x]=new Color(broad*.70f+grain*.15f+.15f,Mathf.PerlinNoise(u*65,v*130),Mathf.PerlinNoise(u*65+21,v*130+17));
             }
-            texture.SetPixels(pixels); texture.Apply(true,true); dirtTexture=texture;
+            texture.SetPixels(pixels); texture.Apply(true,true); dirtTexture=Own(texture);
             }
-            var material=new Material(Resources.Load<Shader>("RallyDirt")); material.name="Layered packed dirt / gravel";
+            var material=Own(new Material(Resources.Load<Shader>("RallyDirt"))); material.name="Layered packed dirt / gravel";
             material.mainTexture=Resources.Load<Texture2D>("Surface/CoyoteDirt"); material.SetTexture("_NoiseTex",dirtTexture); return material;
         }
 
@@ -318,8 +340,23 @@ namespace RaptorRally
             boardInitialized=true; boardPhase=state; boardPaused=paused; boardLap=lap; boardLeader=leader;
             string status=paused?"PAUSED":state==RallyGame.Phase.Garage?"READY TO RACE":
                 state==RallyGame.Phase.Countdown?"GET READY":state==RallyGame.Phase.Results?"FINISH":"LAP "+lap+" / 3";
-            string value="COYOTE BASIN\n"+status+"\n"+(state==RallyGame.Phase.Garage?"RAPTOR RALLY":"P1  "+leader);
+            string value=CourseName+"\n"+status+"\n"+(state==RallyGame.Phase.Garage?"RAPTOR RALLY":"P1  "+leader);
             if(raceBoard.text!=value) raceBoard.text=value;
+        }
+        void BuildCustomScenery()
+        {
+            foreach(int x in new[]{-7,7}) Box("Scoreboard support",new Vector3(x,5.3f,53),new Vector3(.65f,10.6f,.65f),Dark);
+            Box("Scoreboard",new Vector3(0,9.5f,52),new Vector3(25,7,.8f),Dark);
+            raceBoard=Sign("Custom race board",CourseName+"\nCUSTOM CIRCUIT",new Vector3(0,9.5f,51.5f),.18f,new Color(.83f,.94f,.63f));
+            foreach(int sign in new[]{-1,1}) {
+                Vector3 p=Gate(0)+Side(0)*(HalfWidth+1.2f)*sign;
+                Box("Finish pylon",p+Vector3.up*2,new Vector3(.5f,4,.5f),Dark);
+                Box("Finish pennant",p+Vector3.up*3,new Vector3(1.3f,.8f,.1f),new Color(.64f,.90f,.35f));
+            }
+            foreach(int x in new[]{-63,63}) foreach(int z in new[]{-40,43}) {
+                Box("Floodlight mast",new Vector3(x,6,z),new Vector3(.35f,12,.35f),Dark);
+                Box("Floodlight bank",new Vector3(x,12,z),new Vector3(3.8f,1.3f,.6f),new Color(.8f,.83f,.72f));
+            }
         }
         void BuildScenery()
         {
