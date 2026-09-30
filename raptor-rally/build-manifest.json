@@ -5,8 +5,8 @@
   "threads": false,
   "files": {
     "index.html": {
-      "bytes": 13156,
-      "sha256": "474ed0d3c438dd5ebe4c0742dd14e048baf62d69a13ccf191727ecd1b35e4698"
+      "bytes": 13393,
+      "sha256": "5cc219fd5016fd3e3eacbf1073e628bcf10ec94179010e5bb9d3d3165614623f"
     },
     "touch-controls.css": {
       "bytes": 8242,
@@ -17,16 +17,16 @@
       "sha256": "4baee313b2658f377d9aa77f56e4bd5c4c4a43bf823b57c2635879712e71e62b"
     },
     "track-builder.css": {
-      "bytes": 6586,
-      "sha256": "e93873cdec8584e6e42b1271b34ba41b99e76848fb608e683f22e759454e3d0f"
+      "bytes": 7614,
+      "sha256": "76ed73d705b018ee63d376c01058ea797535f19f6def1c6e785a7635976950b4"
     },
     "track-builder.js": {
-      "bytes": 16440,
-      "sha256": "3616fc7b030eeaf511ad736ce36934aa3c22a50fec2f2146cf5cddc2869ccaae"
+      "bytes": 18107,
+      "sha256": "ffe73f3d945520c78ed01c1e17c4d1d2d5260166683b8218c8adc4af0c5bc24a"
     },
     "track-model.js": {
-      "bytes": 4599,
-      "sha256": "424c85128ab3beb6cbdc72addb56a0768fa2463d80fdc3b6d0d0423d95b6204b"
+      "bytes": 8352,
+      "sha256": "f5f42a64f7f8789fd003e6ef08a3e6ae93cc0174d76ed90136f5e9f382b31e14"
     },
     "raptor-badge.jpg": {
       "bytes": 17131,

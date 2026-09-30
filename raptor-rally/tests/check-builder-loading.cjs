@@ -1,7 +1,7 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const M=require('../track-model.js');
 const nodes=new Map(),frames=[],timers=new Map(),sent=[];let nextTimer=0;
-function element(id){if(!nodes.has(id))nodes.set(id,{id,hidden:true,inert:false,disabled:false,textContent:'',value:'',dataset:{},attrs:{},events:{},classList:{toggle(){}},setAttribute(k,v){this.attrs[k]=v;},addEventListener(k,f){this.events[k]=f;},querySelector(s){return element(s);},querySelectorAll(){return [];},appendChild(){},replaceChildren(){},add(){},focus(){},contains(){return true;}});return nodes.get(id);}
+function element(id){if(!nodes.has(id))nodes.set(id,{id,hidden:true,inert:false,disabled:false,textContent:'',value:'',dataset:{},attrs:{},events:{},classList:{toggle(){}},setAttribute(k,v){this.attrs[k]=v;},getAttribute(k){return this.attrs[k];},scrollIntoView(){},addEventListener(k,f){this.events[k]=f;},querySelector(s){return element(s);},querySelectorAll(){return [];},appendChild(){},replaceChildren(){},add(){},focus(){},contains(){return true;}});return nodes.get(id);}
 const document={getElementById:element,body:element('body'),querySelector:element,createElement:()=>element('created'+nodes.size)};
 const window={RaptorTrackModel:M};
 const localStorage={getItem(){return null;},setItem(){}};

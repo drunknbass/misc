@@ -9,8 +9,8 @@
   function snapshot(){return JSON.stringify({design,closed});}
   function remember(){history.push(snapshot());if(history.length>60)history.shift();redo=[];}
   function store(){try{localStorage.setItem(draftKey,snapshot());$('builder-save-state').textContent='Draft saved on this device';}catch{$('builder-save-state').textContent='Storage unavailable — export to keep this course';}}
-  function error(){return closed?M.validate(design):'Draw adjacent tiles, then tap the first tile to close the loop.';}
-  function ready(){const e=error();message(e||(tool==='route'?'Circuit closed. Choose a piece to add terrain, or tap a route tile to trim.':tool==='start'?'Choose a flat straight with another flat straight behind it.':'Ready to race. Tap a straight tile to place a piece.'),!!e);}
+  function error(){const issue=M.diagnose(design,closed)[0];return issue?issue.title+'. '+issue.message:'';}
+  function ready(){const e=error();message((e?'Fix the highlighted track issues above before racing.':'')||(tool==='route'?'Circuit closed. Choose a piece to add terrain, or tap a route tile to trim.':tool==='start'?'Choose a flat straight with another flat straight behind it.':'Ready to race. Tap a straight tile to place a piece.'),!!e);}
   function savedDraft(){const d=M.parseDraft(snapshot());return {...d.design,closed:d.closed};}
   function refreshLibrary(selected=''){const select=$('builder-library');select.replaceChildren(new Option('Load saved course…',''));library.forEach((d,i)=>select.add(new Option(d.name+(!d.closed||M.validate(d)?' · Draft':''),String(i))));select.value=selected;}
   try{const raw=localStorage.getItem(draftKey);if(raw){const d=M.parseDraft(raw);design=d.design;closed=d.closed;tool=closed?1:'route';}}catch{}
@@ -26,12 +26,26 @@
   function render(){
     $('builder-name').value=design.name;
     const upper=new Set();for(const v of M.crossings(design))for(const i of v)if(Math.abs(design.cells[(i+1)%design.cells.length]-design.cells[i])===1)for(let k=-1;k<=1;k++)upper.add((i+k+design.cells.length)%design.cells.length);
-    const problem=error();$('builder-race').disabled=!!problem||pending;$('builder-export').disabled=!design.cells.length||pending;$('builder-save').disabled=!design.cells.length||pending;
+    const issues=M.diagnose(design,closed),badTiles=new Set(issues.flatMap(issue=>issue.cells));
+    const checkSummary=issues.length?issues.length+' '+(issues.length===1?'issue':'issues')+' to fix before racing':'Ready to race';
+    $('builder-check-summary').textContent=checkSummary;
+    $('builder-checks').dataset.error=String(issues.length>0);
+    $('builder-check-help').textContent=issues.length?'Orange outlines mark the tiles to change. R = row from the top; C = column from the left. Saving keeps your draft.':'Your loop and starting grid pass all racing checks.';
+    const list=$('builder-issues');list.replaceChildren();
+    issues.forEach(issue=>{
+      const item=document.createElement('li'),title=document.createElement('strong'),detail=document.createElement('p');
+      title.textContent=issue.title;detail.textContent=issue.message;item.appendChild(title);item.appendChild(detail);list.appendChild(item);
+    });
+    $('builder-race').textContent=issues.length?'CHECK '+issues.length+' TRACK '+(issues.length===1?'ISSUE':'ISSUES'):'RACE THIS TRACK →';
+    $('builder-race').dataset.blocked=String(issues.length>0);
+    $('builder-race').disabled=pending;$('builder-export').disabled=!design.cells.length||pending;$('builder-save').disabled=!design.cells.length||pending;
     $('builder-undo').disabled=!history.length;$('builder-redo').disabled=!redo.length;
     $('builder-count').textContent=design.cells.length+' / 48 tiles';$('builder-loop').textContent=closed?'Closed circuit':'Drawing circuit';
     panel.querySelectorAll('[data-tool]').forEach(b=>b.setAttribute('aria-pressed',String(String(tool)===b.dataset.tool)));
     cells.forEach((b,c)=>{
       const i=design.cells.indexOf(c),on=i>=0,kind=on?design.pieces[i]:0,cross=on&&design.cells.lastIndexOf(c)!==i;
+      b.classList.toggle('track-problem',badTiles.has(c));
+      b.title=issues.filter(issue=>issue.cells.includes(c)).map(issue=>issue.title+'. '+issue.message).join(' ');
       b.classList.toggle('on-route',on);b.classList.toggle('start-cell',i===0);b.classList.toggle('route-end',on&&!closed&&design.cells.lastIndexOf(c)===design.cells.length-1);
       b.setAttribute('aria-label','Row '+(Math.floor(c/7)+1)+', column '+(c%7+1)+(on?', '+(i===0?'start, ':'')+(cross?'open jump, east–west launches across north–south':upper.has(i)?'dirt jump ramp':names[kind]):', empty'));
       let drawing='<circle cx="32" cy="32" r="1.5" fill="#36515b"/>';
@@ -45,7 +59,8 @@
         else if(kind)drawing+=`<text x="32" y="38" fill="#06161a" text-anchor="middle" font-size="25" font-weight="900">${icons[kind]}</text>`;
       }
       if(cross)drawing='<path d="M32,0 V64" stroke="#ccb68d" stroke-width="22"/><path d="M0,32 H13 M51,32 H64" stroke="#edbd76" stroke-width="22"/><path d="M8,25 Q32,1 56,25" fill="none" stroke="#edbd76" stroke-width="3" stroke-dasharray="4 3"/><path d="M13,20 V44 M51,20 V44" stroke="#644722" stroke-width="3"/>';
-      b.innerHTML=`<svg aria-hidden="true" viewBox="0 0 64 64">${drawing}</svg>`;
+      b.innerHTML=`<svg aria-hidden="true" viewBox="0 0 64 64">${drawing}</svg>`+(badTiles.has(c)?`<span class="tile-issue" aria-hidden="true">${M.coordinate(c)} !</span>`:'');
+      if(badTiles.has(c))b.setAttribute('aria-label',b.getAttribute('aria-label')+'. Needs repair. '+b.title);
     });
   }
   function edit(c){
@@ -135,7 +150,11 @@
     }));
   }
   function race(method,value){request(method,value,'race','Building your circuit…','Shaping the dirt, jumps and racing line.');}
-  $('builder-race').onclick=()=>{if(error()||pending)return;store();race('BuildCustomTrack',JSON.stringify(design));};
+  $('builder-race').onclick=()=>{
+    if(pending)return;
+    if(error()){const checks=$('builder-checks');checks.scrollIntoView({block:'center',behavior:'auto'});checks.focus();return;}
+    store();race('BuildCustomTrack',JSON.stringify(design));
+  };
   $('builder-original').onclick=()=>{if(!pending)race('RaceOriginalTrack');};
   $('builder-close').onclick=()=>request('CloseTrackBuilder',undefined,'close','Returning to garage…','Getting your Raptor ready.');
   $('open-builder').onclick=()=>request('OpenTrackBuilder',undefined,'open','Opening track builder…','Getting your saved circuit ready.');
