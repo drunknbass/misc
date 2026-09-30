@@ -6,7 +6,7 @@ An arcade racer with keyboard and mobile touch controls with three stylized Rapt
 
 ## Opening sequence
 
-A rotating 3D pixel Ford emblem fades through black to Ford Performance, then the Raptor Off-Roadeo badge and garage. Press Enter, Escape or Space, or tap Skip, to skip the 11.7-second intro. Race retries do not replay it. See [implementation and validation](SPLASH.md).
+A rotating 3D pixel Ford emblem fades through black to Ford Performance, then the Raptor Off-Roadeo badge and garage. Press Enter, Escape or Space, or tap Skip, to skip the 11.7-second intro. Race retries do not replay it. See [implementation and validation](SPLASH.md). The refined emblem has a solid rear surface, coarser pixels and a subtle rotation-dependent shimmer; both logo cards share the pixel style. See [refinement verification](SPLASH-REFINEMENT.md).
 
 ## Controls
 

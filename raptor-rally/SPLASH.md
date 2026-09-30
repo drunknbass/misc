@@ -2,9 +2,11 @@
 
 Implemented 2026-09-29 in Unity 6000.6.3f1.
 
+The subsequent rear-face repair, metallic shimmer and matching pixel treatment are documented in `SPLASH-REFINEMENT.md`; latest screenshots are in `splash-refinement/`. Earlier screenshots below document the initial implementation.
+
 The intro lasts 11.7 seconds: an extruded pixel Ford oval rotates on black (0–4.7 s), followed by a fully black interval (4.7–5.05), the supplied Ford Performance artwork (5.05–7.85), black (7.85–8.2), the supplied Raptor badge (8.2–11.4), and black before entering the garage (11.4–11.7). Cards fade in and out. Skip uses a 0.28-second fade. Return, Escape, Space, the desktop skip button and the mobile skip button all target the intro. The Raptor badge is also the garage/title identity.
 
-The emblem is one procedurally generated 3D mesh with front, back and silhouette side faces, sampled on a 104×40 grid. It has real depth, rotation and directional shading. Both original JPEGs are preserved byte-for-byte. GPU UV windows frame the artwork without rewriting image pixels. The Ford source is 720×1280; the badge is 339×296. The texture importer preserves those dimensions.
+The emblem is one procedurally generated 3D mesh with front, back and silhouette side faces, sampled on an 88×34 grid. It has real depth, rotation and directional shading. Both original JPEGs are preserved byte-for-byte. GPU UV windows frame the artwork without rewriting image pixels. The Ford source is 720×1280; the badge is 339×296. The texture importer preserves those dimensions.
 
 ## Actual verification
 
@@ -18,7 +20,7 @@ The emblem is one procedurally generated 3D mesh with front, back and silhouette
 
 ## Limits
 
-The Mac was locked during the second native editor preview attempt, and computer-use inspection reported that limitation. That attempt was stopped; browser rendering and a headless WebGL build succeeded afterward. A standalone macOS player was not built or visually tested. The opt-in SplashCapture native runtime assertions did not complete, so its full assertions (including paused-clock and direct guard checks) are not claimed as passing. Mobile rendering/touch on a real device was not tested. No Keychain access was granted and no Hub CLI command was used for this validation. No deployment or push was performed.
+The Mac was locked during the second native editor preview attempt, and computer-use inspection reported that limitation. That attempt was stopped; browser rendering and a headless WebGL build succeeded afterward. A standalone macOS player was not built or visually tested. The opt-in SplashCapture native runtime assertions did not complete, so its full assertions (including paused-clock and direct guard checks) are not claimed as passing. Mobile rendering/touch on a real device was not tested. No Keychain access was granted and no Hub CLI command was used for this validation. At the time of the implementation checks, no deployment or push had been performed. The user subsequently requested deployment; commit `6999a11` is now live, with the page and all seven supporting files verified against local SHA-256 hashes. See GITHUB-PAGES.md.
 
 ## Changed source files
 

@@ -1,0 +1,2 @@
+Original 104x40 brightness mask: 3 enclosed missing cells: 60,15; 61,15; 64,17
+New mesh: 2151 occupied cells; 0 unsealed/non-manifold edges; depth 0.42. Black transition timing checks passed.

@@ -1,6 +1,11 @@
 (() => {
   'use strict';
   const root=document.getElementById('touch-ui'),byId=id=>document.getElementById(id);
+  // Use the same 116×96 cell grid and source crop as Unity's badge shader.
+  // This is a display-only canvas; the supplied JPEG remains unchanged.
+  const badge=document.getElementById('menu-badge'),badgeSource=new Image();
+  badgeSource.onload=()=>{const context=badge.getContext('2d');context.imageSmoothingEnabled=false;context.drawImage(badgeSource,24,10,292,242,0,0,116,96);};
+  badgeSource.src='raptor-badge.jpg';
   const holdButtons=[...root.querySelectorAll('[data-bit]')],pointers=new Map();
   const trucks=['F-150 RAPTOR','BRONCO RAPTOR','RANGER RAPTOR'];
   const descriptions=['Long wheelbase / strong boost','Short wheelbase / quick rotation','Light pickup / balanced grip'];

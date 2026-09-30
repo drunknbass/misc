@@ -20,15 +20,17 @@ namespace RaptorRally
             float width=Mathf.Min(box.width,box.height*aspect),height=width/aspect;
             return new Rect(box.center.x-width*.5f,box.center.y-height*.5f,width,height);
         }
-        public void DrawBadge(Rect box,float opacity=1) => Draw(Badge,Fit(box,BadgePixels.width/BadgePixels.height),UV(Badge,BadgePixels),opacity);
-        public void DrawPerformance(Rect box,float opacity=1) => Draw(Performance,Fit(box,PerformancePixels.width/PerformancePixels.height),UV(Performance,PerformancePixels),opacity);
-        public void Draw(Texture texture,Rect rect,Rect uv,float opacity=1)
+        public void DrawBadge(Rect box,float opacity=1) => Draw(Badge,Fit(box,BadgePixels.width/BadgePixels.height),UV(Badge,BadgePixels),opacity,new Vector2(116,96));
+        public void DrawPerformance(Rect box,float opacity=1) => Draw(Performance,Fit(box,PerformancePixels.width/PerformancePixels.height),UV(Performance,PerformancePixels),opacity,new Vector2(192,76));
+        public void Draw(Texture texture,Rect rect,Rect uv,float opacity=1,Vector2 pixelGrid=default)
         {
             if(Event.current.type!=EventType.Repaint || opacity<=0) return;
             // Graphics.DrawTexture uses pixel coordinates; convert the IMGUI canvas once.
             Vector3 a=GUI.matrix.MultiplyPoint3x4(new Vector3(rect.x,rect.y,0));
             Vector3 b=GUI.matrix.MultiplyPoint3x4(new Vector3(rect.xMax,rect.yMax,0));
             material.SetFloat("_Opacity",Mathf.Clamp01(opacity));
+            material.SetVector("_Crop",new Vector4(uv.x,uv.y,uv.width,uv.height));
+            material.SetVector("_PixelGrid",new Vector4(pixelGrid.x,pixelGrid.y,0,0));
             Graphics.DrawTexture(new Rect(a.x,a.y,b.x-a.x,b.y-a.y),texture,uv,0,0,0,0,Color.white,material);
         }
         public void Dispose() { StartupIntro.Release(material); }
@@ -135,25 +137,35 @@ namespace RaptorRally
         }
         public static Mesh BuildVoxelMesh(Texture2D source,out int cells)
         {
-            const int columns=104,rows=40; const float pitch=.057f,depth=.42f;
+            const int columns=88,rows=34; const float pitch=5.928f/columns,depth=.42f;
             Rect uv=BrandArtwork.UV(source,BrandArtwork.OvalPixels);
             var colors=new Color[columns,rows]; var occupied=new bool[columns,rows]; cells=0;
             for(int x=0;x<columns;x++) for(int y=0;y<rows;y++) {
                 Color c=source.GetPixelBilinear(uv.x+(x+.5f)/columns*uv.width,uv.y+(y+.5f)/rows*uv.height);
                 occupied[x,y]=Mathf.Max(c.r,c.g,c.b)>.13f;
-                if(occupied[x,y]) cells++;
+
                 colors[x,y]=QualitySettings.activeColorSpace==ColorSpace.Linear?c.linear:c;
             }
+            // Brightness defines only the stepped silhouette. Dark blue interior pixels
+            // must not become holes through the solid metal emblem.
+            for(int y=0;y<rows;y++) {
+                int first=columns,last=-1;
+                for(int x=0;x<columns;x++) if(occupied[x,y]) { first=Mathf.Min(first,x); last=x; }
+                for(int x=first;x<=last;x++) { occupied[x,y]=true; cells++; }
+            }
+            var grain=new List<Vector2>(); Vector2 cell=Vector2.zero;
             var vertices=new List<Vector3>(); var normals=new List<Vector3>(); var vertexColors=new List<Color>(); var triangles=new List<int>();
             Action<Vector3,Vector3,Vector3,Vector3,Vector3,Color> face=(a,b,c,d,n,color)=>{
                 int start=vertices.Count; vertices.AddRange(new[]{a,b,c,d});
+                grain.AddRange(new[]{cell,cell,cell,cell});
                 normals.AddRange(new[]{n,n,n,n}); vertexColors.AddRange(new[]{color,color,color,color});
                 triangles.AddRange(new[]{start,start+1,start+2,start,start+2,start+3});
             };
             for(int x=0;x<columns;x++) for(int y=0;y<rows;y++) if(occupied[x,y]) {
-                float left=(x-columns*.5f)*pitch,right=left+pitch,bottom=(y-rows*.5f)*pitch,top=bottom+pitch;
-                // Tiny relief differences make the pixel grid read without thousands of objects.
-                float front=-depth*.5f-((x+y)%3)*.004f,back=depth*.5f;
+                // Shared boundaries are computed identically on both neighboring cells.
+                // Coplanar fronts remove the previously unsealed relief seams.
+                float left=(x-columns*.5f)*pitch,right=(x+1-columns*.5f)*pitch,bottom=(y-rows*.5f)*pitch,top=(y+1-rows*.5f)*pitch;
+                float front=-depth*.5f,back=depth*.5f; cell=new Vector2(x,y);
                 Color c=colors[x,y],edge=Color.Lerp(c,new Color(.025f,.10f,.25f),.4f);
                 face(new Vector3(left,bottom,front),new Vector3(left,top,front),new Vector3(right,top,front),new Vector3(right,bottom,front),Vector3.back,c);
                 face(new Vector3(right,bottom,back),new Vector3(right,top,back),new Vector3(left,top,back),new Vector3(left,bottom,back),Vector3.forward,new Color(.012f,.045f,.12f));
@@ -163,7 +175,7 @@ namespace RaptorRally
                 if(y==rows-1 || !occupied[x,y+1]) face(new Vector3(left,top,front),new Vector3(left,top,back),new Vector3(right,top,back),new Vector3(right,top,front),Vector3.up,edge);
             }
             var mesh=new Mesh { name="Ford oval • sampled extruded pixels",indexFormat=IndexFormat.UInt32 };
-            mesh.SetVertices(vertices); mesh.SetNormals(normals); mesh.SetColors(vertexColors); mesh.SetTriangles(triangles,0); mesh.RecalculateBounds();
+            mesh.SetVertices(vertices); mesh.SetUVs(0,grain); mesh.SetNormals(normals); mesh.SetColors(vertexColors); mesh.SetTriangles(triangles,0); mesh.RecalculateBounds();
             return mesh;
         }
         public void Dispose()

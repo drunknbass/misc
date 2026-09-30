@@ -128,3 +128,7 @@ The stadium uses a warm directional key with a cooler sky fill, two high-resolut
 The dirt surface uses an original generated albedo blended at two world-space scales, mipmapping and anisotropic filtering, with separate granular normals, racing-line wear and darker wall edges. Concrete barriers now have a chamfered Jersey profile while retaining the same physical collision shapes. A fixed 160-quad mesh renders pooled tire dust and four soft ground-contact shadows for the entire field; no per-frame particle object creation or realtime reflection-probe rendering is required. The garage has separate studio lighting and its track preview follows the same letterboxed layout as the controls.
 
 Ground-art provenance and the exact built-in imagegen prompt are in `Assets/Resources/Surface/ART-PROVENANCE.md`. No new package dependencies were added.
+
+## Pixel splash refinement
+
+The Ford emblem uses an 88×34 solid extruded pixel mesh with rotation-dependent metallic highlights. Its interior is filled and its front is continuous to prevent rear flecks and grazing-angle seams. Ford Performance and the Raptor badge use matching quantized sampling of the unchanged supplied images; the garage badge shares that treatment. See `../SPLASH-REFINEMENT.md` and `../splash-refinement/index.html` for verified browser captures.
