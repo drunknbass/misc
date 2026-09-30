@@ -7,15 +7,30 @@
   badgeSource.onload=()=>{const context=badge.getContext('2d');context.imageSmoothingEnabled=false;context.drawImage(badgeSource,24,10,292,242,0,0,116,96);};
   badgeSource.src='raptor-badge.jpg';
   const holdButtons=[...root.querySelectorAll('[data-bit]')],pointers=new Map();
+  const pedals=holdButtons.filter(button=>button.closest('.pedal-group'));
+  const inputMask=bit=>bit===16?20:bit; // Boost includes throttle for one-finger slides.
+  function pedalAt(x,y){
+    const bounds=pedals.map(button=>({button,rect:button.getBoundingClientRect()}));
+    if(!bounds.length)return 0;
+    const left=Math.min(...bounds.map(p=>p.rect.left)),right=Math.max(...bounds.map(p=>p.rect.right));
+    const top=Math.min(...bounds.map(p=>p.rect.top)),bottom=Math.max(...bounds.map(p=>p.rect.bottom));
+    if(x<left || x>right || y<top || y>bottom)return 0;
+    // Midpoints bridge the gaps and different pedal heights during a slide.
+    const closest=bounds.reduce((a,b)=>Math.abs(x-(a.rect.left+a.rect.right)/2)<=Math.abs(x-(b.rect.left+b.rect.right)/2)?a:b);
+    return inputMask(Number(closest.button.dataset.bit));
+  }
   const trucks=['F-150 RAPTOR','BRONCO RAPTOR','RANGER RAPTOR'];
   const descriptions=['Long wheelbase / strong boost','Short wheelbase / quick rotation','Light pickup / balanced grip'];
   let instance=null,enabled=false,lastMask=-1,state={phase:4,paused:false,selected:0};
   const coarse=matchMedia('(pointer:coarse)');
-  const mobile=()=>coarse.matches || navigator.maxTouchPoints>0 && innerWidth<=1100;
+  // Optional touch layout lets desktop users try the mobile controls as well.
+  const forceTouch=new URLSearchParams(window.location.search).get('controls')==='touch';
+  const mobile=()=>forceTouch || coarse.matches || navigator.maxTouchPoints>0 && innerWidth<=1100;
   const send=(method,value)=>{if(instance)instance.SendMessage('Raptor Rally',method,value);};
   const canDrive=()=>enabled && state.phase===2 && !state.paused;
   function flush(){
     let mask=0;for(const bit of pointers.values())mask|=bit;
+    if(mask&8)mask&=~20; // Braking cancels throttle and boost, including a second held finger.
     if(!canDrive())mask=0;
     for(const button of holdButtons)button.setAttribute('aria-pressed',String(!!(mask&Number(button.dataset.bit))));
     if(mask!==lastMask){lastMask=mask;send('SetTouchInput',mask);}
@@ -24,7 +39,7 @@
   function configure(){
     releaseAll();const next=mobile();
     document.body.classList.toggle('touch-enabled',next);
-    byId('input-help').textContent=next?'Touch controls • hold gas + steer • turn your phone for a wider view':'WASD / arrows to drive · Space for nitro · C to cycle camera views';
+    byId('input-help').textContent=next?'Touch controls • slide gas → nitro → brake • hold steer with your other thumb':'WASD / arrows to drive · Space for nitro · C to cycle camera views';
     if(!instance)return;
     if(next!==enabled){enabled=next;root.hidden=!enabled;send('SetTouchControls',enabled?1:0);lastMask=-1;flush();}
   }
@@ -32,11 +47,15 @@
     const bit=Number(button.dataset.bit);
     button.addEventListener('pointerdown',event=>{
       if(!canDrive() || event.pointerType==='mouse' && event.button!==0)return;
-      event.preventDefault();button.setPointerCapture(event.pointerId);pointers.set(event.pointerId,bit);flush();
+      event.preventDefault();button.setPointerCapture(event.pointerId);pointers.set(event.pointerId,inputMask(bit));flush();
+    });
+    if(pedals.includes(button))button.addEventListener('pointermove',event=>{
+      if(!pointers.has(event.pointerId))return;
+      event.preventDefault();pointers.set(event.pointerId,pedalAt(event.clientX,event.clientY));flush();
     });
     const release=event=>{pointers.delete(event.pointerId);flush();};
     button.addEventListener('pointerup',release);button.addEventListener('pointercancel',release);button.addEventListener('lostpointercapture',release);
-    button.addEventListener('keydown',event=>{if([' ','Enter'].includes(event.key) && canDrive()){event.preventDefault();pointers.set('key'+bit,bit);flush();}});
+    button.addEventListener('keydown',event=>{if([' ','Enter'].includes(event.key) && canDrive()){event.preventDefault();pointers.set('key'+bit,inputMask(bit));flush();}});
     button.addEventListener('keyup',event=>{if([' ','Enter'].includes(event.key)){event.preventDefault();pointers.delete('key'+bit);flush();}});
     button.addEventListener('blur',()=>{pointers.delete('key'+bit);flush();});
     button.addEventListener('contextmenu',event=>event.preventDefault());

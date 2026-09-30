@@ -21,7 +21,7 @@ A rotating 3D pixel Ford emblem fades through black to Ford Performance, then th
 | 1 / 2 / 3 | Select a truck in the garage |
 | Enter | Start race |
 
-Off-course trucks can rejoin through barriers; collisions restore after the truck clears the wall. Best times stay in this browser. A WebGL 2 browser is required. On phones and touch tablets, translucent bottom controls provide steering, gas, brake/reverse and nitro, with simultaneous touches supported. Portrait and landscape layouts include touch truck selection, race information, camera switching, recovery and pause. Gamepad input is not implemented. See [mobile implementation and validation](MOBILE.md).
+Off-course trucks can rejoin through barriers; collisions restore after the truck clears the wall. Best times stay in this browser. A WebGL 2 browser is required. On phones and touch tablets, translucent bottom controls provide steering, gas, brake/reverse and nitro, with simultaneous touches supported. The right cluster runs gas → nitro → brake: hold the ribbed gas pedal and slide onto nitro without lifting to boost while accelerating, then onto brake to stop. Sliding back works too. Add `?controls=touch` to try the touch layout on a desktop. Portrait and landscape layouts include touch truck selection, race information, camera switching, recovery and pause. Gamepad input is not implemented. See [mobile implementation and validation](MOBILE.md).
 
 Glancing wall impacts now slide along the rail, and truck impacts transfer momentum with reduced spin. See [handling changes](HANDLING.md) and the [84 Play Mode contact checks](COLLISIONS.md).
 
