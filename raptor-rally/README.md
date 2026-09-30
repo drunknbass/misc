@@ -33,7 +33,7 @@ Press C or use the mobile camera button to cycle through whole-track, follow and
 
 ## Track builder
 
-Open **Track builder** in the header. Draw a closed route on the 7×5 grid (8–48 route tiles), then paint flat dirt, jumps, tabletops, rollers, mud or nitro recharge pads. **Race this track** generates the Unity terrain, barriers, AI racing line and checkpoints and starts a three-lap race. All three Raptors and camera views work on custom circuits. **Edit track** returns to your draft; **Race Coyote Basin** restores the original course.
+Open **Track builder** in the header. Opening, generating a course and returning to the garage show immediate loading feedback; controls unlock when the game is ready. Draw a closed route on the 7×5 grid (8–48 route tiles), then paint flat dirt, jumps, tabletops, rollers, mud or nitro recharge pads. **Race this track** generates the Unity terrain, barriers, AI racing line and checkpoints and starts a three-lap race. All three Raptors and camera views work on custom circuits. **Edit track** returns to your draft; **Race Coyote Basin** restores the original course.
 
 **Junction jumps:** choose **Figure eight · jump**. While drawing, cross an existing straight at right angles and continue straight through the junction. The east–west route gets a dirt takeoff ramp, an open gap across the north–south road, and a landing ramp. Carry speed to clear the gap; there is no bridge deck. Leave one straight, flat approach tile on each side of both routes. Amber tiles mark the ramps, and a dashed flight arc marks the gap. Recover returns you to the run-up after a missed jump. Existing crossing courses automatically use the new jump; version 1 saved tracks remain compatible.
 
@@ -64,3 +64,5 @@ The latest [Safari and render-pass optimization](performance/WEB-FIRST.md) conso
 The browser build now batches static scenery, indexes nearby barriers, reuses trucks and cached garage graphics, limits Rive refresh work and caps Retina/fullscreen rendering resolution. See [before/after results and test method](performance/RESULTS.md).
 
 The latest [visual quality pass](performance/VISUAL-QUALITY.md) adds revised truck proportions, material/lighting detail, original dirt artwork, shaped barriers, pooled dust, contact shadows and corrected garage presentation while retaining the browser performance gains.
+
+See [header and builder loading checks](NAV-BUILDER-CHECKS.md) for the garage badge alignment fix and transition feedback.

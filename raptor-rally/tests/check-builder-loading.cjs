@@ -1,0 +1,25 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const M=require('../track-model.js');
+const nodes=new Map(),frames=[],timers=new Map(),sent=[];let nextTimer=0;
+function element(id){if(!nodes.has(id))nodes.set(id,{id,hidden:true,inert:false,disabled:false,textContent:'',value:'',dataset:{},attrs:{},events:{},classList:{toggle(){}},setAttribute(k,v){this.attrs[k]=v;},addEventListener(k,f){this.events[k]=f;},querySelector(s){return element(s);},querySelectorAll(){return [];},appendChild(){},replaceChildren(){},add(){},focus(){},contains(){return true;}});return nodes.get(id);}
+const document={getElementById:element,body:element('body'),querySelector:element,createElement:()=>element('created'+nodes.size)};
+const window={RaptorTrackModel:M};
+const localStorage={getItem(){return null;},setItem(){}};
+const context={window,document,localStorage,Option:class{},requestAnimationFrame:f=>frames.push(f),setTimeout:(f)=>{timers.set(++nextTimer,f);return nextTimer;},clearTimeout:id=>timers.delete(id),console,JSON,Math,Number,String,Set,Map};
+vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname,'../track-builder.js'),'utf8'),context);
+const bridge=window.raptorBuilder;
+bridge.connect({SendMessage(...args){sent.push(args);}});bridge.update({phase:0,custom:false,name:'COYOTE BASIN',error:''});
+const click=id=>element(id).onclick();
+click('open-builder');assert.equal(element('track-builder').hidden,false);assert.equal(element('builder-busy').hidden,false);assert.equal(element('open-builder').textContent,'Opening…');assert.equal(sent.length,0);
+click('open-builder');assert.equal(frames.length,1,'duplicate request ignored');
+bridge.update({phase:0,custom:false,name:'COYOTE BASIN',error:''});assert.equal(element('builder-busy').hidden,false,'old engine state cannot hide pending feedback');
+frames.shift()();assert.equal(sent.length,0,'first frame is reserved for painting');frames.shift()();assert.equal(sent.at(-1)[1],'OpenTrackBuilder');
+bridge.update({phase:5,custom:false,name:'COYOTE BASIN',error:''});assert.equal(element('builder-busy').hidden,true);assert.equal(element('.builder-body').inert,false);assert.equal(timers.size,0);
+click('builder-race');assert.equal(element('builder-busy-title').textContent,'Building your circuit…');assert.equal(element('.builder-body').inert,true);assert.equal(element('builder-race').disabled,true);assert.equal(sent.length,1);frames.shift()();frames.shift()();assert.equal(sent.at(-1)[1],'BuildCustomTrack');assert.equal(M.validate(JSON.parse(sent.at(-1)[2])),'');
+bridge.update({phase:5,custom:false,name:'COYOTE BASIN',error:'Rejected course'});assert.equal(element('builder-busy').hidden,true);assert.equal(element('builder-status').textContent,'Rejected course');assert.equal(element('.builder-body').inert,false);
+click('builder-race');bridge.update({phase:5,custom:false,name:'COYOTE BASIN',error:'Rejected course'});assert.equal(element('builder-busy').hidden,false,'previous error cannot cancel a queued retry');frames.shift()();frames.shift()();bridge.update({phase:1,custom:true,name:'Test track',error:''});assert.equal(element('track-builder').hidden,true);assert.equal(element('builder-busy').hidden,true);assert.equal(element('open-builder').textContent,'Edit track');
+click('open-builder');const stale=frames.shift();const timeout=[...timers.values()][0];timeout();assert.equal(element('builder-busy').hidden,true);assert.equal(element('builder-feedback').hidden,false);assert.equal(element('open-builder').disabled,false);stale();frames.shift()();assert.equal(sent.length,3,'timed-out frame cannot dispatch');
+bridge.connect({SendMessage(){throw Error('Disconnected');}});click('open-builder');frames.shift()();frames.shift()();assert.equal(element('builder-busy').hidden,true);assert.match(element('builder-feedback').textContent,/Could not reach/);assert.equal(timers.size,0);
+bridge.connect({SendMessage(...args){sent.push(args);bridge.update({phase:args[1]==='OpenTrackBuilder'?5:0,custom:true,name:'Test track',error:''});}});
+click('open-builder');frames.shift()();frames.shift()();assert.equal(element('builder-busy').hidden,true,'synchronous acknowledgement clears pending');click('builder-close');assert.equal(element('builder-busy-title').textContent,'Returning to garage…');frames.shift()();frames.shift()();assert.equal(element('track-builder').hidden,true);assert.equal(element('builder-busy').hidden,true);assert.equal(timers.size,0);
+console.log('PASS: immediate loading feedback, paint before Unity, duplicate suppression, stale-state protection, editor locking, build errors, timeouts, retry, synchronous acknowledgements and close feedback.');

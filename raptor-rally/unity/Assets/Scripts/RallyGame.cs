@@ -72,6 +72,7 @@ namespace RaptorRally
 #if UNITY_WEBGL && !UNITY_EDITOR
             WebGLInput.captureAllKeyboardInput=false;
 #endif
+            PublishTouchState();
         }
         public void CloseTrackBuilder() { if(State==Phase.Builder) Garage(); }
         void ReplaceTrack(TrackDesign design)

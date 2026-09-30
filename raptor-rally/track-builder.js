@@ -3,7 +3,7 @@
   const M=window.RaptorTrackModel,$=id=>document.getElementById(id),panel=$('track-builder'),grid=$('track-grid');
   const names=['Flat','Jump','Tabletop','Rollers','Mud','Nitro pad'],icons=['━','▲','▰','≋','∷','ϟ'],colors=['#ccb68d','#edbd76','#edbd76','#edbd76','#9b6a40','#7ee6ed'];
   const draftKey='raptor-track-draft-v1',libraryKey='raptor-track-library-v1';
-  let design=M.preset(),closed=true,tool=1,history=[],redo=[],instance=null,phase=4,pending=false,pendingTimer,drag=null,lastCell=-1,library=[];
+  let design=M.preset(),closed=true,tool=1,history=[],redo=[],instance=null,phase=4,pending=false,pendingTimer,pendingAction=null,dispatched=false,operation=0,lastState={custom:false},drag=null,lastCell=-1,library=[];
   const send=(method,value)=>{if(instance)instance.SendMessage('Raptor Rally',method,...(value===undefined?[]:[value]));};
   function message(text,error=false){$('builder-status').textContent=text;$('builder-status').dataset.error=String(error);}
   function snapshot(){return JSON.stringify({design,closed});}
@@ -96,22 +96,49 @@
   $('builder-export').onclick=()=>{if(error())return;const blob=new Blob([JSON.stringify(design,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=M.cleanName(design.name).replace(/ /g,'-')+'.raptor.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);message('Course exported. Import the JSON file on another device to race it.');};
   $('builder-import').onclick=()=>$('builder-file').click();
   $('builder-file').onchange=async()=>{const file=$('builder-file').files[0];if(!file)return;try{if(file.size>8192)throw Error('Course files must be smaller than 8 KB.');const d=M.parse(await file.text());remember();design=d;closed=true;store();render();ready();}catch(e){message(e.message||'Could not read course.',true);}finally{$('builder-file').value='';}};
-  function race(method,value){pending=true;render();message('Building your circuit…');send(method,value);clearTimeout(pendingTimer);pendingTimer=setTimeout(()=>{pending=false;render();message('The game did not respond. Close the editor and try again.',true);},20000);}
+  function sync(){
+    const shown=phase===5||pendingAction==='open';
+    panel.hidden=!shown;document.body.classList.toggle('builder-open',shown);
+    $('stage').inert=shown;document.querySelector('header').inert=shown;
+    panel.setAttribute('aria-busy',String(pending));
+    panel.querySelector('.builder-body').inert=pending;panel.querySelector('.builder-footer').inert=pending;
+    $('builder-close').disabled=pending;$('builder-original').disabled=pending;
+    $('builder-busy').hidden=!pending;
+    $('open-builder').disabled=!instance||phase===4||pending;
+    $('open-builder').setAttribute('aria-busy',String(pendingAction==='open'));
+    $('open-builder').textContent=pendingAction==='open'?'Opening…':lastState.custom?'Edit track':'Track builder';
+  }
+  function finish(errorText){
+    pending=false;pendingAction=null;operation++;clearTimeout(pendingTimer);render();sync();
+    if(errorText){message(errorText,true);if(phase!==5){$('builder-feedback').textContent=errorText;$('builder-feedback').hidden=false;$('open-builder').focus();}}
+  }
+  function request(method,value,action,title,detail){
+    if(pending||!instance||phase===4)return;
+    pending=true;pendingAction=action;dispatched=false;const id=++operation;
+    $('builder-feedback').hidden=true;$('builder-busy-title').textContent=title;$('builder-busy-detail').textContent=detail;
+    render();sync();message(title);
+    pendingTimer=setTimeout(()=>{if(id===operation)finish('The game did not respond. Please try again.');},20000);
+    // Give the browser a full paint before synchronous Unity terrain work can block its main thread.
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      if(id!==operation)return;
+      try{dispatched=true;send(method,value);}catch{finish('Could not reach the game. Please try again.');}
+    }));
+  }
+  function race(method,value){request(method,value,'race','Building your circuit…','Shaping the dirt, jumps and racing line.');}
   $('builder-race').onclick=()=>{if(error()||pending)return;store();race('BuildCustomTrack',JSON.stringify(design));};
   $('builder-original').onclick=()=>{if(!pending)race('RaceOriginalTrack');};
-  $('builder-close').onclick=()=>{if(!pending)send('CloseTrackBuilder');};
-  $('open-builder').onclick=()=>send('OpenTrackBuilder');
-  panel.addEventListener('keydown',e=>{if(e.key==='Escape'&&!pending){e.preventDefault();send('CloseTrackBuilder');}});
+  $('builder-close').onclick=()=>request('CloseTrackBuilder',undefined,'close','Returning to garage…','Getting your Raptor ready.');
+  $('open-builder').onclick=()=>request('OpenTrackBuilder',undefined,'open','Opening track builder…','Getting your saved circuit ready.');
+  panel.addEventListener('keydown',e=>{if(e.key==='Escape'&&!pending){e.preventDefault();$('builder-close').onclick();}});
   window.raptorBuilder={
-    connect(game){instance=game;},
+    connect(game){instance=game;sync();},
     update(next){
-      const opening=phase!==5&&next.phase===5,leaving=phase===5&&next.phase!==5;phase=next.phase;
-      $('open-builder').disabled=!instance||phase===4;$('open-builder').textContent=next.custom?'Edit track':'Track builder';
-      panel.hidden=phase!==5;document.body.classList.toggle('builder-open',phase===5);
-      $('stage').inert=phase===5;document.querySelector('header').inert=phase===5;
+      const opening=phase!==5&&next.phase===5,leaving=phase===5&&next.phase!==5;phase=next.phase;lastState=next;
+      if(pending&&dispatched&&(next.error||(pendingAction==='open'?phase===5:phase!==5)))finish(next.error);
+      sync();
       const course=document.querySelector('.garage-heading .eyebrow');if(course)course.textContent=next.name+' / 3 LAPS';
-      if(opening){pending=false;render();ready();$('builder-close').focus();}
-      if(leaving||next.error){pending=false;clearTimeout(pendingTimer);if(next.error){render();message(next.error,true);}}
+      if(opening){render();ready();$('builder-close').focus();}
+      if(next.error&&!pending){render();message(next.error,true);}
       if(leaving)$('unity-canvas').focus();
     }
   };

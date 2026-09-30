@@ -25,13 +25,16 @@ namespace RaptorRally
         public void Draw(Texture texture,Rect rect,Rect uv,float opacity=1,Vector2 pixelGrid=default)
         {
             if(Event.current.type!=EventType.Repaint || opacity<=0) return;
-            // Graphics.DrawTexture uses pixel coordinates; convert the IMGUI canvas once.
+            // Draw in screen coordinates with an identity GUI matrix so letterboxing and scale apply once.
             Vector3 a=GUI.matrix.MultiplyPoint3x4(new Vector3(rect.x,rect.y,0));
             Vector3 b=GUI.matrix.MultiplyPoint3x4(new Vector3(rect.xMax,rect.yMax,0));
             material.SetFloat("_Opacity",Mathf.Clamp01(opacity));
             material.SetVector("_Crop",new Vector4(uv.x,uv.y,uv.width,uv.height));
             material.SetVector("_PixelGrid",new Vector4(pixelGrid.x,pixelGrid.y,0,0));
-            Graphics.DrawTexture(new Rect(a.x,a.y,b.x-a.x,b.y-a.y),texture,uv,0,0,0,0,Color.white,material);
+            Matrix4x4 canvas=GUI.matrix;
+            GUI.matrix=Matrix4x4.identity;
+            try { Graphics.DrawTexture(new Rect(a.x,a.y,b.x-a.x,b.y-a.y),texture,uv,0,0,0,0,Color.white,material); }
+            finally { GUI.matrix=canvas; }
         }
         public void Dispose() { StartupIntro.Release(material); }
     }
