@@ -1,0 +1,9 @@
+F-150 RAPTOR crest=25 air=1.28s height=4.05m clearance=3.25m launch=7.33m/s landed=True
+F-150 RAPTOR crest=182 air=1.32s height=4.25m clearance=3.45m launch=7.25m/s landed=True
+F-150 RAPTOR crest=269 air=1.18s height=3.76m clearance=2.94m launch=6.83m/s landed=True
+BRONCO RAPTOR crest=25 air=1.08s height=3.57m clearance=2.67m launch=6.66m/s landed=True
+BRONCO RAPTOR crest=182 air=1.12s height=3.70m clearance=2.79m launch=6.59m/s landed=True
+BRONCO RAPTOR crest=269 air=0.98s height=3.28m clearance=2.29m launch=6.20m/s landed=True
+RANGER RAPTOR crest=25 air=1.22s height=3.84m clearance=3.03m launch=7.01m/s landed=True
+RANGER RAPTOR crest=182 air=1.22s height=3.98m clearance=3.15m launch=6.94m/s landed=True
+RANGER RAPTOR crest=269 air=1.08s height=3.52m clearance=2.65m launch=6.53m/s landed=True

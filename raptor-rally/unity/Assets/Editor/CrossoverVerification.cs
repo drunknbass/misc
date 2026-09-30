@@ -23,8 +23,9 @@ public static class CrossoverVerification
             var t=game.Player;t.Autopilot=false;t.Body.interpolation=RigidbodyInterpolation.None;
             t.Body.position=new Vector3(-29,.92f,5);t.Body.rotation=Quaternion.LookRotation(Vector3.right);
             t.transform.SetPositionAndRotation(t.Body.position,t.Body.rotation);t.Body.linearVelocity=Vector3.right*20;t.Body.angularVelocity=Vector3.zero;
-            Physics.SyncTransforms();bool air=false;float max=0;
-            for(int step=0;step<300&&t.Body.position.x<29;step++) {t.Throttle=1;t.Steer=0;t.Boost=true;t.Tick(.02f,true);Physics.Simulate(.02f);air|=!t.Grounded&&t.Body.position.y>3;max=Mathf.Max(max,t.Body.position.y);}
+            t.CrossedStart=true;t.NextGate=(game.Track.Nearest(t.Body.position)/(Stadium.Samples/Stadium.GateCount)+1)%Stadium.GateCount;
+            t.UpdateBarrierRecovery(true);Physics.SyncTransforms();bool air=false;float max=0;
+            for(int step=0;step<300&&t.Body.position.x<29;step++) {t.Throttle=1;t.Steer=0;t.Boost=true;t.Tick(.02f,true);Physics.Simulate(.02f);t.CheckGate(step*.02f);air|=!t.Grounded&&t.Body.position.y>3;max=Mathf.Max(max,t.Body.position.y);}
             Check(t.Body.position.x>=29&&Mathf.Abs(t.Body.position.z-5)<2&&t.Body.position.y<3&&air,"nitro crossing failed "+t.Spec.Name+" at "+t.Body.position);
             report.AppendLine("- PASS: 20 m/s approach with nitro held: "+t.Spec.Name+" cleared jump and landed on exit; max chassis height="+max.ToString("F2")+"m.");
         }}finally{Physics.simulationMode=SimulationMode.FixedUpdate;}

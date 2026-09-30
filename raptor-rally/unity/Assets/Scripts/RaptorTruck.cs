@@ -39,7 +39,10 @@ namespace RaptorRally
         public DriverCockpit Cockpit { get; private set; }
         readonly Transform[] wheels = new Transform[4];
         readonly Transform[] wheelPivots = new Transform[4];
-        float wheelRoll;
+        float wheelRoll,airTime,previousVerticalSpeed,suspension,suspensionVelocity,bodyPitch,pitchVelocity;
+        public float LongestAirTime { get; private set; }
+        public float LandingImpact { get; private set; }
+        readonly Vector3[] wheelRest=new Vector3[4];
         TrailRenderer[] trails;
         BoxCollider bodyCollider;
         bool[] passingBarriers;
@@ -81,6 +84,7 @@ namespace RaptorRally
             }
             System.Array.Copy(model.Wheels,wheels,4);
             System.Array.Copy(model.Pivots,wheelPivots,4);
+            for(int i=0;i<4;i++)wheelRest[i]=wheelPivots[i].localPosition;
             trails = new TrailRenderer[2];
             for (int i = 0; i < 2; i++)
             {
@@ -118,6 +122,7 @@ namespace RaptorRally
         void SetPose(Vector3 p, Vector3 forward)
         {
             wallContactTime=truckContactTime=0; wallNormal=Vector3.zero;
+            airTime=previousVerticalSpeed=suspension=suspensionVelocity=bodyPitch=pitchVelocity=LongestAirTime=LandingImpact=0; Grounded=false;
             Body.position = p; Body.rotation = Quaternion.LookRotation(forward);
             transform.SetPositionAndRotation(p, Body.rotation);
             Body.linearVelocity = Vector3.zero; Body.angularVelocity = Vector3.zero;
@@ -143,7 +148,14 @@ namespace RaptorRally
             if (!active) { Boosting = false; foreach (var trail in trails) trail.emitting = false; return; }
             UpdateBarrierRecovery();
             if (!IsPlayer || Autopilot || Finished) DriveAI(dt);
+            bool wasGrounded=Grounded;
             Grounded = HasGroundContact();
+            // Retain ramp-generated momentum in flight; compression is driven by impact speed.
+            if(!Grounded){airTime+=dt;LongestAirTime=Mathf.Max(LongestAirTime,airTime);}
+            else {
+                if(!wasGrounded&&airTime>.12f){LandingImpact=Mathf.Max(0,-previousVerticalSpeed);suspensionVelocity-=Mathf.Min(LandingImpact*.3f,2.8f);}
+                airTime=0;
+            }
             int surface=Track.SurfaceAt(nearestSample);
             if(Grounded && !OffCourse && surface==4) Body.AddForce(-Vector3.ProjectOnPlane(Body.linearVelocity,Vector3.up)*1.5f,ForceMode.Acceleration);
             if(Grounded && !OffCourse && surface==5) Nitro=Mathf.Min(1,Nitro+dt*.32f);
@@ -153,7 +165,7 @@ namespace RaptorRally
             Boosting = Boost && Throttle > 0 && Nitro > 0 && Grounded;
             if (Boosting) Nitro = Mathf.Max(0, Nitro - dt / 8);
             Vector3 velocity = Body.linearVelocity;
-            if (velocity.y > 4.5f) { velocity.y = 4.5f; Body.linearVelocity = velocity; }
+            if (velocity.y > 8f) { velocity.y = 8f; Body.linearVelocity = velocity; }
             Vector3 planar = Vector3.ProjectOnPlane(velocity, Vector3.up);
             float forward = Vector3.Dot(planar, (Body.rotation * Vector3.forward));
             if (Grounded)
@@ -183,19 +195,27 @@ namespace RaptorRally
                 Body.MoveRotation(Body.rotation * Quaternion.Euler(0, yaw * dt, 0));
                 Body.AddForce(Vector3.down * 6, ForceMode.Acceleration);
             }
-            else Body.AddForce(Vector3.down*4,ForceMode.Acceleration);
+            // Airborne motion uses Unity gravity alone: no extra downward force or tire drag.
             float max = Boosting ? Spec.TopSpeed * 1.3f : Spec.TopSpeed;
-            if (planar.magnitude > max) Body.linearVelocity = planar.normalized * max + Vector3.up * velocity.y;
-            if (forward < -7) Body.linearVelocity = planar.normalized * 7 + Vector3.up * velocity.y;
+            // The editor crossover has a short landing straight. Its ramp speed limiter
+            // acts before takeoff; flight itself keeps its horizontal momentum.
+            if(surface==6&&!OffCourse)max=Mathf.Min(max,Spec.TopSpeed);
+            if (Grounded && planar.magnitude > max) Body.linearVelocity = planar.normalized * max + Vector3.up * velocity.y;
+            if (Grounded && forward < -7) Body.linearVelocity = planar.normalized * 7 + Vector3.up * velocity.y;
             SampleCourse(); int near=nearestSample;
             Vector3 slope=Track.Points[Stadium.Wrap(near+1)]-Track.Points[Stadium.Wrap(near-1)];
-            float pitch=Grounded?-Mathf.Atan2(slope.y,new Vector2(slope.x,slope.z).magnitude)*Mathf.Rad2Deg:Mathf.Clamp(-velocity.y*1.5f,-10,10);
-            visual.localRotation=Quaternion.Euler(pitch,0,-Steer*Mathf.Clamp(Speed,0,12)*.45f);
-            visual.localPosition=Vector3.up*(Grounded?Mathf.Sin(Time.fixedTime*18)*Mathf.Min(Speed*.002f,.025f):.06f);
+            float pitch=Grounded?-Mathf.Atan2(slope.y,new Vector2(slope.x,slope.z).magnitude)*Mathf.Rad2Deg:-Mathf.Atan2(velocity.y,Mathf.Max(Speed,6))*Mathf.Rad2Deg;
+            bodyPitch=Mathf.SmoothDampAngle(bodyPitch,Mathf.Clamp(pitch,-28,28),ref pitchVelocity,.16f,180,dt);
+            suspensionVelocity+=(-suspension*120-suspensionVelocity*14)*dt;
+            suspension=Mathf.Clamp(suspension+suspensionVelocity*dt,-.24f,.1f);
+            visual.localRotation=Quaternion.Euler(bodyPitch,0,Grounded?-Steer*Mathf.Clamp(Speed,0,12)*.45f:0);
+            visual.localPosition=Vector3.up*(suspension+(Grounded?Mathf.Sin(Time.fixedTime*18)*Mathf.Min(Speed*.002f,.025f):.06f));
+            previousVerticalSpeed=velocity.y;
             wheelRoll+=forward*dt/0.575f*Mathf.Rad2Deg;
             for(int i=0;i<wheels.Length;i++)
             {
-                wheelPivots[i].localRotation=Quaternion.Euler(0,i%2==1?Steer*23:0,0);
+                wheelPivots[i].localPosition=Vector3.Lerp(wheelPivots[i].localPosition,visual.localRotation*(wheelRest[i]+Vector3.down*(Grounded?0:.16f)),Mathf.Clamp01(dt*12));
+                wheelPivots[i].localRotation=visual.localRotation*Quaternion.Euler(0,i%2==1?Steer*23:0,0);
                 wheels[i].localRotation=Quaternion.Euler(wheelRoll,0,0);
             }
             foreach (var trail in trails) trail.emitting = Grounded && Speed > 5 && Mathf.Abs(Steer) > .25f;

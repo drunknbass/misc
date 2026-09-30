@@ -72,3 +72,7 @@ See [header and builder loading checks](NAV-BUILDER-CHECKS.md) for the garage ba
 ### Publish verification
 
 Run `node raptor-rally/tests/check-published-shell.cjs` from the repository root before publishing web changes. It checks the actual deployed HTML, parses its startup JavaScript, and verifies the referenced Unity build files. Also load the complete game through to the garage; an editor-only fixture cannot verify startup. Never copy `unity/Assets/WebGLTemplates/RaptorPages/index.html` directly over the published `index.html`: the template contains Unity preprocessing directives and must be compiled or have its existing compiled startup block preserved.
+
+### Jump handling
+
+Stadium jump crests are 1.8–2 m high; custom Jump and Tabletop pieces are 1.8 m and 1.65 m. Airborne trucks retain horizontal momentum and use normal gravity, with an 8 m/s upward safety cap. Short crossover ramps limit takeoff speed to each truck’s unboosted top speed so nitro cannot overshoot their landing straight. Body pitch follows the flight arc, tires extend in the air, and a damped visual suspension response compresses on landing. Nitro-speed tests across all three stadium jumps and all three Raptors measured 0.98–1.32 seconds of flight with lane-safe landings; see AIRTIME-CHECKS.md and AIRTIME-BASELINE.md.

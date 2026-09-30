@@ -74,8 +74,8 @@ namespace RaptorRally
         public static Vector3 Center(int cell) => new Vector3((cell%Columns-3)*CellSize,0,(2-cell/Columns)*CellSize+5);
         public static float Elevation(int piece,float t)
         {
-            if(piece==1) return Mathf.Pow(Mathf.Sin(Mathf.PI*t),2)*1.1f;
-            if(piece==2) return 1.15f*(t<.3f?Mathf.SmoothStep(0,1,t/.3f):t>.65f?Mathf.SmoothStep(1,0,(t-.65f)/.35f):1);
+            if(piece==1) return Mathf.Pow(Mathf.Sin(Mathf.PI*t),2)*1.8f;
+            if(piece==2) return 1.65f*(t<.3f?Mathf.SmoothStep(0,1,t/.3f):t>.65f?Mathf.SmoothStep(1,0,(t-.65f)/.35f):1);
             if(piece==3) return Mathf.Pow(Mathf.Sin(3*Mathf.PI*t),2)*.35f;
             return 0;
         }

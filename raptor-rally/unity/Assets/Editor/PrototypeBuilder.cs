@@ -236,7 +236,7 @@ public static class PrototypeBuilder
                     if(game.Track.DistanceFromCourse(truck.Body.position)>Stadium.HalfWidth-.4f)
                         throw new Exception("Boosted ramp launch left its lane: "+truck.Spec.Name+" crest="+crest);
                 }
-                if(truck.MaxAirHeight>4) throw new Exception("Ramp launch remains excessive");
+                if(truck.MaxAirHeight>5.5f) throw new Exception("Ramp launch exceeds the tuned landing envelope");
             }
             truck.NextGate=0; truck.CrossedStart=false;
             truck.Body.position=game.Track.Gate(0)+game.Track.Side(0)*(Stadium.HalfWidth+.8f)+Vector3.up*.92f;

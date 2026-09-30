@@ -140,8 +140,8 @@ namespace RaptorRally
         {
             float t = (float)index / Samples;
             // Crests leave a straight landing zone even at nitro speed.
-            return Jump(t,25f/Samples,.024f,.026f,1.1f)+Jump(t,182f/Samples,.026f,.027f,1.25f)
-                +Jump(t,269f/Samples,.025f,.027f,1.05f)+Jump(t,.28f,.018f,.018f,.55f);
+            return Jump(t,25f/Samples,.024f,.026f,1.85f)+Jump(t,182f/Samples,.026f,.027f,2f)
+                +Jump(t,269f/Samples,.025f,.027f,1.8f)+Jump(t,.28f,.018f,.018f,.55f);
         }
         static float Jump(float t, float peak, float rise, float fall, float height)
         {
