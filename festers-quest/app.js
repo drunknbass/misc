@@ -1,4 +1,5 @@
 import { bindController } from './controller.mjs';
+import { playbackState, requestPlaybackUnlock, suspendPlayback, waitForPlayback } from './audio-policy.mjs';
 
 (() => {
   'use strict';
@@ -51,6 +52,9 @@ import { bindController } from './controller.mjs';
   let themeProperty = null;
   let frameProperty = null;
   let userPaused = false;
+  let soundOn = false;
+  let soundRequest = 0;
+  let soundPending = false;
   let ready = false;
   let failed = false;
 
@@ -62,11 +66,13 @@ import { bindController } from './controller.mjs';
   function fail(message, detail) {
     if (failed) return;
     failed = true;
+    soundRequest++;
     ready = false;
     if (diagnosticOutput && vm) {
       try {
         lastDiagnosticSnapshot = diagnosticNames.map(name =>
-          `${name}: ${vm.number(name)?.value ?? 'unavailable'}`).join(' · ');
+          `${name}: ${vm.number(name)?.value ?? 'unavailable'}`).join(' · ') +
+          ` · playbackContext: ${playbackState(window.miniaudio)}`;
       } catch { /* Retain the last successful sample if the runtime is gone. */ }
     }
     for (const control of controls) control.disabled = true;
@@ -80,7 +86,7 @@ import { bindController } from './controller.mjs';
     if (progressTimer !== null) clearInterval(progressTimer);
     try {
       releaseControls();
-      if (game) { game.volume = 0; game.pause(); }
+      if (game) { game.volume = 0; suspendPlayback(window.miniaudio); game.pause(); }
     } catch (error) { console.error('Game shutdown after failure:', error); }
     console.error(`Fester's Quest demo: ${message} ${detail}`);
   }
@@ -120,23 +126,79 @@ import { bindController } from './controller.mjs';
     themeLabel.textContent = modern ? 'Modern graphics' : 'Original graphics';
   }
 
-  function setMute(muted) {
+  function setSound(enabled, retry = false) {
     if (!muteProperty) return;
-    muteProperty.value = muted ? 1 : 0;
-    if (game) game.volume = muted || userPaused || document.hidden ? 0 : 1;
-    muteButton.setAttribute('aria-pressed', String(muted));
-    muteButton.firstChild.textContent = muted ? 'Sound off ' : 'Sound on ';
+    soundOn = enabled;
+    muteProperty.value = enabled ? 0 : 1;
+    if (game) game.volume = enabled && !userPaused && !document.hidden ? 1 : 0;
+    muteButton.setAttribute('aria-pressed', String(!enabled));
+    muteButton.firstChild.textContent = enabled ? 'Sound on ' : retry ? 'Retry sound ' : 'Enable sound ';
+  }
+
+  async function enableSound() {
+    if (!ready || failed) return;
+    if (userPaused || document.hidden) {
+      setStatus('Resume game to enable sound', 'ready');
+      return;
+    }
+    const request = ++soundRequest;
+    soundPending = true;
+    // Allow ROM voices to create the playback device if this is the first
+    // opt-in; keep the artboard at volume zero until playback is confirmed.
+    muteButton.firstChild.textContent = 'Enabling sound ';
+    muteProperty.value = 0;
+    if (game) game.volume = 0;
+    let unlocked = false;
+    try {
+      unlocked = requestPlaybackUnlock(window.miniaudio);
+    } catch (error) {
+      console.warn('Rive playback unlock failed:', error);
+    }
+    if (unlocked && await waitForPlayback(() => window.miniaudio)) {
+      if (request !== soundRequest || failed) return;
+      soundPending = false;
+      setSound(true);
+      if (!userPaused && !document.hidden) setStatus('Playing with sound', 'ready');
+    } else if (request === soundRequest && !failed) {
+      soundPending = false;
+      setSound(false, true);
+      setStatus('Sound unavailable — tap Retry sound', 'ready');
+    }
+  }
+
+  function toggleSound() {
+    if (soundOn && playbackState(window.miniaudio) !== 'running') {
+      enableSound();
+    } else if (soundOn) {
+      soundRequest++;
+      setSound(false);
+      if (ready) setStatus('Playing without sound', 'ready');
+    } else enableSound();
   }
 
   function setPaused(paused) {
     userPaused = paused;
+    if (paused && soundPending) {
+      soundRequest++;
+      soundPending = false;
+      setSound(false, true);
+    }
     releaseControls();
     if (game) {
-      if (paused || document.hidden) { game.volume = 0; game.pause(); }
-      else { game.play(); game.volume = muteProperty?.value >= 0.5 ? 0 : 1; }
+      if (paused || document.hidden) {
+        game.volume = 0;
+        suspendPlayback(window.miniaudio);
+        game.pause();
+      }
+      else {
+        game.play();
+        if (soundOn && playbackState(window.miniaudio) !== 'running') enableSound();
+        else game.volume = soundOn ? 1 : 0;
+      }
     }
     pauseButton.setAttribute('aria-pressed', String(paused));
     pauseButton.firstChild.textContent = paused ? 'Resume ' : 'Pause ';
+    muteButton.disabled = paused;
     if (ready) setStatus(paused ? 'Paused' : 'Resuming game', paused ? '' : 'ready');
   }
 
@@ -159,7 +221,7 @@ import { bindController } from './controller.mjs';
       setTheme(themeProperty.value < 0.5);
     } else if (event.code === 'KeyM') {
       event.preventDefault();
-      setMute(muteProperty.value < 0.5);
+      toggleSound();
     } else if (event.code === 'KeyP') {
       event.preventDefault();
       setPaused(!userPaused);
@@ -176,20 +238,35 @@ import { bindController } from './controller.mjs';
   window.addEventListener('resize', releaseControls);
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
+      if (soundPending) {
+        soundRequest++;
+        soundPending = false;
+        setSound(false, true);
+      }
       releaseControls();
-      if (game) { game.volume = 0; game.pause(); }
+      if (game) { game.volume = 0; suspendPlayback(window.miniaudio); game.pause(); }
       if (ready) setStatus('Paused while hidden');
     } else if (ready && !userPaused) {
+      muteButton.disabled = false;
       game?.play();
-      if (game) game.volume = muteProperty?.value >= 0.5 ? 0 : 1;
-      setStatus('Resuming game');
+      if (soundOn && playbackState(window.miniaudio) !== 'running') {
+        soundRequest++;
+        setSound(false, true);
+        setStatus('Sound interrupted — tap Retry sound', 'ready');
+      } else {
+        if (game) game.volume = soundOn ? 1 : 0;
+        setStatus('Resuming game');
+      }
     }
   });
   window.addEventListener('pagehide', () => {
     if (diagnosticTimer !== null) clearInterval(diagnosticTimer);
     if (progressTimer !== null) clearInterval(progressTimer);
     releaseControls();
+    soundRequest++;
+    soundPending = false;
     controller.dispose();
+    suspendPlayback(window.miniaudio);
     game?.cleanup();
     game = null;
   });
@@ -198,7 +275,7 @@ import { bindController } from './controller.mjs';
   });
 
   themeButton.addEventListener('click', () => setTheme(themeProperty.value < 0.5));
-  muteButton.addEventListener('click', () => setMute(muteProperty.value < 0.5));
+  muteButton.addEventListener('click', toggleSound);
   pauseButton.addEventListener('click', () => setPaused(!userPaused));
 
   function loaded() {
@@ -219,7 +296,7 @@ import { bindController } from './controller.mjs';
     buttonsProperty.value = 0;
     for (const control of controls) control.disabled = false;
     setTheme(themeProperty.value >= 0.5);
-    setMute(muteProperty.value >= 0.5);
+    setSound(false);
     game.resizeDrawingSurfaceToCanvas();
     cover.hidden = true;
     ready = true;
@@ -228,7 +305,8 @@ import { bindController } from './controller.mjs';
       const fields = diagnosticNames.map(name => [name, vm.number(name)]);
       const refresh = () => {
         lastDiagnosticSnapshot = fields.map(([name, field]) =>
-          `${name}: ${field?.value ?? 'unavailable'}`).join(' · ');
+          `${name}: ${field?.value ?? 'unavailable'}`).join(' · ') +
+          ` · playbackContext: ${playbackState(window.miniaudio)}`;
         diagnosticOutput.textContent = lastDiagnosticSnapshot;
       };
       refresh();
@@ -241,6 +319,11 @@ import { bindController } from './controller.mjs';
     let unchangedSince = performance.now();
     progressTimer = setInterval(() => {
       if (!ready) return;
+      if (soundOn && !userPaused && !document.hidden && playbackState(window.miniaudio) !== 'running') {
+        soundRequest++;
+        setSound(false, true);
+        setStatus('Sound interrupted — tap Retry sound', 'ready');
+      }
       const frame = frameProperty.value;
       if (faultProperty?.value > 0) {
         fail('Game interpreter stopped', `ROM fault ${faultProperty.value} at frame ${frame}. Reload to restart.`);
@@ -277,6 +360,8 @@ import { bindController } from './controller.mjs';
       onLoad: () => queueMicrotask(loaded),
       onLoadError: event => fail('Game file could not load', String(event?.data || 'Check the connection and reload.')),
     });
+    // Safari requires an explicit later tap before playback can be enabled.
+    game.volume = 0;
     const resize = new ResizeObserver(() => game?.resizeDrawingSurfaceToCanvas());
     resize.observe($('screen'));
   } catch (error) {

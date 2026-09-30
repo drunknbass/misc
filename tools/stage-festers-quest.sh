@@ -19,7 +19,7 @@ if [ -e "$destination" ]; then
   echo "Destination already exists; review it before replacing files: $destination" >&2
   exit 2
 fi
-for required in index.html app.js controller.mjs style.css game.riv preview.png RUNTIME-NOTICE.md runtime/LICENSE runtime/rive.js runtime/rive.wasm runtime/rive_fallback.wasm release.json; do
+for required in index.html app.js audio-policy.mjs controller.mjs style.css game.riv preview.png RUNTIME-NOTICE.md runtime/LICENSE runtime/rive.js runtime/rive.wasm runtime/rive_fallback.wasm release.json; do
   if [ ! -s "$source_dir/$required" ]; then
     echo "Release file missing or empty: $source_dir/$required" >&2
     exit 2
