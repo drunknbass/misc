@@ -11,9 +11,10 @@
   function store(){try{localStorage.setItem(draftKey,snapshot());$('builder-save-state').textContent='Draft saved on this device';}catch{$('builder-save-state').textContent='Storage unavailable — export to keep this course';}}
   function error(){return closed?M.validate(design):'Draw adjacent tiles, then tap the first tile to close the loop.';}
   function ready(){const e=error();message(e||(tool==='route'?'Circuit closed. Choose a piece to add terrain, or tap a route tile to trim.':tool==='start'?'Choose a flat straight with another flat straight behind it.':'Ready to race. Tap a straight tile to place a piece.'),!!e);}
-  function refreshLibrary(){const select=$('builder-library');select.replaceChildren(new Option('Load saved course…',''));library.forEach((d,i)=>select.add(new Option(d.name,String(i))));}
-  try{const d=JSON.parse(localStorage.getItem(draftKey));if(d&&d.design&&Array.isArray(d.design.cells)&&Array.isArray(d.design.pieces)&&d.design.cells.length<=48&&d.design.cells.length===d.design.pieces.length&&d.design.cells.every(c=>Number.isInteger(c)&&c>=0&&c<35)&&d.design.pieces.every(p=>Number.isInteger(p)&&p>=0&&p<=5)){design=d.design;design.name=M.cleanName(design.name);closed=!!d.closed;}}catch{}
-  try{const list=JSON.parse(localStorage.getItem(libraryKey));if(Array.isArray(list))library=list.slice(0,12).filter(d=>!M.validate(d)).map(d=>M.parse(JSON.stringify(d)));}catch{}
+  function savedDraft(){const d=M.parseDraft(snapshot());return {...d.design,closed:d.closed};}
+  function refreshLibrary(selected=''){const select=$('builder-library');select.replaceChildren(new Option('Load saved course…',''));library.forEach((d,i)=>select.add(new Option(d.name+(!d.closed||M.validate(d)?' · Draft':''),String(i))));select.value=selected;}
+  try{const raw=localStorage.getItem(draftKey);if(raw){const d=M.parseDraft(raw);design=d.design;closed=d.closed;tool=closed?1:'route';}}catch{}
+  try{const list=JSON.parse(localStorage.getItem(libraryKey));if(Array.isArray(list))for(const item of list.slice(0,12)){try{const d=M.parseDraft(JSON.stringify(item));library.push({...d.design,closed:d.closed});}catch{}}}catch{}
   refreshLibrary();
   const cells=[];
   for(let c=0;c<35;c++){
@@ -25,7 +26,7 @@
   function render(){
     $('builder-name').value=design.name;
     const upper=new Set();for(const v of M.crossings(design))for(const i of v)if(Math.abs(design.cells[(i+1)%design.cells.length]-design.cells[i])===1)for(let k=-1;k<=1;k++)upper.add((i+k+design.cells.length)%design.cells.length);
-    const problem=error();$('builder-race').disabled=!!problem||pending;$('builder-export').disabled=!!problem;$('builder-save').disabled=!!problem;
+    const problem=error();$('builder-race').disabled=!!problem||pending;$('builder-export').disabled=!design.cells.length||pending;$('builder-save').disabled=!design.cells.length||pending;
     $('builder-undo').disabled=!history.length;$('builder-redo').disabled=!redo.length;
     $('builder-count').textContent=design.cells.length+' / 48 tiles';$('builder-loop').textContent=closed?'Closed circuit':'Drawing circuit';
     panel.querySelectorAll('[data-tool]').forEach(b=>b.setAttribute('aria-pressed',String(String(tool)===b.dataset.tool)));
@@ -91,11 +92,20 @@
   $('builder-name').addEventListener('focus',remember);
   $('builder-name').addEventListener('input',()=>{design.name=M.cleanName($('builder-name').value);store();$('builder-undo').disabled=!history.length;});
   $('builder-name').addEventListener('change',()=>{design.name=M.cleanName($('builder-name').value);store();render();});
-  $('builder-save').onclick=()=>{if(error())return;const copy=M.parse(JSON.stringify(design)),index=library.findIndex(d=>d.name===copy.name),next=library.slice();if(index>=0)next[index]=copy;else if(next.length<12)next.push(copy);else {message('12 courses saved. Export a course or reuse a saved name.',true);return;}try{localStorage.setItem(libraryKey,JSON.stringify(next));library=next;refreshLibrary();message('Saved “'+copy.name+'” on this device.');}catch{message('Storage is unavailable. Export the course instead.',true);}};
-  $('builder-library').onchange=()=>{const d=library[Number($('builder-library').value)];if(!d||$('builder-library').value==='')return;remember();design=M.parse(JSON.stringify(d));closed=true;store();render();ready();};
-  $('builder-export').onclick=()=>{if(error())return;const blob=new Blob([JSON.stringify(design,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=M.cleanName(design.name).replace(/ /g,'-')+'.raptor.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);message('Course exported. Import the JSON file on another device to race it.');};
+  $('builder-save').onclick=()=>{
+    if(pending||!design.cells.length)return;
+    try{
+      const copy=savedDraft(),index=library.findIndex(d=>d.name===copy.name),next=library.slice();
+      if(index>=0)next[index]=copy;else if(next.length<12)next.push(copy);else {message('12 courses saved. Export a course or reuse a saved name.',true);return;}
+      localStorage.setItem(libraryKey,JSON.stringify(next));library=next;store();refreshLibrary(String(index>=0?index:next.length-1));
+      const feedback='Saved “'+copy.name+'” on this device.'+(error()?' Draft kept — finish the circuit before racing.':'');
+      $('builder-save-state').textContent=feedback;message(feedback);
+    }catch{message('Storage is unavailable. Export the course instead.',true);}
+  };
+  $('builder-library').onchange=()=>{const d=library[Number($('builder-library').value)];if(!d||$('builder-library').value==='')return;remember();const restored=M.parseDraft(JSON.stringify(d));design=restored.design;closed=restored.closed;tool=closed?1:'route';store();render();ready();};
+  $('builder-export').onclick=()=>{if(pending||!design.cells.length)return;const blob=new Blob([JSON.stringify(savedDraft(),null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=M.cleanName(design.name).replace(/ /g,'-')+'.raptor.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);message(error()?'Draft exported. Import it to continue editing.':'Course exported. Import the JSON file on another device to race it.');};
   $('builder-import').onclick=()=>$('builder-file').click();
-  $('builder-file').onchange=async()=>{const file=$('builder-file').files[0];if(!file)return;try{if(file.size>8192)throw Error('Course files must be smaller than 8 KB.');const d=M.parse(await file.text());remember();design=d;closed=true;store();render();ready();}catch(e){message(e.message||'Could not read course.',true);}finally{$('builder-file').value='';}};
+  $('builder-file').onchange=async()=>{const file=$('builder-file').files[0];if(!file)return;try{if(file.size>8192)throw Error('Course files must be smaller than 8 KB.');const d=M.parseDraft(await file.text());remember();design=d.design;closed=d.closed;tool=closed?1:'route';store();render();ready();}catch(e){message(e.message||'Could not read course.',true);}finally{$('builder-file').value='';}};
   function sync(){
     const shown=phase===5||pendingAction==='open';
     panel.hidden=!shown;document.body.classList.toggle('builder-open',shown);
