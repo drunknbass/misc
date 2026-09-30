@@ -48,3 +48,9 @@
 .tile-issue{position:absolute;top:1px;left:1px;padding:1px 3px;background:#ffb477;color:#281609;border-radius:2px;font:bold clamp(7px,1vw,11px)/1.2 system-ui;pointer-events:none}
 #track-builder #builder-race[data-blocked=true]{background:#ffc18c;border-color:#ffc18c;color:#29190b}
 @media(max-width:600px){#builder-checks{font-size:11px;padding:10px}#builder-checks h2{font-size:13px}}
+
+#builder-edit-help{margin:0 0 10px;padding:10px 12px;background:#123039;border-left:3px solid #74e4ed;color:#c1f4f5;font-size:12px;line-height:1.5}
+#builder-edit-help[hidden],#builder-edit-actions[hidden]{display:none!important}
+#builder-edit-actions{display:flex;gap:8px;margin-bottom:10px}#track-builder #builder-apply-road{background:#74e4ed;color:#09242a;font-weight:700}
+#track-builder .track-cell.road-removed svg{opacity:.3}#track-builder .track-cell.road-preview svg{opacity:1}
+#track-builder .track-cell.road-preview,#track-builder .track-cell.road-anchor{border:2px solid #74e4ed;background:#183d43}

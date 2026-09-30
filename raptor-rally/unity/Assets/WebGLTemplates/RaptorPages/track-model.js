@@ -63,7 +63,7 @@
       const turns=indices.filter(i=>!straight(d.cells,i)).map(i=>d.cells[i]),terrain=indices.filter(i=>d.pieces[i]).map(i=>d.cells[i]);
       if(turns.length||terrain.length){
         const instructions=[];
-        if(turns.length)instructions.push([...new Set(turns)].map(coordinate).join(', ')+' turn too close to the crossing. Use Draw route to move these corners at least one tile farther away. Flat changes terrain; it does not straighten a corner.');
+        if(turns.length)instructions.push([...new Set(turns)].map(coordinate).join(', ')+' turn too close to the crossing. Use Edit road to replace the section around these corners, leaving a straight tile beside the crossing. Flat changes terrain; it does not straighten a corner.');
         if(terrain.length)instructions.push('Choose Flat and clear the terrain pieces at '+[...new Set(terrain)].map(coordinate).join(', ')+'. The crossing adds its own ramps.');
         add('crossover-approach','Crossover at '+label+' needs straight, flat approaches',instructions.join(' '),turns.concat(terrain));
       }
@@ -89,6 +89,20 @@
   function preset(){return {version:1,name:'Raptor rhythm',cells:[24,25,26,19,12,11,10,9,8,15,22,23],pieces:[0,1,0,4,0,2,0,5,0,3,0,0]};}
   function figureEight(){return {version:2,name:'Junction jump',cells:[29,28,21,14,15,16,17,18,19,20,13,6,5,4,3,10,17,24,31,30],pieces:Array(20).fill(0)};}
   function rotate(d,index){return {...d,cells:d.cells.slice(index).concat(d.cells.slice(0,index)),pieces:d.pieces.slice(index).concat(d.pieces.slice(0,index))};}
-  const api={adjacent,straight,cleanName,validate,diagnose,coordinate,parse,parseDraft,preset,figureEight,crossings,reserved,rotate};
+  // Keep the arc from B back to A; replace only the forward arc from A to B.
+  function keptSection(d,a,b){
+    if(!Number.isInteger(a)||!Number.isInteger(b)||a<0||b<0||a>=d.cells.length||b>=d.cells.length||a===b)throw Error('Choose two different road tiles.');
+    const indices=[];for(let i=b;;i=(i+1)%d.cells.length){indices.push(i);if(i===a)break;}return indices;
+  }
+  function replaceSection(d,a,b,path){
+    const kept=keptSection(d,a,b);
+    if(!Array.isArray(path)||path.length<2||path[0]!==d.cells[a]||path.at(-1)!==d.cells[b])throw Error('Draw from A all the way to B.');
+    if(new Set(path).size!==path.length||path.some((c,i)=>!Number.isInteger(c)||c<0||c>=35||i>0&&!adjacent(path[i-1],c)))throw Error('Use adjacent tiles without doubling back.');
+    const cells=kept.map(i=>d.cells[i]).concat(path.slice(1,-1)),pieces=kept.map(i=>d.pieces[i]).concat(path.slice(1,-1).map(()=>0));
+    if(cells.length<8||cells.length>48)throw Error('The finished loop needs 8 to 48 tiles.');
+    const result={...d,version:2,cells,pieces},start=kept.indexOf(0);
+    return start>=0?rotate(result,start):result;
+  }
+  const api={adjacent,straight,cleanName,validate,diagnose,coordinate,parse,parseDraft,preset,figureEight,crossings,reserved,rotate,keptSection,replaceSection};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.RaptorTrackModel=api;
 })(typeof window==='undefined'?this:window);
