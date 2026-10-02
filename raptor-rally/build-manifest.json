@@ -5,8 +5,8 @@
   "threads": false,
   "files": {
     "index.html": {
-      "bytes": 13735,
-      "sha256": "b4856fdbd17ce75519f8b2a03790a720ed1aa8be9d91c7b80ac8395d89af3f78"
+      "bytes": 14095,
+      "sha256": "73c3703529cc310d0097157aed2d611729915f66586e9f714ad7b662b277541a"
     },
     "touch-controls.css": {
       "bytes": 8242,
@@ -32,21 +32,21 @@
       "bytes": 17131,
       "sha256": "d7ed519139068a74a65434aad0bf2e8e0d39183faf67a4dc161bb853d750e0a2"
     },
-    "Build/9a3e959283f48bd5746624448f94a0d9.data.unityweb": {
-      "bytes": 4620724,
-      "sha256": "15c8e83951d778b3930ca312cc4c3e02d41b70fa290eb2260a43f2ab7c981c96"
-    },
-    "Build/adae2ea5114bf89a63577d0b66e3ec03.framework.js.unityweb": {
-      "bytes": 82609,
-      "sha256": "88d6198e2c649fe04c7e699a69737222372703cb8326904c57a133eeed272337"
-    },
-    "Build/b6cdbc7c9422f1f9aa660058df0644bc.wasm.unityweb": {
-      "bytes": 6428361,
-      "sha256": "ee724ca9fa3157dffbf2136651576e9b088a310e6b37768af395cfa1f1bc8c67"
-    },
-    "Build/dab41cd04f7f3cdc874993b8348371f5.loader.js": {
+    "Build/81bf5245048132e4fec2126a7967effa.loader.js": {
       "bytes": 48540,
-      "sha256": "bb06418ddbcce1f15e0086728c6e9ea3bf918b5e0ecd94821716308eaea8126a"
+      "sha256": "41ffc3cd9292f92996674dc0e3d019871da3826143bd7116bb50c666f7649ef7"
+    },
+    "Build/0f4a436114357f9f2935e377f65d0427.data.unityweb": {
+      "bytes": 4621739,
+      "sha256": "375251b5200dd5d2d7a58504a24d83a8835558a553c9e18523abc0a35bfaa2b3"
+    },
+    "Build/fb284360d487dbde1bfb504d60416eef.framework.js.unityweb": {
+      "bytes": 82862,
+      "sha256": "600a7238de8491c1ab68c32dedceff25c0c8f9a9186981b33f160f187f2968ee"
+    },
+    "Build/7d8321ed5695b4129209cec55edec676.wasm.unityweb": {
+      "bytes": 6465868,
+      "sha256": "b7aaf4a7a49c8b8595a9641a10566fa11fd123a870472c5c70c41dd2ffa81091"
     }
   }
 }

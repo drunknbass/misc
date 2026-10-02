@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -45,7 +46,38 @@ namespace RaptorRally
     public sealed class StartupIntro : IDisposable
     {
         public enum Card { Ford, Black, Complete }
-        public const float Duration=6.6f;
+        public const float Duration=6.6f, CoinTime=2.1f;
+        readonly AudioSource coinSource;
+        readonly AudioClip coinClip;
+        bool coinTriggered;
+        public bool CoinTriggered => coinTriggered;
+#if UNITY_WEBGL && !UNITY_EDITOR
+        [DllImport("__Internal")] static extern int RaptorIntroAudio(int active);
+#endif
+        static bool SoundReady(bool active)
+        {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            return RaptorIntroAudio(active?1:0)!=0;
+#else
+            return true;
+#endif
+        }
+        // Original two-note pulse chime. Band-limit harmonics and ramp the envelope
+        // to retain the console timbre without harsh aliasing or click transients.
+        public static float[] CoinSamples(int rate=44100)
+        {
+            var samples=new float[Mathf.CeilToInt(rate*.48f)];
+            for(int i=0;i<samples.Length;i++) {
+                float t=(float)i/rate,local=t<.085f?t:t-.085f;
+                float length=t<.085f?.085f:.395f,frequency=t<.085f?1046.5f:1568f;
+                float envelope=Mathf.Min(1,local/.003f)*Mathf.Clamp01((length-local)/.018f)*Mathf.Exp(-local*7);
+                float pulse=0;
+                for(int harmonic=1;harmonic<=9;harmonic+=2)
+                    pulse+=Mathf.Sin(2*Mathf.PI*frequency*harmonic*local)/harmonic;
+                samples[i]=pulse*.23f*envelope;
+            }
+            return samples;
+        }
         readonly BrandArtwork art;
         float elapsed,skipRemaining=-1,skipOpacity;
         public bool Active { get; private set; }=true;
@@ -54,7 +86,19 @@ namespace RaptorRally
         public Card CurrentCard => !Active?Card.Complete:CardAt(elapsed);
         public float PixelReveal => RevealAt(elapsed);
         public float Opacity => !Active?0:skipRemaining>=0?skipOpacity*Mathf.Clamp01(skipRemaining/.28f):OpacityAt(elapsed);
-        public StartupIntro(Transform parent,BrandArtwork artwork) { art=artwork; }
+        public StartupIntro(Transform parent,BrandArtwork artwork)
+        {
+            art=artwork;
+            if(parent!=null && Application.isPlaying) {
+                var sound=new GameObject("Intro coin chime"); sound.transform.SetParent(parent,false);
+                coinSource=sound.AddComponent<AudioSource>(); coinSource.playOnAwake=false;
+                coinSource.spatialBlend=0; coinSource.volume=.65f; coinSource.ignoreListenerPause=true;
+                float[] samples=CoinSamples();
+                coinClip=AudioClip.Create("Original retro coin",samples.Length,1,44100,false);
+                coinClip.SetData(samples,0); coinSource.clip=coinClip;
+            }
+            SoundReady(true);
+        }
         public static Card CardAt(float t) => t>=Duration?Card.Complete:t>=6.3f?Card.Black:Card.Ford;
         public static float RevealAt(float t) => Mathf.SmoothStep(0,1,(t-2.1f)/1.8f);
         public static float OpacityAt(float t) => t>=6.3f?0:Mathf.Min(Mathf.SmoothStep(0,1,t/.8f),1-Mathf.SmoothStep(0,1,(t-5.3f)/1f));
@@ -63,12 +107,22 @@ namespace RaptorRally
             if(!Active) return;
             dt=Mathf.Max(0,dt);
             if(skipRemaining>=0) { skipRemaining-=dt; if(skipRemaining<=0) Active=false; }
-            else { elapsed+=dt; if(elapsed>=Duration) Active=false; }
+            else {
+                float before=elapsed; elapsed+=dt;
+                bool ready=SoundReady(true);
+                if(!coinTriggered && before<CoinTime && elapsed>=CoinTime) {
+                    coinTriggered=true;
+                    // Never queue a blocked chime for a later, unrelated gesture.
+                    if(ready && elapsed<CoinTime+.25f && coinSource!=null) coinSource.Play();
+                }
+                if(elapsed>=Duration) Active=false;
+            }
         }
         public void Skip()
         {
             if(!Active || skipRemaining>=0) return;
             skipOpacity=OpacityAt(elapsed); skipRemaining=.28f;
+            if(coinSource!=null) coinSource.Stop(); SoundReady(false);
         }
         public void Draw(bool touch)
         {
@@ -132,7 +186,12 @@ namespace RaptorRally
             mesh.SetVertices(vertices); mesh.SetUVs(0,grain); mesh.SetNormals(normals); mesh.SetColors(vertexColors); mesh.SetTriangles(triangles,0); mesh.RecalculateBounds();
             return mesh;
         }
-        public void Dispose() { }
+        public void Dispose()
+        {
+            SoundReady(false);
+            if(coinSource!=null) { coinSource.Stop(); Release(coinSource.gameObject); }
+            if(coinClip!=null) Release(coinClip);
+        }
         internal static void Release(UnityEngine.Object item) { if(Application.isPlaying) UnityEngine.Object.Destroy(item); else UnityEngine.Object.DestroyImmediate(item); }
     }
 }

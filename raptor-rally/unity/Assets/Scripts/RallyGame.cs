@@ -175,6 +175,12 @@ namespace RaptorRally
             View.enabled=false; garageBackground.enabled=false;
         }
         public void SkipIntro() { if(IntroActive) Intro.Skip(); }
+        // Called only by the browser's explicit audio-unlock gesture.
+        public void RestartIntroWithSound()
+        {
+            if(!IntroActive) return;
+            Intro.Dispose(); Intro=new StartupIntro(transform,Branding);
+        }
         public void AdvanceIntro(float unscaledDt)
         {
             if(!IntroActive) return;
@@ -426,7 +432,7 @@ namespace RaptorRally
                 if(circuitPreview!=null) GUI.DrawTexture(new Rect(1110,250,465,485),circuitPreview,ScaleMode.StretchToFill,false);
                 Text(1120,156,450,34,Track.CourseName,label);
                 Text(1120,195,450,24,"4 TRUCKS  /  3 LAPS  /  SWITCHBACKS",small);
-                Text(425,777,1100,30,"THREE RAPTORS. ALL DIRT.",heading);
+                Text(425,768,1100,52,"THREE RAPTORS. ALL DIRT.",heading);
                 Text(427,817,1100,26,"C cycles whole track, follow truck and driver seat views.",small);
             }
             else

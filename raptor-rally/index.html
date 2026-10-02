@@ -17,12 +17,14 @@ a{color:#94aeb8;text-decoration:none}a:hover{color:#b9f26a}strong{font-size:13px
 #loading{position:absolute;inset:0;display:grid;place-content:center;gap:18px;padding:28px;background:#000;text-align:center}#loading[hidden]{display:none}.eyebrow{color:#b9f26a;font-size:12px;letter-spacing:.22em}h1{font-size:clamp(36px,7vw,76px);line-height:1;margin:0;letter-spacing:-.05em}#loading p{color:#94aeb8;margin:0}progress{width:min(380px,80vw);height:5px;accent-color:#b9f26a;margin:12px auto}#status{font-variant-numeric:tabular-nums;max-width:600px}#status.error{color:#ffb75e}#retry{margin:0 auto}#retry[hidden]{display:none}
 @media(max-width:720px){header{gap:12px;padding:0 12px}header span{display:none}header strong{font-size:11px}}
 body.intro-pending header{display:none}body.intro-pending #stage{height:100dvh}body.intro-pending,body.intro-pending #unity-canvas{background:#000}
+#intro-sound{position:absolute;z-index:25;left:max(20px,env(safe-area-inset-left));bottom:max(22px,env(safe-area-inset-bottom));margin:0;max-width:46%;font-size:12px;background:#10181cbb;color:#bdc9cb;border-color:#435157;padding:12px 16px;border-radius:6px}#intro-sound[hidden]{display:none}
 </style>
 </head>
 <body class="intro-pending">
 <header><a href="../" aria-label="Back to misc experiments">← misc</a><strong>RAPTOR RODEO</strong><span>COYOTE BASIN · ALL DIRT</span><button id="open-builder" disabled>Track builder</button><button id="fullscreen" disabled>Full screen</button></header>
 <main id="stage">
 <canvas id="unity-canvas" width="1600" height="900" tabindex="0" aria-label="Raptor Rodeo racing game. Use WASD or arrows to drive, Space for nitro, C to cycle camera views, R to recover, Escape to pause and M for reduced motion."></canvas>
+<button id="intro-sound" hidden>▶ Play intro with sound</button>
 <div id="touch-ui" hidden>
   <section id="touch-intro" aria-label="Opening logos"><button id="intro-skip" data-action="skip" hidden>Skip intro ›</button></section>
   <section id="touch-garage" aria-label="Choose your Raptor" hidden>
@@ -83,12 +85,12 @@ function resizeCanvas(){const r=canvas.getBoundingClientRect(),scale=Math.min(wi
 new ResizeObserver(resizeCanvas).observe(canvas);resizeCanvas();
 function showError(message){loading.hidden=false;progress.hidden=true;status.className='error';status.textContent='The game could not start. '+String(message);document.getElementById('retry').hidden=false;}
 document.getElementById('retry').onclick=()=>location.reload();
-const loader=document.createElement('script');loader.src='Build/dab41cd04f7f3cdc874993b8348371f5.loader.js';loader.onerror=()=>showError('Check your connection and reload.');
+const loader=document.createElement('script');loader.src='Build/81bf5245048132e4fec2126a7967effa.loader.js';loader.onerror=()=>showError('Check your connection and reload.');
 loader.onload=()=>createUnityInstance(canvas,{
 arguments:[],
-dataUrl:'Build/9a3e959283f48bd5746624448f94a0d9.data.unityweb',
-frameworkUrl:'Build/adae2ea5114bf89a63577d0b66e3ec03.framework.js.unityweb',
-codeUrl:'Build/b6cdbc7c9422f1f9aa660058df0644bc.wasm.unityweb',
+dataUrl:'Build/0f4a436114357f9f2935e377f65d0427.data.unityweb',
+frameworkUrl:'Build/fb284360d487dbde1bfb504d60416eef.framework.js.unityweb',
+codeUrl:'Build/7d8321ed5695b4129209cec55edec676.wasm.unityweb',
 streamingAssetsUrl:'StreamingAssets',companyName:"RaptorRallyPrototype",productName:"Raptor Rally",productVersion:"1.0",matchWebGLToCanvasSize:false,
 showBanner:(message,type)=>{if(type==='error')showError(message);else console.warn(message);}
 },value=>{progress.value=value;status.textContent=value<.9?'Loading the track… '+Math.round(value*100)+'%':'Starting engines…';}).then(instance=>{window.raptorGame=instance;loading.hidden=true;fullscreen.disabled=false;fullscreen.onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else if(document.getElementById('stage').requestFullscreen)await document.getElementById('stage').requestFullscreen();}catch(error){console.warn('Fullscreen unavailable',error);}canvas.focus();};if(!document.fullscreenEnabled)fullscreen.hidden=true;canvas.focus();document.documentElement.dataset.gameReady='true';window.raptorTouch.connect(instance);window.raptorBuilder.connect(instance);}).catch(showError);

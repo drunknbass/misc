@@ -76,3 +76,6 @@ Run `node raptor-rally/tests/check-published-shell.cjs` from the repository root
 ### Jump handling
 
 Stadium jump crests are 1.8–2 m high; custom Jump and Tabletop pieces are 1.8 m and 1.65 m. Airborne trucks retain horizontal momentum and use normal gravity, with an 8 m/s upward safety cap. Short crossover ramps limit takeoff speed to each truck’s unboosted top speed so nitro cannot overshoot their landing straight. Body pitch follows the flight arc, tires extend in the air, and a damped visual suspension response compresses on landing. Nitro-speed tests across all three stadium jumps and all three Raptors measured 0.98–1.32 seconds of flight with lane-safe landings; see AIRTIME-CHECKS.md and AIRTIME-BASELINE.md.
+
+
+**Intro sound:** An original two-note pulse chime plays as the Ford logo starts turning into pixels. If Safari blocks audio, tap **Play intro with sound** during the intro to unlock sound and replay it in sync. Skipping stops the chime. The garage slogan now has a full-height text box to avoid clipped letter tops.
